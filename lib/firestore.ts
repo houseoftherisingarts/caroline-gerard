@@ -9,7 +9,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview } from '../types';
+import { BlogPost, AppEvent, Conference, Interview, Lead } from '../types';
 
 // --- Generic helper ---
 
@@ -63,7 +63,77 @@ export const saveInterview = (interview: Interview) =>
 export const deleteInterview = (id: string) =>
   deleteDoc(doc(db, 'interviews', id));
 
-// --- Site Settings (media library, profile image, visitor toggle) ---
+// --- Leads ---
+
+export const subscribeToLeads = (cb: (leads: Lead[]) => void) =>
+  subscribeToCollection<Lead>('leads', cb);
+
+export const saveLead = (lead: Lead) =>
+  setDoc(doc(db, 'leads', lead.id), lead);
+
+// --- Kanban ---
+
+export type KanbanData = {
+  projects: { id: string; name: string }[];
+  tasks: {
+    id: string;
+    title: string;
+    notes: string;
+    deadline: string;
+    status: string;
+    projectId: string;
+    subtasks: { id: string; title: string; completed: boolean }[];
+  }[];
+};
+
+const kanbanRef = () => doc(db, 'kanban', 'main');
+
+export const subscribeToKanban = (cb: (data: KanbanData) => void) =>
+  onSnapshot(kanbanRef(), snap => {
+    if (snap.exists()) cb(snap.data() as KanbanData);
+  });
+
+export const saveKanban = (data: KanbanData) =>
+  setDoc(kanbanRef(), data);
+
+// --- Invoices ---
+
+export type StoredInvoice = {
+  id: string;
+  number: string;
+  clientName: string;
+  savedAt: string;
+  meta: { number: string; date: string; dueDate: string; terms: string };
+  billTo: { name: string; address: string; email: string };
+  shipTo: { name: string; address: string; phone: string };
+  items: { id: string; description: string; isTaxable: boolean; quantity: number; rate: number }[];
+  shipping: { method: string; cost: number };
+};
+
+export const subscribeToInvoices = (cb: (invoices: StoredInvoice[]) => void) =>
+  subscribeToCollection<StoredInvoice>('invoices', cb);
+
+export const saveInvoice = (invoice: StoredInvoice) =>
+  setDoc(doc(db, 'invoices', invoice.id), invoice);
+
+export const deleteInvoice = (id: string) =>
+  deleteDoc(doc(db, 'invoices', id));
+
+// --- Site Content (editable text & images) ---
+
+export type SiteContent = Record<string, string>;
+
+const siteContentRef = () => doc(db, 'settings', 'siteContent');
+
+export const subscribeToSiteContent = (cb: (content: SiteContent) => void) =>
+  onSnapshot(siteContentRef(), snap => {
+    cb(snap.exists() ? (snap.data() as SiteContent) : {});
+  });
+
+export const saveSiteContent = (content: SiteContent) =>
+  setDoc(siteContentRef(), content);
+
+// --- Site Settings ---
 
 export type SiteSettings = {
   mediaLibrary?: string[];
@@ -81,7 +151,7 @@ export const subscribeToSettings = (cb: (s: SiteSettings) => void) =>
 export const saveSettings = (settings: Partial<SiteSettings>) =>
   setDoc(settingsRef(), settings, { merge: true });
 
-// --- Initial seed (runs once when Firestore is empty on first deploy) ---
+// --- Initial seed ---
 
 const DEFAULT_MEDIA = [
   'https://images.unsplash.com/photo-1519682337058-a94d519337bc?q=80&w=2070&auto=format&fit=crop',
@@ -94,7 +164,6 @@ const DEFAULT_PROFILE_IMAGE =
   'https://storage.googleapis.com/salondesinconnus/Caroline/Gemini_Generated_Image_8wrovw8wrovw8wro.png';
 
 export async function seedIfEmpty(initialPosts: BlogPost[]) {
-  // Seed blog posts
   const postsSnap = await getDocs(collection(db, 'posts'));
   if (postsSnap.empty && initialPosts.length > 0) {
     const batch = writeBatch(db);
@@ -102,7 +171,6 @@ export async function seedIfEmpty(initialPosts: BlogPost[]) {
     await batch.commit();
   }
 
-  // Seed settings doc
   const settingsSnap = await getDoc(settingsRef());
   if (!settingsSnap.exists()) {
     await setDoc(settingsRef(), {

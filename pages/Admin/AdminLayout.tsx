@@ -1,20 +1,23 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Feather, 
-  LayoutDashboard, 
-  ShoppingCart, 
-  FileText, 
-  Layers, 
-  Camera, 
-  Edit3, 
-  Calendar, 
-  Image as ImageIcon, 
-  Package, 
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase';
+import {
+  Feather,
+  LayoutDashboard,
+  ShoppingCart,
+  FileText,
+  Layers,
+  Camera,
+  Edit3,
+  Calendar,
+  Image as ImageIcon,
+  Package,
   Settings,
   Briefcase,
   CheckSquare,
-  Mic
+  Mic,
+  Globe,
 } from 'lucide-react';
 
 const NavLink = ({ to, icon, label }: { to: string, icon: React.ReactNode, label: string }) => {
@@ -37,6 +40,12 @@ const NavLink = ({ to, icon, label }: { to: string, icon: React.ReactNode, label
 }
 
 const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
+  const location = useLocation();
+  const isEditor = location.pathname === '/admin/editeur';
+
+  // In editor mode, render children full-screen without the sidebar
+  if (isEditor) return <>{children}</>;
+
   return (
     <div className="min-h-screen text-slate-200 font-sans flex flex-col md:flex-row">
       <aside className="w-full md:w-72 bg-midnight/90 backdrop-blur-xl border-r border-white/5 text-white fixed md:h-full z-40 flex flex-col shadow-2xl overflow-y-auto">
@@ -63,6 +72,8 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/medias" icon={<ImageIcon />} label="Médiathèque" />
           <NavLink to="/admin/produits" icon={<Package />} label="Inventaire Livres" />
           <NavLink to="/admin/kanban" icon={<CheckSquare />} label="Kanban" />
+          <div className="my-2 border-t border-white/5" />
+          <NavLink to="/admin/editeur" icon={<Globe />} label="Modifier le site" />
         </nav>
         
         <div className="p-6 border-t border-white/10 bg-deep-blue/30">
@@ -72,6 +83,12 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
             </div>
             Retour au site public
           </Link>
+          <button onClick={() => signOut(auth)} className="flex items-center gap-3 text-sm text-slate-500 hover:text-red-400 transition-colors mt-2 w-full">
+            <div className="p-2 bg-white/5 rounded-xl">
+              <Settings className="w-4 h-4" />
+            </div>
+            Se déconnecter
+          </button>
         </div>
       </aside>
 

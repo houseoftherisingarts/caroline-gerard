@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
+import { trackAddToCart, trackBeginCheckout, trackPageView } from './lib/analytics';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { 
@@ -35,6 +38,8 @@ import AdminMedia from './pages/Admin/AdminMedia';
 import AdminConferences from './pages/Admin/AdminConferences';
 import AdminKanban from './pages/Admin/AdminKanban';
 import AdminInterviews from './pages/Admin/AdminInterviews';
+import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
+import { SiteContentProvider } from './contexts/SiteContentContext';
 
 import { recentOrders, salesData, blogPosts } from './data';
 import { Book, Order, ProductOffer, CartItem, BlogPost, Conference, Lead, AppEvent, Interview } from './types';
@@ -44,8 +49,11 @@ import {
   subscribeToConferences, saveConference, deleteConference,
   subscribeToInterviews, saveInterview, deleteInterview,
   subscribeToSettings, saveSettings,
+  subscribeToLeads,
+  subscribeToSiteContent, saveSiteContent,
   seedIfEmpty,
 } from './lib/firestore';
+import type { SiteContent } from './lib/firestore';
 
 // --- Layout Components ---
 
@@ -54,6 +62,7 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackPageView(pathname);
   }, [pathname]);
 
   return null;
@@ -162,7 +171,7 @@ const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, show
 const App = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   // Lifted state for Profile Image
   const [profileImage, setProfileImage] = useState<string>('https://storage.googleapis.com/salondesinconnus/Caroline/Gemini_Generated_Image_8wrovw8wrovw8wro.png');
   
@@ -186,6 +195,7 @@ const App = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
+  const [siteContent, setSiteContent] = useState<SiteContent>({});
 
   const addToCart = (book: Book) => {
     setCartItems(prev => {
@@ -195,6 +205,7 @@ const App = () => {
       }
       return [...prev, { book, quantity: 1 }];
     });
+    trackAddToCart(book.title, book.price);
     setIsCartOpen(true);
   };
 
@@ -215,6 +226,11 @@ const App = () => {
   const cartTotal = cartItems.reduce((sum, item) => sum + (item.book.price * item.quantity), 0);
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
+  // --- Firebase Auth ---
+  useEffect(() => {
+    return onAuthStateChanged(auth, user => setIsAuthenticated(!!user));
+  }, []);
+
   // --- Firestore subscriptions ---
   useEffect(() => {
     const unsubs = [
@@ -222,11 +238,13 @@ const App = () => {
       subscribeToEvents(setEvents),
       subscribeToConferences(setConferences),
       subscribeToInterviews(setInterviews),
+      subscribeToLeads(setLeads),
       subscribeToSettings(s => {
         if (s.mediaLibrary) setMediaLibrary(s.mediaLibrary);
         if (s.profileImage) setProfileImage(s.profileImage);
         if (s.showVisitorCount !== undefined) setShowVisitorCount(s.showVisitorCount);
       }),
+      subscribeToSiteContent(setSiteContent),
     ];
     seedIfEmpty(blogPosts);
     return () => unsubs.forEach(u => u());
@@ -304,13 +322,22 @@ const App = () => {
 
   return (
     <HelmetProvider>
+      <SiteContentProvider
+        content={siteContent}
+        mediaLibrary={mediaLibrary}
+        onSave={saveSiteContent}
+      >
       <Router>
         <ScrollToTop />
         <StarField />
         <Routes>
           {/* Admin Routes */}
           <Route path="/admin/*" element={
-            isAuthenticated ? (
+            isAuthenticated === null ? (
+              <div className="min-h-screen bg-midnight flex items-center justify-center">
+                <div className="text-slate-400 animate-pulse">Chargement...</div>
+              </div>
+            ) : isAuthenticated ? (
               <AdminLayout>
                 <Routes>
                   <Route index element={<AdminDashboard recentOrdersList={recentOrdersList} setRecentOrdersList={setRecentOrdersList} salesDataState={salesDataState} setSalesDataState={setSalesDataState} visitorCount={visitorCount} showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
@@ -325,11 +352,12 @@ const App = () => {
                   <Route path="conferences" element={<AdminConferences conferences={conferences} setConferences={handleSetConferences} mediaLibrary={mediaLibrary} />} />
                   <Route path="interviews" element={<AdminInterviews interviews={interviews} setInterviews={handleSetInterviews} />} />
                   <Route path="kanban" element={<AdminKanban />} />
+                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} />} />
                   <Route path="*" element={<div className="text-center p-12 text-slate-500">Section en développement...</div>} />
                 </Routes>
               </AdminLayout>
             ) : (
-              <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+              <AdminLogin />
             )
           } />
 
@@ -392,7 +420,7 @@ const App = () => {
                     <Helmet>
                       <title>Caroline Gérard | Conférences</title>
                     </Helmet>
-                    <ConferencesPage conferences={conferences} setLeads={setLeads} />
+                    <ConferencesPage conferences={conferences} />
                   </>
                 } />
                 <Route path="/interviews" element={
@@ -419,6 +447,7 @@ const App = () => {
           } />
         </Routes>
       </Router>
+      </SiteContentProvider>
     </HelmetProvider>
   );
 };
