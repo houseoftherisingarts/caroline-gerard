@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Download, Image as ImageIcon, X, Plus, Move, Trash2, Square, Smartphone, Monitor, Sparkles, Loader2, Upload, Save } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
+import { uploadMediaFile } from '../../lib/storage';
 
 // --- Types & Constants ---
 
@@ -350,12 +351,16 @@ const AdminSocialStudio = ({ mediaLibrary, setMediaLibrary }: { mediaLibrary: st
     if (canvas) {
         const currentSelection = selectedLayerId;
         setSelectedLayerId(null);
-        
+
         setTimeout(() => {
-            const dataUrl = canvas.toDataURL('image/png', 1.0);
-            setMediaLibrary([dataUrl, ...mediaLibrary]);
-            alert("Image sauvegardée dans la médiathèque !");
-            setSelectedLayerId(currentSelection);
+            canvas.toBlob(async (blob) => {
+                if (!blob) return;
+                const file = new File([blob], `social-${Date.now()}.png`, { type: 'image/png' });
+                const url = await uploadMediaFile(file);
+                setMediaLibrary([url, ...mediaLibrary]);
+                alert("Image sauvegardée dans la médiathèque !");
+                setSelectedLayerId(currentSelection);
+            }, 'image/png', 1.0);
         }, 50);
     }
   };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PenTool, Edit3, Trash2, ArrowLeft, Save, UploadCloud, Library, X } from 'lucide-react';
 import { BlogPost } from '../../types';
 import BlockEditor from '../../components/BlockEditor';
+import { uploadMediaFile } from '../../lib/storage';
 
 // --- Helper Components ---
 const ToggleSwitch = ({ checked, onChange }: { checked: boolean, onChange: (checked: boolean) => void }) => (
@@ -12,12 +13,14 @@ const ToggleSwitch = ({ checked, onChange }: { checked: boolean, onChange: (chec
 
 const ImageUpload = ({ value, onUpload, mediaLibrary }: { value: string, onUpload: (url: string) => void, mediaLibrary: string[] }) => {
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [isUploading, setIsUploading] = useState(false);
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => { onUpload(reader.result as string); };
-        reader.readAsDataURL(file);
+        setIsUploading(true);
+        const url = await uploadMediaFile(file);
+        onUpload(url);
+        setIsUploading(false);
       }
     };
     return (
@@ -27,7 +30,7 @@ const ImageUpload = ({ value, onUpload, mediaLibrary }: { value: string, onUploa
           <div className="text-center z-10 p-4 bg-midnight/60 rounded-xl flex items-center gap-4">
             <div>
               <UploadCloud className="mx-auto text-slate-500 mb-1" />
-              <label className="text-gold font-bold cursor-pointer hover:text-white text-sm">Choisir un fichier<input type="file" accept="image/*" onChange={handleFileChange} className="hidden" /></label>
+              <label className="text-gold font-bold cursor-pointer hover:text-white text-sm">{isUploading ? 'Téléversement...' : 'Choisir un fichier'}<input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUploading} /></label>
               <p className="text-xs text-slate-500 mt-1">ou glisser-déposer</p>
             </div>
             <div className="border-l border-white/10 h-16 mx-2"></div>
