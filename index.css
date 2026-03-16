@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for React Quill Dark Mode */
+.ql-toolbar {
+  @apply rounded-t-xl border-white/10 bg-midnight/60 !important;
+}
+.ql-container {
+  @apply rounded-b-xl border-white/10 bg-transparent !important;
+}
+.ql-editor {
+  @apply text-slate-200 !important;
+  min-height: 250px;
+}
+.ql-snow .ql-stroke {
+  @apply stroke-slate-400 !important;
+}
+.ql-snow .ql-picker-label {
+    @apply text-slate-400 !important;
+}
+.ql-snow .ql-fill {
+    @apply fill-slate-400 !important;
+}
+.prose-gold img {
+    @apply rounded-xl my-6 w-full;
+}

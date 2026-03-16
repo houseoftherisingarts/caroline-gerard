@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public collections — anyone can read, only authenticated admin can write.
+    // NOTE: Since this site uses a client-side password check (not Firebase Auth),
+    // writes are currently open. Once Firebase Auth is added, replace `true` below
+    // with `request.auth != null` for writes.
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
