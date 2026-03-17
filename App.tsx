@@ -16,6 +16,7 @@ import {
 
 import StarField from './components/StarField';
 import CartDrawer from './components/CartDrawer';
+import EditableText from './components/EditableText';
 import CheckoutPage from './components/CheckoutPage';
 import HomePage from './pages/HomePage';
 import ShopPage from './pages/ShopPage';
@@ -139,9 +140,7 @@ const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, show
     <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
       <div className="text-center md:text-left">
         <h3 className="font-serif text-3xl text-gold mb-2">Caroline Gérard</h3>
-        <p className="text-slate-400 max-w-sm">
-          Accompagner mon fils sur sa route et l&apos;aider à croire en ses rêves.
-        </p>
+        <EditableText tag="p" contentKey="footer_tagline" defaultValue="Accompagner mon fils sur sa route et l'aider à croire en ses rêves." className="text-slate-400 max-w-sm" />
       </div>
       <div className="flex gap-6">
         <a href="https://www.facebook.com/caroline.gerard.338" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-full hover:bg-gold hover:text-midnight transition-all">
@@ -149,7 +148,7 @@ const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, show
         </a>
       </div>
       <div className="text-sm text-slate-600 flex flex-col items-center md:items-end gap-4">
-        <p>© 2026 Copyright Vexel Studio. Tous droits réservés.</p>
+        <EditableText tag="p" contentKey="footer_copyright" defaultValue="© 2026 Copyright Vexel Studio. Tous droits réservés." />
         <div className="flex items-center gap-6">
           {showVisitorCount && (
             <div className="flex items-center gap-2 text-slate-500">
@@ -352,7 +351,7 @@ const App = () => {
                   <Route path="conferences" element={<AdminConferences conferences={conferences} setConferences={handleSetConferences} mediaLibrary={mediaLibrary} />} />
                   <Route path="interviews" element={<AdminInterviews interviews={interviews} setInterviews={handleSetInterviews} />} />
                   <Route path="kanban" element={<AdminKanban />} />
-                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} />} />
+                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} events={events} conferences={conferences} interviews={interviews} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
                   <Route path="*" element={<div className="text-center p-12 text-slate-500">Section en développement...</div>} />
                 </Routes>
               </AdminLayout>
