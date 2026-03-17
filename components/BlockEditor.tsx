@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { uploadMediaFile } from '../lib/storage';
 import { UploadCloud, Image as ImageIcon, Type, ArrowUp, ArrowDown, MoveLeft, MoveRight, AlignLeft, AlignCenter, AlignRight, AlignJustify, Library, X, Heading, Bold, Italic, Trash2 } from 'lucide-react';
 
 // --- Types ---
@@ -11,12 +12,14 @@ type BlockRow = { id: string; columns: BlockColumn[] };
 // --- Helper Components ---
 const ImageUpload = ({ value, onUpload, mediaLibrary }: { value: string, onUpload: (url: string) => void, mediaLibrary: string[] }) => {
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const [isUploading, setIsUploading] = useState(false);
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => { onUpload(reader.result as string); };
-        reader.readAsDataURL(file);
+        setIsUploading(true);
+        const url = await uploadMediaFile(file);
+        onUpload(url);
+        setIsUploading(false);
       }
     };
     return (
@@ -26,7 +29,10 @@ const ImageUpload = ({ value, onUpload, mediaLibrary }: { value: string, onUploa
           <div className="text-center z-10 p-4 bg-midnight/60 rounded-xl flex items-center gap-4">
             <div>
               <UploadCloud className="mx-auto text-slate-500 mb-1" />
-              <label className="text-gold font-bold cursor-pointer hover:text-white text-sm">Choisir un fichier<input type="file" accept="image/*" onChange={handleFileChange} className="hidden" /></label>
+              <label className="text-gold font-bold cursor-pointer hover:text-white text-sm">
+                {isUploading ? 'Téléversement...' : 'Choisir un fichier'}
+                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUploading} />
+              </label>
               <p className="text-xs text-slate-500 mt-1">ou glisser-déposer</p>
             </div>
             <div className="border-l border-white/10 h-16 mx-2"></div>
@@ -57,6 +63,11 @@ const BlockEditor = ({ value, onChange, mediaLibrary }: { value: string, onChang
     onChangeRef.current = onChange;
     const isInitialMount = useRef(true);
 
+    // Initialize rows from value on mount only.
+    // Must NOT re-run when value changes — that would create a loop:
+    // user types → onChange → parent updates value prop → this effect fires →
+    // setRows with new object references → second effect fires → onChange again → ∞
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         try {
             const parsedRows = JSON.parse(value);
@@ -68,7 +79,7 @@ const BlockEditor = ({ value, onChange, mediaLibrary }: { value: string, onChang
         } catch {
             setRows([{ id: 'default-row', columns: [{ id: 'default-col', type: 'text', value: value || '', align: 'left', fontFamily: 'sans', fontSize: 'p' }] }]);
         }
-    }, [value]);
+    }, []);
 
     useEffect(() => {
         if (isInitialMount.current) {
