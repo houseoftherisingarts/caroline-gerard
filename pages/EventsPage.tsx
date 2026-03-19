@@ -4,6 +4,19 @@ import { AppEvent } from '../types';
 import BlockRenderer from '../components/BlockRenderer';
 import EditableText from '../components/EditableText';
 
+const getFirstImage = (image: string | undefined, content: string): string => {
+  if (image) return image;
+  try {
+    const rows = JSON.parse(content || '[]');
+    for (const row of rows) {
+      for (const col of row.columns) {
+        if (col.type === 'image' && col.value) return col.value;
+      }
+    }
+  } catch {}
+  return '';
+};
+
 const EventsPage = ({ events }: { events: AppEvent[] }) => {
   const [selectedEvent, setSelectedEvent] = useState<AppEvent | null>(null);
 
@@ -39,6 +52,11 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
                   <span className="flex items-center gap-2"><MapPin size={16} /> {event.location}</span>
                 </div>
               </div>
+              {getFirstImage(event.image, event.content) && (
+                <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
+                  <img src={getFirstImage(event.image, event.content)} alt={event.title} className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
           )) : (
             <p className="text-center text-slate-500 italic">Aucun événement prévu pour le moment.</p>
@@ -50,7 +68,7 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
           <div className="w-full max-w-screen-xl mx-auto px-6 md:px-12 pt-32 pb-24 relative">
             <button onClick={() => setSelectedEvent(null)} className="fixed top-6 right-6 z-10 p-2 text-slate-500 hover:text-white bg-black/20 rounded-full transition-colors"><X /></button>
-            <img src={selectedEvent.image} alt={selectedEvent.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />
+            {getFirstImage(selectedEvent.image, selectedEvent.content) && <img src={getFirstImage(selectedEvent.image, selectedEvent.content)} alt={selectedEvent.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />}
             <h1 className="text-5xl md:text-7xl font-serif text-white mb-4">{selectedEvent.title}</h1>
             <div className="flex items-center justify-between border-b border-white/10 pb-8 mb-12">
               <div className="flex items-center gap-4 text-sm text-gold">

@@ -1,9 +1,66 @@
 import React, { useState } from 'react';
 import { AppEvent } from '../../types';
-import { PenTool, Edit, Trash2, ArrowLeft, Save } from 'lucide-react';
+import { PenTool, Edit, Trash2, ArrowLeft, Save, UploadCloud, Library, X as XIcon } from 'lucide-react';
 import BlockEditor from '../../components/BlockEditor';
+import { uploadMediaFile } from '../../lib/storage';
+
+// --- Helpers ---
+const getFirstImage = (image: string | undefined, content: string): string => {
+  if (image) return image;
+  try {
+    const rows = JSON.parse(content || '[]');
+    for (const row of rows) {
+      for (const col of row.columns) {
+        if (col.type === 'image' && col.value) return col.value;
+      }
+    }
+  } catch {}
+  return '';
+};
 
 // --- Reusable Components ---
+const ImageUpload = ({ value, onUpload, mediaLibrary }: { value: string, onUpload: (url: string) => void, mediaLibrary: string[] }) => {
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setIsUploading(true);
+        const url = await uploadMediaFile(file);
+        onUpload(url);
+        setIsUploading(false);
+      }
+    };
+    return (
+      <>
+        <div className="w-full h-full bg-black/20 rounded-lg border-2 border-dashed border-white/10 flex items-center justify-center relative min-h-[150px]">
+          {value && <img src={value} alt="Aperçu" className="w-full h-full object-cover rounded-lg absolute opacity-80" />}
+          <div className="text-center z-10 p-4 bg-midnight/60 rounded-xl flex items-center gap-4">
+            <div>
+              <UploadCloud className="mx-auto text-slate-500 mb-1" />
+              <label className="text-gold font-bold cursor-pointer hover:text-white text-sm">{isUploading ? 'Téléversement...' : 'Choisir un fichier'}<input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={isUploading} /></label>
+              <p className="text-xs text-slate-500 mt-1">ou glisser-déposer</p>
+            </div>
+            <div className="border-l border-white/10 h-16 mx-2"></div>
+            <div>
+              <Library className="mx-auto text-slate-500 mb-1" />
+              <button onClick={() => setIsLibraryOpen(true)} className="text-gold font-bold cursor-pointer hover:text-white text-sm">Parcourir</button>
+              <p className="text-xs text-slate-500 mt-1">la médiathèque</p>
+            </div>
+          </div>
+        </div>
+        {isLibraryOpen && (
+            <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in">
+                <div className="bg-midnight/80 border border-white/10 rounded-2xl w-full max-w-4xl h-[80vh] p-6 flex flex-col">
+                    <div className="flex justify-between items-center mb-4"><h3 className="text-2xl font-serif text-white">Sélectionner une image</h3><button onClick={() => setIsLibraryOpen(false)} className="p-2 text-slate-400 hover:text-white"><XIcon /></button></div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2"><div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">{mediaLibrary.map((imgUrl, index) => (<div key={index} className="aspect-square rounded-lg overflow-hidden cursor-pointer group" onClick={() => { onUpload(imgUrl); setIsLibraryOpen(false); }}><img src={imgUrl} alt={`Media ${index}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" /></div>))}</div></div>
+                </div>
+            </div>
+        )}
+      </>
+    );
+};
+
 const ToggleSwitch = ({ checked, onChange }: { checked: boolean, onChange: (checked: boolean) => void }) => (
   <button onClick={() => onChange(!checked)} className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${checked ? 'bg-gold' : 'bg-slate-700'}`}>
     <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${checked ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -87,9 +144,10 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
         <div className="bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 p-8 space-y-6">
             {activeTab === 'content' && (
                 <div className="space-y-6">
-                    <input 
-                        type="text" 
-                        placeholder="Titre de l'événement" 
+                    <div className="h-64"><ImageUpload value={currentEvent.image || ''} onUpload={(url) => updateCurrentEvent({ image: url })} mediaLibrary={mediaLibrary} /></div>
+                    <input
+                        type="text"
+                        placeholder="Titre de l'événement"
                         value={currentEvent.title || ''} 
                         onChange={(e) => updateCurrentEvent({ title: e.target.value })} 
                         className="w-full bg-transparent text-4xl font-serif text-white focus:outline-none placeholder-slate-600 border-b border-white/10 py-2"
@@ -161,7 +219,7 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
         {events.map((event, index) => (
           <div key={event.id} className={`p-6 flex flex-col md:flex-row gap-6 items-start md:items-center ${index !== events.length - 1 ? 'border-b border-white/5' : ''}`}>
             <div className="w-24 h-24 rounded-lg overflow-hidden bg-slate-800 flex-shrink-0">
-              {event.image ? <img src={event.image} alt={event.title} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-black/20"></div>}
+              {getFirstImage(event.image, event.content) ? <img src={getFirstImage(event.image, event.content)} alt={event.title} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-black/20"></div>}
             </div>
             <div className="flex-1">
                <div className="flex items-center gap-3 mb-1">

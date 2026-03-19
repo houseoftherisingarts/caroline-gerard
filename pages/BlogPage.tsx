@@ -1,4 +1,17 @@
 import React, { useState, useEffect } from 'react';
+
+const getFirstImage = (image: string | undefined, content: string): string => {
+  if (image) return image;
+  try {
+    const rows = JSON.parse(content || '[]');
+    for (const row of rows) {
+      for (const col of row.columns) {
+        if (col.type === 'image' && col.value) return col.value;
+      }
+    }
+  } catch {}
+  return '';
+};
 import { Calendar, Feather, PenTool, X, Facebook, Linkedin, Twitter, Link as LinkIcon } from 'lucide-react';
 import { BlogPost } from '../types';
 import BlockRenderer from '../components/BlockRenderer';
@@ -36,7 +49,7 @@ const BlogPage = ({ posts }: { posts: BlogPost[] }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {posts.filter(p => p.isPublished).map(post => (
               <article key={post.id} className="bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-gold/30 transition-all group flex flex-col">
-                <div className="h-48 overflow-hidden relative"><img src={post.image} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" /><div className="absolute inset-0 bg-gradient-to-t from-midnight/80 to-transparent" /><div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white/80"><Calendar className="w-3 h-3 text-gold" />{post.date}</div></div>
+                <div className="h-48 overflow-hidden relative bg-slate-800">{getFirstImage(post.image, post.content) && <img src={getFirstImage(post.image, post.content)} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />}<div className="absolute inset-0 bg-gradient-to-t from-midnight/80 to-transparent" /><div className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white/80"><Calendar className="w-3 h-3 text-gold" />{post.date}</div></div>
                 <div className="p-6 flex-1 flex flex-col"><h2 className="text-xl font-serif text-white mb-3 group-hover:text-gold transition-colors">{post.title}</h2><p className="text-slate-400 text-sm leading-relaxed mb-6 flex-1">{post.excerpt}</p><button onClick={() => setSelectedPost(post)} className="text-gold font-bold uppercase tracking-wider text-xs hover:text-white transition-colors flex items-center gap-2 mt-auto self-start">Lire l&apos;article <Feather className="w-3 h-3" /></button></div>
               </article>
             ))}
@@ -53,7 +66,7 @@ const BlogPage = ({ posts }: { posts: BlogPost[] }) => {
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
           <div className="w-full max-w-screen-xl mx-auto px-6 md:px-12 pt-32 pb-24 relative">
             <button onClick={() => setSelectedPost(null)} className="fixed top-6 right-6 z-10 p-2 text-slate-500 hover:text-white bg-black/20 rounded-full transition-colors"><X /></button>
-            <img src={selectedPost.image} alt={selectedPost.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />
+            {getFirstImage(selectedPost.image, selectedPost.content) && <img src={getFirstImage(selectedPost.image, selectedPost.content)} alt={selectedPost.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />}
             <h1 className="text-5xl md:text-7xl font-serif text-white mb-4">{selectedPost.title}</h1>
             <div className="flex items-center justify-between border-b border-white/10 pb-8 mb-12">
               <div className="flex items-center gap-2 text-sm text-gold"><Calendar size={14} /><span>Publié le {selectedPost.date}</span></div>
