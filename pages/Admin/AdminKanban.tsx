@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { subscribeToKanban, saveKanban } from '../../lib/firestore';
 import { Plus, Edit, Calendar, LayoutDashboard, Trash2, X, CheckSquare, Square } from 'lucide-react';
 
 // --- Types ---
@@ -43,6 +44,30 @@ const statusConfig: { [key in TaskStatus]: { title: string; color: string } } = 
 const AdminKanban = () => {
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
+
+  // Keep refs in sync for use inside save helpers
+  const projectsRef = useRef(projects);
+  const tasksRef = useRef(tasks);
+  projectsRef.current = projects;
+  tasksRef.current = tasks;
+
+  // Load from Firestore on mount
+  useEffect(() => {
+    return subscribeToKanban(data => {
+      if (data.projects?.length) setProjects(data.projects as Project[]);
+      if (data.tasks?.length) setTasks(data.tasks as Task[]);
+    });
+  }, []);
+
+  const saveTasks = (newTasks: Task[]) => {
+    setTasks(newTasks);
+    saveKanban({ projects: projectsRef.current, tasks: newTasks });
+  };
+
+  const saveProjects = (newProjects: Project[]) => {
+    setProjects(newProjects);
+    saveKanban({ projects: newProjects, tasks: tasksRef.current });
+  };
   const [activeProjectId, setActiveProjectId] = useState<string>('proj-1');
   const [viewMode, setViewMode] = useState<ViewMode>('board');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -57,11 +82,11 @@ const AdminKanban = () => {
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, status: TaskStatus) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-    setTasks(prevTasks => prevTasks.map(t => t.id === taskId ? { ...t, status } : t));
+    saveTasks(tasksRef.current.map(t => t.id === taskId ? { ...t, status } : t));
   };
 
   const handleUpdateTask = (updatedTask: Task) => {
-    setTasks(prevTasks => prevTasks.map(t => t.id === updatedTask.id ? updatedTask : t));
+    saveTasks(tasksRef.current.map(t => t.id === updatedTask.id ? updatedTask : t));
     setEditingTask(null);
   };
 
@@ -75,20 +100,20 @@ const AdminKanban = () => {
         projectId: activeProjectId,
         subtasks: []
     };
-    setTasks(prev => [...prev, newTask]);
+    saveTasks([...tasksRef.current, newTask]);
     setEditingTask(newTask);
   }
 
   const handleDeleteTask = (taskId: string) => {
-      setTasks(prev => prev.filter(t => t.id !== taskId));
-      setEditingTask(null);
+    saveTasks(tasksRef.current.filter(t => t.id !== taskId));
+    setEditingTask(null);
   }
 
   const addProject = () => {
       const newProjectName = prompt('Nom du nouveau projet:');
       if(newProjectName) {
           const newProject: Project = { id: `proj-${Date.now()}`, name: newProjectName };
-          setProjects(prev => [...prev, newProject]);
+          saveProjects([...projectsRef.current, newProject]);
           setActiveProjectId(newProject.id);
       }
   }

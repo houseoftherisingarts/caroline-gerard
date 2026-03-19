@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { subscribeToInvoices, saveInvoice, deleteInvoice, StoredInvoice } from '../../lib/firestore';
 import { 
   Plus, 
   Trash2, 
@@ -95,6 +96,40 @@ const AdminInvoices = () => {
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
+  const [savedInvoices, setSavedInvoices] = useState<StoredInvoice[]>([]);
+  const [saveMsg, setSaveMsg] = useState('');
+
+  useEffect(() => {
+    return subscribeToInvoices(invoices => {
+      setSavedInvoices(invoices.sort((a, b) => b.savedAt.localeCompare(a.savedAt)));
+    });
+  }, []);
+
+  const handleSave = async () => {
+    const invoice: StoredInvoice = {
+      id: `inv-${Date.now()}`,
+      number: invoiceMeta.number,
+      clientName: billTo.name || 'Client sans nom',
+      savedAt: new Date().toISOString(),
+      meta: invoiceMeta,
+      billTo,
+      shipTo,
+      items,
+      shipping,
+    };
+    await saveInvoice(invoice);
+    setSaveMsg('Facture sauvegardée !');
+    setTimeout(() => setSaveMsg(''), 3000);
+  };
+
+  const handleLoad = (inv: StoredInvoice) => {
+    setInvoiceMeta(inv.meta);
+    setBillTo(inv.billTo);
+    setShipTo(inv.shipTo);
+    setItems(inv.items);
+    setShipping(inv.shipping);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -120,13 +155,44 @@ const AdminInvoices = () => {
               <h1 className="text-3xl font-serif font-bold text-white">Créateur de Facture</h1>
               <p className="text-slate-400 mt-1">Générez vos documents professionnels</p>
             </div>
-            <button 
-              onClick={handlePrint}
-              className="bg-gold text-midnight px-6 py-3 rounded-xl font-bold hover:bg-white transition-all flex items-center gap-2 shadow-lg shadow-gold/20"
-            >
-              <Printer size={20} /> Imprimer / PDF
-            </button>
+            <div className="flex items-center gap-3">
+              {saveMsg && <span className="text-green-400 text-sm font-bold">{saveMsg}</span>}
+              <button
+                onClick={handleSave}
+                className="bg-white/10 text-white px-4 py-3 rounded-xl font-bold hover:bg-white/20 transition-all flex items-center gap-2"
+              >
+                <FileText size={18} /> Sauvegarder
+              </button>
+              <button
+                onClick={handlePrint}
+                className="bg-gold text-midnight px-6 py-3 rounded-xl font-bold hover:bg-white transition-all flex items-center gap-2 shadow-lg shadow-gold/20"
+              >
+                <Printer size={20} /> Imprimer / PDF
+              </button>
+            </div>
           </div>
+
+          {/* Saved Invoices */}
+          {savedInvoices.length > 0 && (
+            <div className="bg-midnight/60 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Factures sauvegardées</h3>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {savedInvoices.map(inv => (
+                  <div key={inv.id} className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-2">
+                    <div>
+                      <span className="text-white text-sm font-bold">{inv.number}</span>
+                      <span className="text-slate-400 text-xs ml-3">{inv.clientName}</span>
+                      <span className="text-slate-600 text-xs ml-3">{new Date(inv.savedAt).toLocaleDateString('fr-CA')}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => handleLoad(inv)} className="text-xs text-gold hover:text-white font-bold px-2 py-1 bg-gold/10 rounded">Charger</button>
+                      <button onClick={() => deleteInvoice(inv.id)} className="text-xs text-red-400 hover:text-white px-2 py-1 bg-red-400/10 rounded">×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Meta Info */}
           <div className="bg-midnight/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-4">
