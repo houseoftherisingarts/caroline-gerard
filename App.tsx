@@ -40,6 +40,7 @@ import AdminConferences from './pages/Admin/AdminConferences';
 import AdminKanban from './pages/Admin/AdminKanban';
 import AdminInterviews from './pages/Admin/AdminInterviews';
 import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
+import IntroScreen from './components/IntroScreen';
 import { SiteContentProvider } from './contexts/SiteContentContext';
 
 import { recentOrders, salesData, blogPosts } from './data';
@@ -168,6 +169,7 @@ const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, show
 // --- App Container ---
 
 const App = () => {
+  const [showIntro, setShowIntro] = useState(!window.location.pathname.startsWith('/admin'));
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -321,6 +323,7 @@ const App = () => {
 
   return (
     <HelmetProvider>
+      {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
       <SiteContentProvider
         content={siteContent}
         mediaLibrary={mediaLibrary}
