@@ -7,9 +7,14 @@ import {
   getDocs,
   getDoc,
   writeBatch,
+  increment,
+  query,
+  where,
+  orderBy,
+  updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview, Lead } from '../types';
+import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage } from '../types';
 
 // --- Generic helper ---
 
@@ -119,6 +124,49 @@ export const saveInvoice = (invoice: StoredInvoice) =>
 export const deleteInvoice = (id: string) =>
   deleteDoc(doc(db, 'invoices', id));
 
+// --- Abandoned Checkouts ---
+
+export type AbandonedCheckout = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  cartItems: { title: string; price: number; quantity: number }[];
+  subtotal: number;
+  startedAt: string;
+};
+
+export const subscribeToAbandonedCheckouts = (cb: (items: AbandonedCheckout[]) => void) =>
+  subscribeToCollection<AbandonedCheckout>('abandonedCheckouts', cb);
+
+export const saveAbandonedCheckout = (checkout: AbandonedCheckout) =>
+  setDoc(doc(db, 'abandonedCheckouts', checkout.id), checkout);
+
+export const deleteAbandonedCheckout = (id: string) =>
+  deleteDoc(doc(db, 'abandonedCheckouts', id));
+
+// --- Visitor Counter ---
+
+export const incrementVisitorCount = () =>
+  setDoc(doc(db, 'settings', 'analytics'), { visitors: increment(1) }, { merge: true });
+
+export const subscribeToVisitorCount = (cb: (count: number) => void) =>
+  onSnapshot(doc(db, 'settings', 'analytics'), snap => {
+    cb(snap.exists() ? (snap.data().visitors ?? 0) : 0);
+  });
+
+// --- Orders ---
+
+export const subscribeToOrders = (cb: (orders: import('../types').Order[]) => void) =>
+  subscribeToCollection<import('../types').Order>('orders', cb);
+
+export const updateOrderStatus = (id: string, status: 'Payé' | 'Envoyé' | 'En attente') =>
+  setDoc(doc(db, 'orders', id), { status }, { merge: true });
+
 // --- Site Content (editable text & images) ---
 
 export type SiteContent = Record<string, string>;
@@ -150,6 +198,53 @@ export const subscribeToSettings = (cb: (s: SiteSettings) => void) =>
 
 export const saveSettings = (settings: Partial<SiteSettings>) =>
   setDoc(settingsRef(), settings, { merge: true });
+
+// --- Newsletter Subscribers ---
+
+export const subscribeToSubscribers = (cb: (items: Subscriber[]) => void) =>
+  subscribeToCollection<Subscriber>('subscribers', cb);
+
+export const saveSubscriber = (sub: Subscriber) =>
+  setDoc(doc(db, 'subscribers', sub.id), sub);
+
+export const deleteSubscriber = (id: string) =>
+  deleteDoc(doc(db, 'subscribers', id));
+
+// --- Community Members ---
+
+export const subscribeToMembers = (cb: (items: Member[]) => void) =>
+  subscribeToCollection<Member>('members', cb);
+
+export const saveMember = (member: Member) =>
+  setDoc(doc(db, 'members', member.id), member);
+
+export const deleteMember = (id: string) =>
+  deleteDoc(doc(db, 'members', id));
+
+// --- Community Messages ---
+
+export const sendCommunityMessage = (msg: CommunityMessage) =>
+  setDoc(doc(db, 'communityMessages', msg.id), msg);
+
+// Subscribe to all messages for a specific member (member's own thread)
+export const subscribeToMemberMessages = (memberId: string, cb: (msgs: CommunityMessage[]) => void) =>
+  onSnapshot(
+    query(collection(db, 'communityMessages'), where('memberId', '==', memberId), orderBy('createdAt', 'asc')),
+    snap => cb(snap.docs.map(d => d.data() as CommunityMessage))
+  );
+
+// Subscribe to all messages (admin view)
+export const subscribeToAllMessages = (cb: (msgs: CommunityMessage[]) => void) =>
+  onSnapshot(
+    query(collection(db, 'communityMessages'), orderBy('createdAt', 'asc')),
+    snap => cb(snap.docs.map(d => d.data() as CommunityMessage))
+  );
+
+export const markMessageRead = (id: string) =>
+  updateDoc(doc(db, 'communityMessages', id), { read: true });
+
+export const deleteCommunityMessage = (id: string) =>
+  deleteDoc(doc(db, 'communityMessages', id));
 
 // --- Initial seed ---
 

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Star, Feather, BookOpen } from 'lucide-react';
 import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
+import NewsletterForm from '../components/NewsletterForm';
 
 const HomePage = ({ profileImage }: { profileImage: string }) => {
   return (
@@ -28,7 +29,7 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
               className="uppercase tracking-[0.2em] text-xs font-bold"
             />
           </div>
-          <h1 className="font-serif text-6xl md:text-8xl leading-tight text-white drop-shadow-2xl">
+          <h1 className="font-serif text-5xl md:text-7xl leading-tight text-white drop-shadow-2xl">
             <EditableText tag="span" contentKey="home_hero_title_line1" defaultValue="Croire en ses rêves," />
             <br />
             <EditableText tag="span" contentKey="home_hero_title_italic" defaultValue="un mot à la fois." className="italic text-gold" />
@@ -116,6 +117,9 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
           </div>
         </div>
       </section>
+
+      {/* Newsletter */}
+      <NewsletterForm />
 
       {/* Mission Preview */}
       <section className="w-full py-24 relative overflow-hidden">

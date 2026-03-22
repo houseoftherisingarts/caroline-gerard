@@ -3,6 +3,7 @@ import { AppEvent } from '../../types';
 import { PenTool, Edit, Trash2, ArrowLeft, Save, UploadCloud, Library, X as XIcon } from 'lucide-react';
 import BlockEditor from '../../components/BlockEditor';
 import { uploadMediaFile } from '../../lib/storage';
+import NewsletterSendModal from '../../components/NewsletterSendModal';
 
 // --- Helpers ---
 const getFirstImage = (image: string | undefined, content: string): string => {
@@ -72,6 +73,7 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
   const [isEditing, setIsEditing] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<Partial<AppEvent> | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
   const openEditor = (event: AppEvent | null = null) => {
     if (event) {
@@ -99,24 +101,58 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
       setCurrentEvent(prev => prev ? { ...prev, ...data } : null);
   }
 
-  const handleSave = () => {
-    if (!currentEvent) return;
-
-    if (currentEvent.id) {
-      setEvents(events.map(e => e.id === currentEvent.id ? currentEvent as AppEvent : e));
+  const executeSave = (evt: Partial<AppEvent> = currentEvent!) => {
+    if (!evt) return;
+    if (evt.id) {
+      setEvents(events.map(e => e.id === evt.id ? evt as AppEvent : e));
     } else {
-      const newEvent: AppEvent = { ...currentEvent, id: `evt-${Date.now()}` } as AppEvent;
+      const newEvent: AppEvent = { ...evt, id: `evt-${Date.now()}` } as AppEvent;
       setEvents([newEvent, ...events]);
     }
     setIsEditing(false);
+    setShowNewsletterModal(false);
+  };
+
+  const handleSave = () => {
+    if (!currentEvent) return;
+    const wasPublished = currentEvent.id
+      ? (events.find(e => e.id === currentEvent.id)?.isPublished ?? false)
+      : false;
+    const isFirstPublication = currentEvent.isPublished && !wasPublished;
+    if (isFirstPublication) {
+      setShowNewsletterModal(true);
+      return;
+    }
+    executeSave();
   };
 
   const handleDelete = (id: string) => {
     setEvents(events.filter(e => e.id !== id));
   };
 
+  const eventDefaultBody = (e: Partial<AppEvent>) => {
+    const datePart = e.date
+      ? new Date(e.date).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      : '';
+    const locationPart = e.location ? ` — ${e.location}` : '';
+    return `${datePart}${locationPart}\n\n${e.description || ''}`.trim();
+  };
+
   if (isEditing && currentEvent) {
     return (
+      <>
+      {showNewsletterModal && (
+        <NewsletterSendModal
+          type="event"
+          defaultSubject={`Nouvel événement : ${currentEvent.title || ''}`}
+          defaultTitle={currentEvent.title || ''}
+          defaultBodyText={eventDefaultBody(currentEvent)}
+          defaultImage={currentEvent.image || ''}
+          mediaLibrary={mediaLibrary}
+          onConfirm={() => executeSave()}
+          onCancel={() => setShowNewsletterModal(false)}
+        />
+      )}
       <div className="animate-fade-in-up space-y-6">
         <div className="flex justify-between items-center">
           <button onClick={() => setIsEditing(false)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
@@ -201,6 +237,7 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
             )}
         </div>
       </div>
+      </>
     );
   }
 

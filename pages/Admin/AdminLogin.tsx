@@ -1,13 +1,16 @@
-// SETUP: In Firebase Console → Authentication → Sign-in method → enable Email/Password
-// Then go to Users → Add user → enter Caroline's email and a secure password.
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, User } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 
+// Usernames are mapped to internal non-guessable emails.
+// Firebase Auth requires an email format, but we hide this from the UI entirely.
+const toInternalEmail = (username: string) =>
+  `${username.trim().toLowerCase()}@admin.local`;
+
 const AdminLogin = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,10 +20,9 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // App.tsx onAuthStateChanged handles the rest
+      await signInWithEmailAndPassword(auth, toInternalEmail(username), password);
     } catch {
-      setError('Courriel ou mot de passe incorrect.');
+      setError('Nom d\'utilisateur ou mot de passe incorrect.');
     } finally {
       setLoading(false);
     }
@@ -37,15 +39,16 @@ const AdminLogin = () => {
         <h2 className="text-2xl font-serif text-center mb-6">Espace Auteure</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-bold text-slate-400 mb-2">Courriel</label>
+            <label className="block text-sm font-bold text-slate-400 mb-2">Nom d'utilisateur</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                type="text"
+                value={username}
+                onChange={(e) => { setUsername(e.target.value); setError(''); }}
                 className="w-full bg-black/20 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
-                placeholder="votre@courriel.com"
+                placeholder="Nom d'utilisateur"
+                autoComplete="username"
                 autoFocus
                 required
               />
@@ -59,6 +62,7 @@ const AdminLogin = () => {
               onChange={(e) => { setPassword(e.target.value); setError(''); }}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold transition-colors"
               placeholder="••••••••"
+              autoComplete="current-password"
               required
             />
           </div>

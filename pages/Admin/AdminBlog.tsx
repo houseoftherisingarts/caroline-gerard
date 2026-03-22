@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { PenTool, Edit3, Trash2, ArrowLeft, Save, UploadCloud, Library, X } from 'lucide-react';
+import NewsletterSendModal from '../../components/NewsletterSendModal';
 
 const getFirstImage = (image: string | undefined, content: string): string => {
   if (image) return image;
@@ -71,6 +72,7 @@ const AdminBlog = ({ posts, setPosts, mediaLibrary }: { posts: BlogPost[], setPo
   const [isEditing, setIsEditing] = useState(false);
   const [currentPost, setCurrentPost] = useState<Partial<BlogPost> | null>(null);
   const [activeTab, setActiveTab] = useState('content');
+  const [showNewsletterModal, setShowNewsletterModal] = useState(false);
 
   const openEditor = (post: BlogPost | null = null) => {
     if (post) {
@@ -82,22 +84,48 @@ const AdminBlog = ({ posts, setPosts, mediaLibrary }: { posts: BlogPost[], setPo
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    if (!currentPost) return;
-    
-    if (currentPost.id) { 
-        setPosts(posts.map(p => p.id === currentPost.id ? currentPost as BlogPost : p)); 
-    } else { 
-        const newPost: BlogPost = { ...currentPost, id: `post-${Date.now()}` } as BlogPost; 
-        setPosts([newPost, ...posts]); 
+  const executeSave = (post: Partial<BlogPost> = currentPost!) => {
+    if (!post) return;
+    if (post.id) {
+      setPosts(posts.map(p => p.id === post.id ? post as BlogPost : p));
+    } else {
+      const newPost: BlogPost = { ...post, id: `post-${Date.now()}` } as BlogPost;
+      setPosts([newPost, ...posts]);
     }
     setIsEditing(false);
+    setShowNewsletterModal(false);
+  };
+
+  const handleSave = () => {
+    if (!currentPost) return;
+    const wasPublished = currentPost.id
+      ? (posts.find(p => p.id === currentPost.id)?.isPublished ?? false)
+      : false;
+    const isFirstPublication = currentPost.isPublished && !wasPublished;
+    if (isFirstPublication) {
+      setShowNewsletterModal(true);
+      return;
+    }
+    executeSave();
   };
 
   const handleDeletePost = (id: string) => setPosts(posts.filter(p => p.id !== id));
 
   if (isEditing && currentPost) {
     return (
+      <>
+      {showNewsletterModal && (
+        <NewsletterSendModal
+          type="blog"
+          defaultSubject={`Nouveau billet de blog : ${currentPost.title || ''}`}
+          defaultTitle={currentPost.title || ''}
+          defaultBodyText={currentPost.excerpt || ''}
+          defaultImage={currentPost.image || ''}
+          mediaLibrary={mediaLibrary}
+          onConfirm={() => executeSave()}
+          onCancel={() => setShowNewsletterModal(false)}
+        />
+      )}
       <div className="animate-fade-in-up space-y-6">
         <div className="flex justify-between items-center"><button onClick={() => setIsEditing(false)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"><ArrowLeft size={18} /> Retour</button><div className="flex items-center gap-4"><div className="flex items-center gap-2"><span className={`font-bold text-sm ${currentPost.isPublished ? 'text-green-400' : 'text-slate-400'}`}>{currentPost.isPublished ? 'Publié' : 'Brouillon'}</span><ToggleSwitch checked={currentPost.isPublished || false} onChange={(isChecked) => setCurrentPost({ ...currentPost, isPublished: isChecked })}/></div><button onClick={handleSave} className="bg-gold text-midnight px-4 py-2 rounded-lg font-bold flex items-center gap-2"><Save size={16} /> Enregistrer</button></div></div>
         <div className="bg-midnight/60 backdrop-blur-md border border-white/10 rounded-full p-1 flex w-fit mx-auto"><button onClick={() => setActiveTab('content')} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === 'content' ? 'bg-gold text-midnight' : 'text-slate-400 hover:text-white'}`}>✍️ Rédaction</button><button onClick={() => setActiveTab('seo')} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === 'seo' ? 'bg-gold text-midnight' : 'text-slate-400 hover:text-white'}`}>🔍 SEO & Meta</button></div>
@@ -117,6 +145,7 @@ const AdminBlog = ({ posts, setPosts, mediaLibrary }: { posts: BlogPost[], setPo
             {activeTab === 'seo' && ( <div className="grid grid-cols-1 md:grid-cols-2 gap-8">...</div> )}
         </div>
       </div>
+      </>
     );
   }
 

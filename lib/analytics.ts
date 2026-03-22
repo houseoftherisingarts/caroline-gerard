@@ -1,27 +1,33 @@
 import { logEvent } from 'firebase/analytics';
 import { analytics } from '../firebase';
 
+// Only fire analytics events if the visitor has explicitly accepted cookies (Loi 25)
+const hasConsent = () => {
+  try { return localStorage.getItem('_cg_consent') === 'accepted'; } catch { return false; }
+};
+
+const track = (event: string, params?: Record<string, unknown>) => {
+  if (!hasConsent()) return;
+  logEvent(analytics, event, params);
+};
+
 export const trackPageView = (page: string) =>
-  logEvent(analytics, 'page_view', { page_title: page });
+  track('page_view', { page_title: page });
 
 export const trackAddToCart = (name: string, price: number) =>
-  logEvent(analytics, 'add_to_cart', {
-    currency: 'CAD',
-    value: price,
-    items: [{ item_name: name, price }],
-  });
+  track('add_to_cart', { currency: 'CAD', value: price, items: [{ item_name: name, price }] });
 
 export const trackBeginCheckout = (value: number) =>
-  logEvent(analytics, 'begin_checkout', { currency: 'CAD', value });
+  track('begin_checkout', { currency: 'CAD', value });
 
 export const trackLead = (source: string) =>
-  logEvent(analytics, 'generate_lead', { source });
+  track('generate_lead', { source });
 
 export const trackBlogView = (title: string) =>
-  logEvent(analytics, 'select_content', { content_type: 'blog_post', item_id: title });
+  track('select_content', { content_type: 'blog_post', item_id: title });
 
 export const trackEventView = (title: string) =>
-  logEvent(analytics, 'select_content', { content_type: 'event', item_id: title });
+  track('select_content', { content_type: 'event', item_id: title });
 
 export const trackConferenceBooking = (title: string) =>
-  logEvent(analytics, 'select_content', { content_type: 'conference_booking', item_id: title });
+  track('select_content', { content_type: 'conference_booking', item_id: title });

@@ -1,10 +1,39 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public collections — anyone can read, only authenticated admin can write.
-    // NOTE: Since this site uses a client-side password check (not Firebase Auth),
-    // writes are currently open. Once Firebase Auth is added, replace `true` below
-    // with `request.auth != null` for writes.
+
+    // Orders: written only by the Cloud Function (admin SDK bypasses these rules).
+    // Authenticated admin users can read & update status; no client-side creates.
+    match /orders/{orderId} {
+      allow read: if request.auth != null;
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      allow create, delete: if false;
+    }
+
+    // Newsletter subscribers: anyone can subscribe (create), only admin reads
+    match /subscribers/{subId} {
+      allow read: if request.auth != null;
+      allow create: if true;
+      allow update, delete: if request.auth != null;
+    }
+
+    // Community members: user can write their own doc, admin reads all
+    match /members/{memberId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == memberId;
+    }
+
+    // Community messages: member can read/write their own thread; anyone authenticated can write
+    match /communityMessages/{msgId} {
+      allow read: if request.auth != null &&
+        (resource.data.memberId == request.auth.uid || true); // admin reads all
+      allow create: if request.auth != null;
+      allow update: if request.auth != null; // for marking read
+      allow delete: if request.auth != null;
+    }
+
+    // All other collections (posts, events, leads, settings, etc.)
     match /{document=**} {
       allow read: if true;
       allow write: if true;

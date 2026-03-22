@@ -18,6 +18,7 @@ import {
   CheckSquare,
   Mic,
   Globe,
+  Users,
 } from 'lucide-react';
 
 const NavLink = ({ to, icon, label }: { to: string, icon: React.ReactNode, label: string }) => {
@@ -72,6 +73,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/medias" icon={<ImageIcon />} label="Médiathèque" />
           <NavLink to="/admin/produits" icon={<Package />} label="Inventaire Livres" />
           <NavLink to="/admin/kanban" icon={<CheckSquare />} label="Kanban" />
+          <NavLink to="/admin/communaute" icon={<Users />} label="Communauté" />
           <div className="my-2 border-t border-white/5" />
           <NavLink to="/admin/editeur" icon={<Globe />} label="Modifier le site" />
         </nav>

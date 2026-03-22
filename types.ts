@@ -9,15 +9,27 @@ export interface Book {
   color: string;
 }
 
+export interface OrderItem {
+  title: string;
+  price: number;
+  quantity: number;
+}
+
 export interface Order {
   id: string;
+  squarePaymentId?: string;
   customerName: string;
+  email: string;
+  phone?: string;
   date: string;
   total: number;
+  subtotal?: number;
+  delivery?: number;
+  tps?: number;
+  tvq?: number;
   status: 'Payé' | 'Envoyé' | 'En attente';
-  items: string[];
-  email: string;
-  address: string;
+  items: OrderItem[];
+  address?: string;
 }
 
 export interface BlogPost {
@@ -97,3 +109,30 @@ export type Lead = { id: string; source: string; name: string; email: string; me
 export type AppEvent = { id: string; title: string; date: string; location: string; description: string; image: string; link?: string; isPublished: boolean; content: string; slug: string; metaTitle: string; metaDescription: string; };
 
 export type Interview = { id: string; title: string; description: string; mediaType: 'video' | 'audio'; sourceType: 'youtube' | 'upload'; mediaUrl: string; date: string; isPublished: boolean; };
+
+export type Subscriber = {
+  id: string;
+  email: string;
+  subscribedAt: string;
+};
+
+export type Member = {
+  id: string;
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  provider: 'google' | 'email';
+  joinedAt: string;
+};
+
+export type CommunityMessage = {
+  id: string;
+  memberId: string;
+  memberEmail: string;
+  memberName: string;
+  direction: 'from_member' | 'from_caroline';
+  body: string;
+  createdAt: string;
+  read: boolean;
+};

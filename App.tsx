@@ -5,13 +5,14 @@ import { trackAddToCart, trackBeginCheckout, trackPageView } from './lib/analyti
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { 
-  Feather, 
-  ShoppingCart, 
-  Menu, 
+  Feather,
+  ShoppingCart,
+  Menu,
   X,
   Facebook,
   Lock,
   Eye,
+  Scale,
 } from 'lucide-react';
 
 import StarField from './components/StarField';
@@ -40,7 +41,12 @@ import AdminConferences from './pages/Admin/AdminConferences';
 import AdminKanban from './pages/Admin/AdminKanban';
 import AdminInterviews from './pages/Admin/AdminInterviews';
 import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
+import AdminCommunaute from './pages/Admin/AdminCommunaute';
+import CommunautePage from './pages/CommunautePage';
+import TermsPage from './pages/TermsPage';
 import IntroScreen from './components/IntroScreen';
+import NewsletterForm from './components/NewsletterForm';
+import CookieBanner from './components/CookieBanner';
 import { SiteContentProvider } from './contexts/SiteContentContext';
 
 import { recentOrders, salesData, blogPosts } from './data';
@@ -54,6 +60,7 @@ import {
   subscribeToLeads,
   subscribeToSiteContent, saveSiteContent,
   seedIfEmpty,
+  incrementVisitorCount,
 } from './lib/firestore';
 import type { SiteContent } from './lib/firestore';
 
@@ -80,13 +87,10 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
   return (
     <nav className="fixed w-full z-50 top-0 px-6 py-6 transition-all duration-300">
       <div className="w-full bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 px-8 py-4 flex justify-between items-center shadow-2xl">
-        <Link to="/" className="flex items-center gap-3 group">
+        <Link to="/" className="flex items-center group">
           <div className="bg-gold/20 p-2 rounded-full group-hover:bg-gold/40 transition-colors">
             <Feather className="text-gold w-6 h-6" />
           </div>
-          <span className="font-serif text-2xl text-white tracking-wide">
-            Caroline <span className="text-gold">Gérard</span>
-          </span>
         </Link>
 
         {/* Desktop Nav */}
@@ -98,6 +102,7 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
           <Link to="/conferences" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>
           <Link to="/blog" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Blog</Link>
           <Link to="/contact" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Contact</Link>
+          <Link to="/communaute" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase border border-gold/30 px-3 py-1.5 rounded-lg hover:border-gold">Communauté</Link>
         </div>
 
         <div className="flex items-center gap-4">
@@ -130,6 +135,7 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
           <Link to="/conferences" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Conférence</Link>
           <Link to="/blog" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Blog</Link>
           <Link to="/contact" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Contact</Link>
+          <Link to="/communaute" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center text-gold border border-gold/30 rounded-xl py-2">Communauté</Link>
         </div>
       )}
     </nav>
@@ -137,8 +143,9 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
 };
 
 const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, showVisitorCount: boolean }) => (
-  <footer className="bg-midnight/60 backdrop-blur-md border-t border-white/5 py-12 px-8 relative z-10 w-full">
-    <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8">
+  <footer className="bg-midnight/60 backdrop-blur-md border-t border-white/5 relative z-10 w-full">
+    <NewsletterForm compact />
+    <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8 py-12 px-8">
       <div className="text-center md:text-left">
         <h3 className="font-serif text-3xl text-gold mb-2">Caroline Gérard</h3>
         <EditableText tag="p" contentKey="footer_tagline" defaultValue="Accompagner mon fils sur sa route et l'aider à croire en ses rêves." className="text-slate-400 max-w-sm" />
@@ -157,6 +164,9 @@ const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, show
               <span>{visitorCount.toLocaleString('fr-FR')} Visiteurs</span>
             </div>
           )}
+          <Link to="/conditions" className="flex items-center gap-2 text-slate-500 hover:text-gold transition-colors">
+            <Scale className="w-3 h-3" /> Conditions & Confidentialité
+          </Link>
           <Link to="/admin" className="flex items-center gap-2 text-slate-500 hover:text-gold transition-colors px-3 py-1.5 border border-slate-800 rounded-lg hover:border-gold/50">
             <Lock className="w-3 h-3" /> Espace Admin
           </Link>
@@ -173,6 +183,7 @@ const App = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   // Lifted state for Profile Image
   const [profileImage, setProfileImage] = useState<string>('https://storage.googleapis.com/salondesinconnus/Caroline/Gemini_Generated_Image_8wrovw8wrovw8wro.png');
   
@@ -185,12 +196,12 @@ const App = () => {
     { id: '5', title: 'Mentorat Privé', price: 2500, category: 'premium', description: 'Accompagnement VIP 1-on-1', status: 'active', type: 'service', isPublished: false },
   ]);
 
-  // Admin Dashboard State
-  const [recentOrdersList, setRecentOrdersList] = useState<Order[]>(recentOrders);
-  const [salesDataState, setSalesDataState] = useState(salesData);
+  // Admin Dashboard State (mock orders kept only for type-import; real data lives in Firestore)
+  const _unusedOrders = recentOrders; void _unusedOrders;
+  const _unusedSales = salesData; void _unusedSales;
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [mediaLibrary, setMediaLibrary] = useState<string[]>([]);
-  const [visitorCount] = useState(1284);
+  const [visitorCount] = useState(0); // now driven by AdminDashboard's own Firestore sub
   const [showVisitorCount, setShowVisitorCount] = useState(true);
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -229,7 +240,10 @@ const App = () => {
 
   // --- Firebase Auth ---
   useEffect(() => {
-    return onAuthStateChanged(auth, user => setIsAuthenticated(!!user));
+    return onAuthStateChanged(auth, user => {
+      setIsAuthenticated(!!user);
+      setIsAdmin(!!user && (user.email?.endsWith('@admin.local') ?? false));
+    });
   }, []);
 
   // --- Firestore subscriptions ---
@@ -249,6 +263,14 @@ const App = () => {
     ];
     seedIfEmpty(blogPosts);
     return () => unsubs.forEach(u => u());
+  }, []);
+
+  // Increment visitor counter once per browser session
+  useEffect(() => {
+    if (!sessionStorage.getItem('_cg_visited')) {
+      sessionStorage.setItem('_cg_visited', '1');
+      incrementVisitorCount();
+    }
   }, []);
 
   // --- Firestore-persisted setters ---
@@ -339,10 +361,10 @@ const App = () => {
               <div className="min-h-screen bg-midnight flex items-center justify-center">
                 <div className="text-slate-400 animate-pulse">Chargement...</div>
               </div>
-            ) : isAuthenticated ? (
+            ) : isAdmin ? (
               <AdminLayout>
                 <Routes>
-                  <Route index element={<AdminDashboard recentOrdersList={recentOrdersList} setRecentOrdersList={setRecentOrdersList} salesDataState={salesDataState} setSalesDataState={setSalesDataState} visitorCount={visitorCount} showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
+                  <Route index element={<AdminDashboard showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
                   <Route path="commandes" element={<AdminOrders />} />
                   <Route path="factures" element={<AdminInvoices />} />
                   <Route path="echelle" element={<AdminProductLadder offers={offers} />} />
@@ -354,6 +376,7 @@ const App = () => {
                   <Route path="conferences" element={<AdminConferences conferences={conferences} setConferences={handleSetConferences} mediaLibrary={mediaLibrary} />} />
                   <Route path="interviews" element={<AdminInterviews interviews={interviews} setInterviews={handleSetInterviews} />} />
                   <Route path="kanban" element={<AdminKanban />} />
+                  <Route path="communaute" element={<AdminCommunaute />} />
                   <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} events={events} conferences={conferences} interviews={interviews} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
                   <Route path="*" element={<div className="text-center p-12 text-slate-500">Section en développement...</div>} />
                 </Routes>
@@ -398,7 +421,7 @@ const App = () => {
                     <Helmet>
                       <title>Caroline Gérard | Caisse</title>
                     </Helmet>
-                    <CheckoutPage cartItems={cartItems} total={cartTotal} />
+                    <CheckoutPage cartItems={cartItems} total={cartTotal} onOrderComplete={() => setCartItems([])} />
                   </>
                 } />
                 <Route path="/blog" element={
@@ -441,10 +464,15 @@ const App = () => {
                     <ContactPage />
                   </>
                 } />
+                <Route path="/communaute" element={
+                  <CommunautePage posts={posts} events={events} conferences={conferences} />
+                } />
+                <Route path="/conditions" element={<TermsPage />} />
                 {/* Fallback to Home if unknown route in public section */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <Footer visitorCount={visitorCount} showVisitorCount={showVisitorCount} />
+              <CookieBanner />
             </div>
           } />
         </Routes>
