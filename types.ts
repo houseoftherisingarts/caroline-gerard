@@ -7,6 +7,7 @@ export interface Book {
   image: string;
   backImage?: string;
   color: string;
+  comingSoon?: boolean;
 }
 
 export interface OrderItem {

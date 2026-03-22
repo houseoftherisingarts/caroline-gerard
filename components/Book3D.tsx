@@ -11,7 +11,7 @@ interface Book3DProps {
 const Book3D: React.FC<Book3DProps> = ({ book, isOpen, onToggle, onAddToCart }) => {
   return (
     <div
-      className={`relative transition-all duration-500 ease-in-out ${isOpen ? 'scale-105 -translate-y-2' : 'hover:scale-105 hover:-translate-y-2 cursor-default'}`}
+      className={`relative transition-all duration-500 ease-in-out ${onToggle ? (isOpen ? 'scale-105 -translate-y-2' : 'hover:scale-105 hover:-translate-y-2 cursor-pointer') : 'opacity-80 grayscale-[20%]'}`}
       onClick={onToggle}
       style={{ perspective: '1500px' }}
     >

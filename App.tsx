@@ -42,6 +42,7 @@ import AdminKanban from './pages/Admin/AdminKanban';
 import AdminInterviews from './pages/Admin/AdminInterviews';
 import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
 import AdminCommunaute from './pages/Admin/AdminCommunaute';
+import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
 import IntroScreen from './components/IntroScreen';
@@ -96,6 +97,7 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-8 xl:gap-10">
           <Link to="/" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
+          <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>
           <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>
           <Link to="/evenements" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>
           <Link to="/interviews" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>
@@ -129,6 +131,7 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
       {isOpen && (
         <div className="absolute top-24 left-6 right-6 bg-deep-blue rounded-xl p-8 flex flex-col gap-6 border border-gold/20 shadow-xl lg:hidden z-50">
           <Link to="/" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Accueil</Link>
+          <Link to="/a-propos" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">À Propos</Link>
           <Link to="/boutique" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Boutique</Link>
           <Link to="/evenements" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Événements</Link>
           <Link to="/interviews" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Médias</Link>
@@ -405,6 +408,15 @@ const App = () => {
                       <meta name="description" content="Bienvenue dans l'univers de Caroline Gérard et William Lorrain." />
                     </Helmet>
                     <HomePage profileImage={profileImage} />
+                  </>
+                } />
+                <Route path="/a-propos" element={
+                  <>
+                    <Helmet>
+                      <title>Caroline Gérard | À Propos</title>
+                      <meta name="description" content="Découvrez l'histoire de Caroline Gérard et de son fils William Lorrain." />
+                    </Helmet>
+                    <AProposPage />
                   </>
                 } />
                 <Route path="/boutique" element={

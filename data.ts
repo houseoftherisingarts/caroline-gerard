@@ -10,6 +10,16 @@ export const books: Book[] = [
     image: 'https://storage.googleapis.com/salondesinconnus/Caroline/william%20cover.jpg',
     backImage: 'https://storage.googleapis.com/salondesinconnus/Caroline/615078333_26281261438145401_6607312617290889589_n.jpg',
     color: '#1e293b'
+  },
+  {
+    id: '2',
+    title: 'William et les univers invisibles',
+    subtitle: 'Bientôt disponible',
+    description: "La suite des aventures de William est en cours d'écriture. Restez à l'affût pour découvrir de nouveaux univers magiques et des défis encore plus extraordinaires.",
+    price: 0,
+    image: 'https://storage.googleapis.com/salondesinconnus/Caroline/gifr%20png.png',
+    color: '#1e293b',
+    comingSoon: true,
   }
 ];
 
