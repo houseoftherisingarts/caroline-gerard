@@ -86,8 +86,8 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
   if (isAdmin) return null; 
 
   return (
-    <nav className="fixed w-full z-50 top-0 px-6 py-6 transition-all duration-300">
-      <div className="w-full bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 px-8 py-4 flex justify-between items-center shadow-2xl">
+    <nav className="fixed w-full z-50 top-0 px-3 py-3 lg:px-6 lg:py-6 transition-all duration-300">
+      <div className="w-full bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3 lg:px-8 lg:py-4 flex justify-between items-center shadow-2xl">
         <Link to="/" className="flex items-center group">
           <div className="bg-gold/20 p-2 rounded-full group-hover:bg-gold/40 transition-colors">
             <Feather className="text-gold w-6 h-6" />
@@ -127,19 +127,51 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — full-screen overlay */}
       {isOpen && (
-        <div className="absolute top-24 left-6 right-6 bg-deep-blue rounded-xl p-8 flex flex-col gap-6 border border-gold/20 shadow-xl lg:hidden z-50">
-          <Link to="/" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Accueil</Link>
-          <Link to="/a-propos" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">À Propos</Link>
-          <Link to="/boutique" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Boutique</Link>
-          <Link to="/evenements" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Événements</Link>
-          <Link to="/interviews" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Médias</Link>
-          <Link to="/conferences" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Conférence</Link>
-          <Link to="/blog" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Blog</Link>
-          <Link to="/contact" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center hover:text-gold">Contact</Link>
-          <Link to="/communaute" onClick={() => setIsOpen(false)} className="text-xl font-serif text-center text-gold border border-gold/30 rounded-xl py-2">Communauté</Link>
-        </div>
+        <>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm lg:hidden z-40" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-x-0 top-0 bg-midnight/98 backdrop-blur-xl border-b border-gold/20 shadow-2xl lg:hidden z-50 flex flex-col overflow-y-auto" style={{ maxHeight: '100dvh' }}>
+            {/* Menu header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <div className="bg-gold/20 p-1.5 rounded-full">
+                <Feather className="text-gold w-5 h-5" />
+              </div>
+              <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-white transition-colors">
+                <X size={22} />
+              </button>
+            </div>
+            {/* Links */}
+            <div className="flex flex-col py-4 px-4 gap-1">
+              {[
+                { to: '/', label: 'Accueil' },
+                { to: '/a-propos', label: 'À Propos' },
+                { to: '/boutique', label: 'Boutique' },
+                { to: '/evenements', label: 'Événements' },
+                { to: '/interviews', label: 'Médias' },
+                { to: '/conferences', label: 'Conférence' },
+                { to: '/blog', label: 'Blog' },
+                { to: '/contact', label: 'Contact' },
+              ].map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-serif text-white hover:text-gold transition-colors px-4 py-3 rounded-xl hover:bg-white/5 active:bg-white/10"
+                >
+                  {label}
+                </Link>
+              ))}
+              <Link
+                to="/communaute"
+                onClick={() => setIsOpen(false)}
+                className="text-lg font-serif text-gold border border-gold/30 rounded-xl py-3 px-4 text-center mt-2 hover:bg-gold hover:text-midnight transition-all"
+              >
+                Communauté
+              </Link>
+            </div>
+          </div>
+        </>
       )}
     </nav>
   );
@@ -148,30 +180,30 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
 const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, showVisitorCount: boolean }) => (
   <footer className="bg-midnight/60 backdrop-blur-md border-t border-white/5 relative z-10 w-full">
     <NewsletterForm compact />
-    <div className="w-full flex flex-col md:flex-row justify-between items-center gap-8 py-12 px-8">
+    <div className="w-full flex flex-col md:flex-row justify-between items-center gap-6 py-8 md:py-12 px-6 md:px-8">
       <div className="text-center md:text-left">
-        <h3 className="font-serif text-3xl text-gold mb-2">Caroline Gérard</h3>
-        <EditableText tag="p" contentKey="footer_tagline" defaultValue="Accompagner mon fils sur sa route et l'aider à croire en ses rêves." className="text-slate-400 max-w-sm" />
+        <h3 className="font-serif text-2xl md:text-3xl text-gold mb-2">Caroline Gérard</h3>
+        <EditableText tag="p" contentKey="footer_tagline" defaultValue="Accompagner mon fils sur sa route et l'aider à croire en ses rêves." className="text-slate-400 max-w-sm text-sm md:text-base" />
       </div>
-      <div className="flex gap-6">
-        <a href="https://www.facebook.com/caroline.gerard.338" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-full hover:bg-gold hover:text-midnight transition-all">
-          <Facebook className="w-6 h-6" />
+      <div className="flex gap-4">
+        <a href="https://www.facebook.com/caroline.gerard.338" target="_blank" rel="noopener noreferrer" className="p-3 md:p-4 bg-white/5 rounded-full hover:bg-gold hover:text-midnight transition-all">
+          <Facebook className="w-5 h-5 md:w-6 md:h-6" />
         </a>
       </div>
-      <div className="text-sm text-slate-600 flex flex-col items-center md:items-end gap-4">
+      <div className="text-xs md:text-sm text-slate-600 flex flex-col items-center md:items-end gap-3">
         <EditableText tag="p" contentKey="footer_copyright" defaultValue="© 2026 Copyright Vexel Studio. Tous droits réservés." />
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 md:gap-6">
           {showVisitorCount && (
             <div className="flex items-center gap-2 text-slate-500">
-              <Eye size={14} />
+              <Eye size={13} />
               <span>{visitorCount.toLocaleString('fr-FR')} Visiteurs</span>
             </div>
           )}
-          <Link to="/conditions" className="flex items-center gap-2 text-slate-500 hover:text-gold transition-colors">
-            <Scale className="w-3 h-3" /> Conditions & Confidentialité
+          <Link to="/conditions" className="flex items-center gap-1.5 text-slate-500 hover:text-gold transition-colors">
+            <Scale className="w-3 h-3" /> Conditions
           </Link>
-          <Link to="/admin" className="flex items-center gap-2 text-slate-500 hover:text-gold transition-colors px-3 py-1.5 border border-slate-800 rounded-lg hover:border-gold/50">
-            <Lock className="w-3 h-3" /> Espace Admin
+          <Link to="/admin" className="flex items-center gap-1.5 text-slate-500 hover:text-gold transition-colors px-2.5 py-1 border border-slate-800 rounded-lg hover:border-gold/50">
+            <Lock className="w-3 h-3" /> Admin
           </Link>
         </div>
       </div>

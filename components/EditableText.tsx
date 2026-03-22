@@ -93,11 +93,11 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
 
       {isEditing && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
           onClick={handleCommit}
         >
           <div
-            className="bg-slate-900 border border-gold/40 rounded-2xl p-6 w-full max-w-2xl shadow-2xl mx-4"
+            className="bg-slate-900 border border-gold/40 rounded-t-2xl sm:rounded-2xl p-4 md:p-6 w-full sm:max-w-2xl shadow-2xl sm:mx-4 max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
             onKeyDown={e => {
               if (e.key === 'Escape') setIsEditing(false);

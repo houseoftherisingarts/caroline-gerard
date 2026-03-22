@@ -19,10 +19,10 @@ const InterviewsPage: React.FC<InterviewsPageProps> = ({ interviews }) => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <div className="pt-32 pb-20 px-6 relative z-10">
+    <div className="pt-24 md:pt-32 pb-20 px-4 md:px-6 relative z-10">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16 animate-fade-in">
-          <h1 className="text-5xl md:text-6xl font-serif font-bold text-white mb-6">
+        <div className="text-center mb-10 md:mb-16 animate-fade-in">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-4 md:mb-6">
             <EditableText tag="span" contentKey="interviews_title_main" defaultValue="Interviews &" />
             {' '}
             <EditableText tag="span" contentKey="interviews_title_gold" defaultValue="Médias" className="text-gold" />

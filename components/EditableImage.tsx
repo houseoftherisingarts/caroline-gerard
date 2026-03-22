@@ -42,8 +42,8 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
       </div>
 
       {isPickerOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl p-6 space-y-6">
+        <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-8 animate-fade-in">
+          <div className="bg-slate-900 border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl p-5 md:p-6 space-y-5 md:space-y-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-serif text-white">Changer l&apos;image</h3>
               <button onClick={() => setIsPickerOpen(false)} className="p-2 text-slate-400 hover:text-white transition-colors">
@@ -65,7 +65,7 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
                 <p className="text-slate-400 text-sm mb-3 flex items-center gap-2 font-bold uppercase tracking-widest">
                   <Library size={14} /> Médiathèque
                 </p>
-                <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-52 overflow-y-auto custom-scrollbar pr-1">
                   {mediaLibrary.map((imgUrl, i) => (
                     <button
                       key={i}

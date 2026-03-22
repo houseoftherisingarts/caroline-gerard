@@ -22,11 +22,11 @@ const StatCard = ({
 }: {
   title: string; value: string; trend?: string; trendUp?: boolean; sub?: string; icon: React.ReactNode;
 }) => (
-  <div className="bg-midnight/60 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/10 hover:border-gold/30 transition-all group">
-    <div className="flex justify-between items-start mb-4">
+  <div className="bg-midnight/60 backdrop-blur-md p-4 md:p-6 rounded-xl shadow-lg border border-white/10 hover:border-gold/30 transition-all group">
+    <div className="flex justify-between items-start mb-3 md:mb-4">
       <div>
-        <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">{title}</p>
-        <h3 className="text-2xl font-bold text-white mt-1">{value}</h3>
+        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">{title}</p>
+        <h3 className="text-xl md:text-2xl font-bold text-white mt-1">{value}</h3>
       </div>
       <div className="p-3 bg-white/5 rounded-xl group-hover:bg-gold/10 transition-colors">
         {icon}
@@ -131,16 +131,14 @@ const AdminDashboard = ({
   );
 
   return (
-    <div className="space-y-8 animate-fade-in-up">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Tableau de Bord</h1>
-          <p className="text-slate-400 mt-1">Données en temps réel</p>
-        </div>
+    <div className="space-y-6 md:space-y-8 animate-fade-in-up">
+      <div>
+        <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">Tableau de Bord</h1>
+        <p className="text-slate-400 mt-1 text-sm">Données en temps réel</p>
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <StatCard
           title="Ventes ce mois"
           value={`${metrics.revenueThis.toFixed(2)} $`}
@@ -181,7 +179,7 @@ const AdminDashboard = ({
         />
 
         {/* Visitor counter with toggle */}
-        <div className="bg-midnight/60 backdrop-blur-md p-6 rounded-xl shadow-lg border border-white/10 md:col-span-2">
+        <div className="bg-midnight/60 backdrop-blur-md p-4 md:p-6 rounded-xl shadow-lg border border-white/10 col-span-2 md:col-span-2">
           <div className="flex justify-between items-start mb-2">
             <div>
               <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Visiteurs Totaux</p>
@@ -199,15 +197,15 @@ const AdminDashboard = ({
       </div>
 
       {/* ── Sales Chart + Recent Orders ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-midnight/60 backdrop-blur-md p-6 rounded-xl border border-white/10 shadow-lg">
-          <h3 className="text-xl font-bold text-white mb-6">Revenus — 6 derniers mois</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+        <div className="lg:col-span-2 bg-midnight/60 backdrop-blur-md p-4 md:p-6 rounded-xl border border-white/10 shadow-lg">
+          <h3 className="text-base md:text-xl font-bold text-white mb-4 md:mb-6">Revenus — 6 derniers mois</h3>
           {metrics.salesChart.every(d => d.sales === 0) ? (
-            <div className="h-72 flex items-center justify-center text-slate-600">
+            <div className="h-48 md:h-72 flex items-center justify-center text-slate-600">
               Aucune vente encore enregistrée.
             </div>
           ) : (
-            <div className="h-72 w-full">
+            <div className="h-48 md:h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={metrics.salesChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />

@@ -7,8 +7,8 @@ import { trackConferenceBooking } from '../lib/analytics';
 import EditableText from '../components/EditableText';
 
 const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () => void }) => (
-  <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center animate-fade-in" onClick={onClose}>
-    <div className="bg-midnight/60 border border-white/10 rounded-xl shadow-2xl w-full max-w-2xl m-4 p-8 relative" onClick={e => e.stopPropagation()}>
+  <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-end sm:items-center justify-center animate-fade-in" onClick={onClose}>
+    <div className="bg-midnight/60 border border-white/10 rounded-t-2xl sm:rounded-xl shadow-2xl w-full sm:max-w-2xl sm:m-4 p-5 md:p-8 relative max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
       <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"><X size={24} /></button>
       {children}
     </div>
@@ -48,9 +48,9 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
   const selectedBookingConference = conferences.find(c => c.id === bookingModalOpen);
 
   return (
-    <div className="container mx-auto px-4 py-32">
-      <div className="text-center mb-16">
-        <EditableText tag="h1" contentKey="conferences_title" defaultValue="Engager Caroline" className="text-5xl font-serif font-bold text-white" />
+    <div className="container mx-auto px-4 pt-24 md:pt-32 pb-16 md:pb-20">
+      <div className="text-center mb-10 md:mb-16">
+        <EditableText tag="h1" contentKey="conferences_title" defaultValue="Engager Caroline" className="text-3xl md:text-5xl font-serif font-bold text-white" />
         <EditableText tag="p" contentKey="conferences_description" defaultValue="Sollicitez une intervention de Caroline Gérard pour votre prochain événement, séminaire ou atelier d'entreprise. Partagez un thème et discutons des possibilités." className="text-slate-400 mt-4 max-w-2xl mx-auto" />
       </div>
 
@@ -91,10 +91,10 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
 
       {detailsModalOpen && (
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
-          <div className="w-full max-w-screen-xl mx-auto px-6 md:px-12 pt-32 pb-24 relative">
-            <button onClick={() => setDetailsModalOpen(null)} className="fixed top-6 right-6 z-10 p-2 text-slate-500 hover:text-white bg-black/20 rounded-full transition-colors"><X /></button>
-            <img src={detailsModalOpen.image} alt={detailsModalOpen.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />
-            <h1 className="text-5xl md:text-7xl font-serif text-white mb-4">{detailsModalOpen.title}</h1>
+          <div className="w-full max-w-screen-xl mx-auto px-4 md:px-12 pt-16 md:pt-32 pb-16 md:pb-24 relative">
+            <button onClick={() => setDetailsModalOpen(null)} className="fixed top-4 right-4 md:top-6 md:right-6 z-10 p-2.5 text-slate-400 hover:text-white bg-black/40 rounded-full transition-colors"><X size={20} /></button>
+            <img src={detailsModalOpen.image} alt={detailsModalOpen.title} className="w-full h-[25vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif text-white mb-4">{detailsModalOpen.title}</h1>
             <div className="border-b border-white/10 pb-8 mb-12">
               <p className="text-slate-300 text-xl max-w-3xl">{detailsModalOpen.description}</p>
             </div>

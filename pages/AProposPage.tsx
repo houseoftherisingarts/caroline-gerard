@@ -6,15 +6,15 @@ import NewsletterForm from '../components/NewsletterForm';
 
 const AProposPage = () => {
   return (
-    <div className="min-h-screen pt-32 pb-12 w-full overflow-hidden">
+    <div className="min-h-screen pt-20 md:pt-32 pb-12 w-full overflow-hidden">
       <Helmet>
         <title>Caroline Gérard | À Propos</title>
         <meta name="description" content="Découvrez l'histoire de Caroline Gérard et de son fils William Lorrain, auteurs de William et les univers invisibles." />
       </Helmet>
 
       {/* About Story Section — Caroline */}
-      <section className="w-full py-24 px-8 md:px-16 lg:px-24 bg-white/5 backdrop-blur-md border-y border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+      <section className="w-full py-12 md:py-24 px-5 md:px-16 lg:px-24 bg-white/5 backdrop-blur-md border-y border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 md:gap-16">
           <div className="flex-1 relative">
             <div className="absolute inset-0 bg-gold/20 blur-[100px] rounded-full"></div>
             <EditableImage
@@ -26,7 +26,7 @@ const AProposPage = () => {
           </div>
           <div className="flex-1 space-y-8">
             <EditableText tag="span" contentKey="home_about_label" defaultValue="Présentation de l'auteure" className="text-gold uppercase tracking-widest text-sm font-bold" />
-            <h2 className="font-serif text-5xl md:text-6xl text-white">
+            <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white">
               <EditableText tag="span" contentKey="home_about_h2_line1" defaultValue="Une histoire" />
               <br />
               <EditableText tag="span" contentKey="home_about_h2_line2" defaultValue="d'amour et de mots" className="italic text-gold" />
@@ -42,8 +42,8 @@ const AProposPage = () => {
       </section>
 
       {/* William Presentation Section */}
-      <section className="w-full py-24 px-8 md:px-16 lg:px-24 bg-midnight/40 backdrop-blur-md border-b border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-16">
+      <section className="w-full py-12 md:py-24 px-5 md:px-16 lg:px-24 bg-midnight/40 backdrop-blur-md border-b border-white/5 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-8 md:gap-16">
           <div className="flex-1 relative">
             <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full"></div>
             <EditableImage
@@ -55,7 +55,7 @@ const AProposPage = () => {
           </div>
           <div className="flex-1 space-y-8">
             <EditableText tag="span" contentKey="home_william_label" defaultValue="Présentation de l'auteur" className="text-gold uppercase tracking-widest text-sm font-bold" />
-            <h2 className="font-serif text-5xl md:text-6xl text-white">
+            <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white">
               <EditableText tag="span" contentKey="home_william_h2_line1" defaultValue="William Lorrain" />
               <br />
               <EditableText tag="span" contentKey="home_william_h2_line2" defaultValue="L'imagination sans limites" className="italic text-gold" />

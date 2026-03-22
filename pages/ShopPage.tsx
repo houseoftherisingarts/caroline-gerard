@@ -14,15 +14,15 @@ const ShopPage: React.FC<ShopPageProps> = ({ addToCart }) => {
   const toggleBook = (id: string) => setOpenBookId(prev => prev === id ? null : id);
 
   return (
-    <div className="min-h-screen pt-40 pb-20 w-full px-8 md:px-16" onClick={() => setOpenBookId(null)}>
-      <div className="w-full mb-16 flex flex-col items-center text-center">
+    <div className="min-h-screen pt-24 md:pt-40 pb-20 w-full px-5 md:px-16" onClick={() => setOpenBookId(null)}>
+      <div className="w-full mb-10 md:mb-16 flex flex-col items-center text-center">
         <EditableText tag="span" contentKey="shop_label" defaultValue="Librairie Magique" className="text-gold uppercase tracking-widest text-sm font-bold mb-4" />
         <EditableText tag="h1" contentKey="shop_title" defaultValue="La Boutique" className="font-serif text-5xl md:text-7xl text-white mb-6" />
         <EditableText tag="p" contentKey="shop_description" defaultValue="Découvrez nos livres et laissez-vous emporter par la magie des mots. Chaque achat soutient notre mission et les rêves de William." className="text-slate-400 max-w-2xl text-lg" />
       </div>
 
       {/* Books row: stacked on mobile, side-by-side on desktop, both locked to the same 380px height */}
-      <div className="flex flex-col lg:flex-row items-end justify-center gap-16 w-full max-w-7xl mx-auto">
+      <div className="flex flex-col lg:flex-row items-end justify-center gap-12 lg:gap-16 w-full max-w-7xl mx-auto">
         {books.map(book => (
           <div key={book.id} className="flex flex-col items-center flex-shrink-0" onClick={(e) => e.stopPropagation()}>
 

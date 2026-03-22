@@ -57,14 +57,14 @@ const AdminOrders = () => {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-white">Commandes</h1>
-          <p className="text-slate-400 mt-1">Gérez vos expéditions et suivis</p>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">Commandes</h1>
+          <p className="text-slate-400 mt-1 text-sm">Gérez vos expéditions et suivis</p>
         </div>
         <button
           onClick={handleExport}
-          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors"
+          className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors self-start sm:self-auto text-sm"
         >
           <Download size={16} /> Exporter CSV
         </button>
@@ -149,7 +149,7 @@ const AdminOrders = () => {
       {selectedOrder && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`Commande ${selectedOrder.id}`}>
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-slate-400 font-bold uppercase text-xs">Client</p>
                 <p className="text-white font-bold">{selectedOrder.customerName}</p>

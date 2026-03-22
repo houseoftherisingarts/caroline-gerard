@@ -40,8 +40,8 @@ const BlogPage = ({ posts }: { posts: BlogPost[] }) => {
 
   return (
     <>
-      <div className="min-h-screen pt-40 pb-20 w-full px-8 md:px-16">
-        <div className="w-full mb-16 flex flex-col items-center text-center">
+      <div className="min-h-screen pt-24 md:pt-40 pb-20 w-full px-4 md:px-16">
+        <div className="w-full mb-10 md:mb-16 flex flex-col items-center text-center">
           <EditableText tag="span" contentKey="blog_label" defaultValue="Histoires & Pensées" className="text-gold uppercase tracking-widest text-sm font-bold mb-4" />
           <EditableText tag="h1" contentKey="blog_title" defaultValue="Le Blog" className="font-serif text-5xl md:text-7xl text-white mb-6" />
         </div>
@@ -64,18 +64,18 @@ const BlogPage = ({ posts }: { posts: BlogPost[] }) => {
       </div>
       {selectedPost && (
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
-          <div className="w-full max-w-screen-xl mx-auto px-6 md:px-12 pt-32 pb-24 relative">
-            <button onClick={() => setSelectedPost(null)} className="fixed top-6 right-6 z-10 p-2 text-slate-500 hover:text-white bg-black/20 rounded-full transition-colors"><X /></button>
-            {getFirstImage(selectedPost.image, selectedPost.content) && <img src={getFirstImage(selectedPost.image, selectedPost.content)} alt={selectedPost.title} className="w-full h-[50vh] object-cover rounded-2xl mb-8 shadow-lg" />}
-            <h1 className="text-5xl md:text-7xl font-serif text-white mb-4">{selectedPost.title}</h1>
-            <div className="flex items-center justify-between border-b border-white/10 pb-8 mb-12">
+          <div className="w-full max-w-screen-xl mx-auto px-4 md:px-12 pt-16 md:pt-32 pb-16 md:pb-24 relative">
+            <button onClick={() => setSelectedPost(null)} className="fixed top-4 right-4 md:top-6 md:right-6 z-10 p-2.5 text-slate-400 hover:text-white bg-black/40 rounded-full transition-colors"><X size={20} /></button>
+            {getFirstImage(selectedPost.image, selectedPost.content) && <img src={getFirstImage(selectedPost.image, selectedPost.content)} alt={selectedPost.title} className="w-full h-[30vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />}
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif text-white mb-4">{selectedPost.title}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between border-b border-white/10 pb-6 md:pb-8 mb-8 md:mb-12">
               <div className="flex items-center gap-2 text-sm text-gold"><Calendar size={14} /><span>Publié le {selectedPost.date}</span></div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-400 font-bold">PARTAGER:</span>
-                <button onClick={() => handleShare('facebook')} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Facebook size={18} /></button>
-                <button onClick={() => handleShare('linkedin')} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Linkedin size={18} /></button>
-                <button onClick={() => handleShare('twitter')} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Twitter size={18} /></button>
-                <button onClick={handleCopyLink} className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><LinkIcon size={18} /></button>
+                <button onClick={() => handleShare('facebook')} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Facebook size={16} /></button>
+                <button onClick={() => handleShare('linkedin')} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Linkedin size={16} /></button>
+                <button onClick={() => handleShare('twitter')} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><Twitter size={16} /></button>
+                <button onClick={handleCopyLink} className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"><LinkIcon size={16} /></button>
               </div>
             </div>
             <BlockRenderer content={selectedPost.content} />

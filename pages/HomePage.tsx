@@ -7,7 +7,7 @@ import NewsletterForm from '../components/NewsletterForm';
 
 const HomePage = ({ profileImage }: { profileImage: string }) => {
   return (
-    <div className="min-h-screen pt-32 pb-12 w-full overflow-hidden">
+    <div className="min-h-screen pt-20 md:pt-32 pb-12 w-full overflow-hidden">
       <Helmet>
         <title>Caroline Gérard | Auteure & Maman</title>
         <meta name="description" content="Bienvenue dans notre univers insolite et merveilleux. Découvrez les aventures de William et les univers invisibles." />
@@ -17,8 +17,8 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
       </Helmet>
 
       {/* Hero Section */}
-      <section className="w-full px-8 md:px-16 lg:px-24 flex flex-col md:flex-row items-center gap-16 mb-24 min-h-[70vh]">
-        <div className="flex-1 space-y-8 animate-fade-in-up">
+      <section className="w-full px-5 md:px-16 lg:px-24 flex flex-col md:flex-row items-center gap-8 md:gap-16 mb-12 md:mb-24 min-h-[70vh]">
+        <div className="flex-1 space-y-5 md:space-y-8 animate-fade-in-up">
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold mb-4">
             <Star className="w-4 h-4 fill-current animate-pulse" />
             <EditableText
@@ -28,7 +28,7 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
               className="uppercase tracking-[0.2em] text-xs font-bold"
             />
           </div>
-          <h1 className="font-serif text-5xl md:text-7xl leading-tight text-white drop-shadow-2xl">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight text-white drop-shadow-2xl">
             <EditableText tag="span" contentKey="home_hero_title_line1" defaultValue="Croire en ses rêves," />
             <br />
             <EditableText tag="span" contentKey="home_hero_title_italic" defaultValue="un mot à la fois." className="italic text-gold" />
@@ -39,11 +39,11 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
             defaultValue="Bienvenue dans notre univers insolite et merveilleux. Je suis Caroline, la maman de William, un jeune héros atypique. Ensemble, nous écrivons des aventures pour ouvrir les cœurs à la différence."
             className="text-xl text-slate-300 leading-relaxed max-w-2xl font-light"
           />
-          <div className="pt-8 flex flex-wrap gap-6">
-            <Link to="/boutique" className="px-10 py-4 bg-gold text-midnight font-bold text-lg rounded-xl hover:bg-white hover:scale-105 transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)]">
+          <div className="pt-4 md:pt-8 flex flex-wrap gap-3 md:gap-6">
+            <Link to="/boutique" className="px-7 md:px-10 py-3 md:py-4 bg-gold text-midnight font-bold text-base md:text-lg rounded-xl hover:bg-white hover:scale-105 transition-all shadow-[0_0_30px_rgba(212,175,55,0.3)]">
               Découvrir nos livres
             </Link>
-            <Link to="/blog" className="px-10 py-4 border border-white/20 text-white font-medium text-lg rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm">
+            <Link to="/blog" className="px-7 md:px-10 py-3 md:py-4 border border-white/20 text-white font-medium text-base md:text-lg rounded-xl hover:bg-white/10 transition-all backdrop-blur-sm">
               Lire le blog
             </Link>
           </div>
@@ -66,9 +66,9 @@ const HomePage = ({ profileImage }: { profileImage: string }) => {
       {/* Mission Preview */}
       <section className="w-full py-24 relative overflow-hidden">
         <Feather className="w-96 h-96 text-white/5 absolute -top-20 -right-20 rotate-12" />
-        <div className="w-full px-8 md:px-24 grid grid-cols-1 md:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
+        <div className="w-full px-5 md:px-24 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-7xl mx-auto">
           <div>
-            <EditableText tag="h2" contentKey="home_mission_title" defaultValue="Une mission de cœur" className="font-serif text-4xl md:text-6xl mb-8 text-gold" />
+            <EditableText tag="h2" contentKey="home_mission_title" defaultValue="Une mission de cœur" className="font-serif text-3xl md:text-4xl lg:text-6xl mb-6 md:mb-8 text-gold" />
             <EditableText tag="p" contentKey="home_mission_quote" defaultValue="William et les univers invisibles est né d'un magnifique rêve commun... Ce premier livre est une invitation à ouvrir ton cœur à la différence." className="text-slate-200 text-xl leading-relaxed mb-6" />
             <EditableText tag="p" contentKey="home_mission_p2" defaultValue="Au travers de nos écrits, nous souhaitons inspirer chaque parent et chaque enfant à voir la beauté unique qui réside en eux." className="text-slate-400 text-lg" />
           </div>
