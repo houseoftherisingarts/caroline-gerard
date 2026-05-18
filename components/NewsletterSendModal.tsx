@@ -76,8 +76,8 @@ const NewsletterSendModal: React.FC<Props> = ({
               <h2 className="text-xl font-bold text-white">Envoyer une infolettre</h2>
               <p className="text-slate-400 text-sm">
                 {type === 'blog'
-                  ? 'Notifiez vos abonnés de ce nouvel article avant de le publier'
-                  : 'Notifiez vos abonnés de ce nouvel événement avant de le publier'}
+                  ? 'Notifie tes abonnés de ce nouvel article avant de le publier'
+                  : 'Notifie tes abonnés de ce nouvel événement avant de le publier'}
               </p>
             </div>
           </div>
@@ -167,7 +167,7 @@ const NewsletterSendModal: React.FC<Props> = ({
                   {title || 'Titre…'}
                 </div>
                 <div style={{ color: '#555', fontSize: '13px', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
-                  {bodyText || 'Votre texte ici…'}
+                  {bodyText || 'Ton texte ici…'}
                 </div>
               </div>
               <div style={{ background: '#f0f0f0', padding: '10px', textAlign: 'center', fontSize: '9px', color: '#aaa' }}>

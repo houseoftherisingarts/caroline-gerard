@@ -6,9 +6,35 @@ export interface Book {
   price: number;
   image: string;
   backImage?: string;
+  pageImages?: string[];
   color: string;
   comingSoon?: boolean;
+  isHidden?: boolean;
+  // Bibliographic metadata
+  format?: string;       // e.g. "6 × 9 pouces"
+  pageCount?: number;    // e.g. 288
+  redaction?: string;    // writing credits
+  direction?: string;    // ideation / direction
+  coordination?: string; // coordination / accompaniment
+  revision?: string;     // proofreading / révision
+  coverDesign?: string;  // cover & graphic design
+  layout?: string;       // mise en page
+  isbnPrint?: string;    // ISBN imprimé
+  isbnPdf?: string;      // ISBN PDF
+  isbnEpub?: string;     // ISBN ePUB
+  wrapped?: boolean;     // show as sealed gift instead of 3D book
 }
+
+export type PromoCode = {
+  id: string;          // uppercased code — used as Firestore doc ID
+  code: string;
+  percentage: number;  // 1-100
+  expiresAt: string;   // ISO date string, '' = never expires
+  maxUses: number;     // 0 = unlimited
+  usedCount: number;
+  isActive: boolean;
+  createdAt: string;
+};
 
 export interface OrderItem {
   title: string;
@@ -105,7 +131,28 @@ export interface CartItem {
 }
 
 export type Conference = { id: string; title: string; description: string; image: string; isPublished: boolean; content: string; slug: string; metaTitle: string; metaDescription: string; };
-export type Lead = { id: string; source: string; name: string; email: string; message: string; date: string; };
+export type Lead = {
+  id: string;
+  source: string;
+  name: string;
+  email: string;
+  message: string;
+  date: string;
+  isRead?: boolean;
+  archived?: boolean;
+};
+
+export type EmailLog = {
+  id: string;
+  type: 'order_receipt' | 'order_admin_notification' | 'subscriber_welcome' | 'newsletter' | 'conference_announcement' | 'direct_message' | 'contact_form';
+  to: string | string[];
+  subject: string;
+  preview: string;
+  sentAt: string;
+  success: boolean;
+  errorMessage?: string;
+  meta?: Record<string, string | number | null>;
+};
 
 export type AppEvent = { id: string; title: string; date: string; location: string; description: string; image: string; link?: string; isPublished: boolean; content: string; slug: string; metaTitle: string; metaDescription: string; };
 
@@ -115,6 +162,17 @@ export type Subscriber = {
   id: string;
   email: string;
   subscribedAt: string;
+};
+
+export type Testimonial = {
+  id: string;
+  quote: string;
+  signature: string;
+  page: 'boutique' | 'apropos';
+  type: 'admin' | 'client';
+  isPublished: boolean;
+  createdAt: string;
+  email?: string;
 };
 
 export type Member = {

@@ -56,7 +56,7 @@ const AdminSocialStudio = ({ mediaLibrary, setMediaLibrary }: { mediaLibrary: st
 
   // Text Layers
   const [layers, setLayers] = useState<TextLayer[]>([
-    { id: '1', text: "Votre message inspirant", x: 540, y: 540, fontSize: 60, isBold: true, color: '#ffffff' },
+    { id: '1', text: "Ton message inspirant", x: 540, y: 540, fontSize: 60, isBold: true, color: '#ffffff' },
     { id: '2', text: "@caroline", x: 540, y: 900, fontSize: 30, isBold: false, color: '#94a3b8' }
   ]);
   const [selectedLayerId, setSelectedLayerId] = useState<string | null>('1');
@@ -193,12 +193,7 @@ const AdminSocialStudio = ({ mediaLibrary, setMediaLibrary }: { mediaLibrary: st
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Load Image
-    const img = new Image();
-    img.crossOrigin = "Anonymous";
-    img.src = bgImage;
-    
-    img.onload = () => {
+    const drawWithImage = (img: HTMLImageElement) => {
       // Clear
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -268,6 +263,26 @@ const AdminSocialStudio = ({ mediaLibrary, setMediaLibrary }: { mediaLibrary: st
         ctx.restore();
       });
     };
+
+    // Use blob fetch to bypass CORS restrictions with Firebase Storage URLs
+    fetch(bgImage)
+      .then(r => r.blob())
+      .then(blob => {
+        const objectUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          drawWithImage(img);
+          URL.revokeObjectURL(objectUrl);
+        };
+        img.src = objectUrl;
+      })
+      .catch(() => {
+        // Fallback: try direct load (works for picsum/external URLs without CORS issues)
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => drawWithImage(img);
+        img.src = bgImage;
+      });
   };
 
   useEffect(() => {

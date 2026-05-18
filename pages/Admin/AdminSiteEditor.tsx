@@ -3,23 +3,29 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Save, Check, Globe } from 'lucide-react';
 import { useSiteContent } from '../../contexts/SiteContentContext';
 import HomePage from '../HomePage';
+import AProposPage from '../AProposPage';
 import ContactPage from '../ContactPage';
 import BlogPage from '../BlogPage';
 import EventsPage from '../EventsPage';
 import ConferencesPage from '../ConferencesPage';
 import InterviewsPage from '../InterviewsPage';
+import CommunautePage from '../CommunautePage';
 import ShopPage from '../ShopPage';
 import EditableText from '../../components/EditableText';
+import TermsPage from '../TermsPage';
 import { BlogPost, AppEvent, Conference, Interview, Book } from '../../types';
 
 const PAGES = [
   { id: 'home',        label: 'Accueil' },
+  { id: 'a-propos',   label: 'À Propos' },
   { id: 'boutique',    label: 'Boutique' },
   { id: 'blog',        label: 'Blog' },
   { id: 'evenements',  label: 'Événements' },
   { id: 'conferences', label: 'Conférences' },
+  { id: 'communaute',  label: 'Communauté' },
   { id: 'interviews',  label: 'Interviews & Médias' },
   { id: 'contact',     label: 'Contact' },
+  { id: 'conditions',  label: 'Conditions & Livraison' },
   { id: 'footer',      label: 'Pied de page' },
 ];
 
@@ -29,13 +35,14 @@ interface AdminSiteEditorProps {
   events: AppEvent[];
   conferences: Conference[];
   interviews: Interview[];
+  books: Book[];
   addToCart: (book: Book) => void;
   visitorCount: number;
   showVisitorCount: boolean;
 }
 
 const AdminSiteEditor = ({
-  profileImage, posts, events, conferences, interviews, addToCart, visitorCount, showVisitorCount,
+  profileImage, posts, events, conferences, interviews, books, addToCart, visitorCount, showVisitorCount,
 }: AdminSiteEditorProps) => {
   const { enterEditMode, exitEditMode, saveChanges, pendingChanges } = useSiteContent();
   const [selectedPage, setSelectedPage] = useState('home');
@@ -60,12 +67,16 @@ const AdminSiteEditor = ({
   const renderPage = () => {
     switch (selectedPage) {
       case 'home':        return <HomePage profileImage={profileImage} />;
-      case 'boutique':    return <ShopPage addToCart={addToCart} />;
+      case 'a-propos':   return <AProposPage />;
+      case 'boutique':    return <ShopPage books={books} addToCart={addToCart} />;
       case 'blog':        return <BlogPage posts={posts} />;
       case 'evenements':  return <EventsPage events={events} />;
       case 'conferences': return <ConferencesPage conferences={conferences} />;
+      case 'communaute':  return <CommunautePage posts={posts} events={events} conferences={conferences} />;
       case 'interviews':  return <InterviewsPage interviews={interviews} />;
       case 'contact':     return <ContactPage />;
+      // Note: ContactPage's `vis` defaults to DEFAULT_VIS in the editor preview, so the form is shown even if hidden in production.
+      case 'conditions':  return <TermsPage />;
       case 'footer':      return <FooterEditor visitorCount={visitorCount} showVisitorCount={showVisitorCount} />;
       default:            return null;
     }

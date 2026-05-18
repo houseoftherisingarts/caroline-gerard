@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { CartItem } from '../types';
+import EditableText from './EditableText';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           <div className="p-6 border-b border-white/10 flex justify-between items-center">
             <div className="flex items-center gap-3">
               <ShoppingCart className="text-gold w-6 h-6" />
-              <h2 className="text-xl font-serif text-white">Votre Panier</h2>
+              <EditableText tag="h2" contentKey="cart_title" defaultValue="Ton panier" className="text-xl font-serif text-white" />
             </div>
             <button 
               onClick={onClose}
@@ -54,12 +55,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center text-slate-500">
                   <ShoppingCart size={40} />
                 </div>
-                <p className="text-slate-400 text-lg">Votre panier est vide.</p>
-                <button 
+                <EditableText tag="p" contentKey="cart_empty_msg" defaultValue="Ton panier est vide." className="text-slate-400 text-lg" />
+                <button
                   onClick={onClose}
                   className="px-6 py-2 border border-gold text-gold rounded-lg hover:bg-gold hover:text-midnight transition-colors font-bold"
                 >
-                  Continuer vos achats
+                  <EditableText tag="span" contentKey="cart_continue_btn" defaultValue="Continuer tes achats" />
                 </button>
               </div>
             ) : (
@@ -108,16 +109,16 @@ const CartDrawer: React.FC<CartDrawerProps> = ({
           {cartItems.length > 0 && (
             <div className="p-6 border-t border-white/10 bg-black/20 space-y-4">
               <div className="flex justify-between items-center text-lg font-bold text-white">
-                <span>Sous-total</span>
+                <EditableText tag="span" contentKey="cart_subtotal_label" defaultValue="Sous-total" />
                 <span>{subtotal.toFixed(2)} $</span>
               </div>
-              <p className="text-xs text-slate-500 text-center">Taxes et frais de livraison calculés à l&apos;étape suivante.</p>
-              <Link 
+              <EditableText tag="p" contentKey="cart_taxes_note" defaultValue="Taxes et frais de livraison calculés à l'étape suivante." className="text-xs text-slate-500 text-center" />
+              <Link
                 to="/checkout"
                 onClick={onClose}
                 className="block w-full py-4 bg-gold text-midnight font-bold text-center rounded-xl hover:bg-white transition-colors shadow-lg hover:shadow-gold/20"
               >
-                Passer à la caisse
+                <EditableText tag="span" contentKey="cart_checkout_btn" defaultValue="Passer à la caisse" />
               </Link>
             </div>
           )}

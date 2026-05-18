@@ -1,0 +1,39 @@
+# Caroline Gérard — carolinegerard.ca
+# Auteure jeunesse · William et les univers invisibles
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin
+Disallow: /checkout
+Disallow: /communaute
+
+# Crawlers de moteurs génératifs (GEO/AEO) — autorisés
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://carolinegerard.ca/sitemap.xml

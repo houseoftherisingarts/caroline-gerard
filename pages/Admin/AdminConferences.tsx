@@ -143,7 +143,7 @@ const AdminConferences = ({ conferences, setConferences, mediaLibrary }: { confe
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-serif font-bold text-white">Conférences & Ateliers</h1>
-          <p className="text-slate-400 mt-1">Gérez vos prochains événements</p>
+          <p className="text-slate-400 mt-1">Gère tes prochains événements</p>
         </div>
         <button onClick={() => openEditor()} className="bg-gold text-midnight px-4 py-2 rounded-lg font-bold hover:bg-white transition-colors flex items-center gap-2">
           <PenTool size={16} /> Ajouter une conférence

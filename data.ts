@@ -39,7 +39,7 @@ export const events: Event[] = [
     title: "Salon de l'Éveil",
     date: '2026-02-28',
     location: 'Centre des congrès de St-Hyacinthe',
-    description: "🥰 Un week-end de bonheur qui arrive à grands pas! Venez faire le plein d'inspiration les 28 février et 1er mars.\n\n📍 Je serai présente au stand Le Gardien de Phare inc. (Kiosques 741 & 742).\n🕐 Horaire de présence : Samedi de 13h à 17h.\n\nVenez jaser d'écriture, de rêves et vous procurer 'William et les univers invisibles'. De l'idée au livre publié! 🤩",
+    description: "🥰 Un week-end de bonheur qui arrive à grands pas! Viens faire le plein d'inspiration les 28 février et 1er mars.\n\n📍 Je serai présente au stand Le Gardien de Phare inc. (Kiosques 741 & 742).\n🕐 Horaire de présence : Samedi de 13h à 17h.\n\nViens jaser d'écriture, de rêves et te procurer 'William et les univers invisibles'. De l'idée au livre publié! 🤩",
     type: 'lancement',
     link: 'https://www.salondeleveil.com/conferenciers-et-exposants.../'
   },

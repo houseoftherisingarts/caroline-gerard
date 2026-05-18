@@ -296,7 +296,7 @@ const AdminDashboard = ({
                     </td>
                     <td className="px-6 py-4 text-center">
                       <a
-                        href={`mailto:${a.email}?subject=Votre commande chez Caroline Gérard&body=Bonjour ${a.firstName},%0D%0A%0D%0ANous avons remarqué que vous n'avez pas complété votre commande. Pouvons-nous vous aider?`}
+                        href={`mailto:${a.email}?subject=Ta commande chez Caroline Gérard&body=Bonjour ${a.firstName},%0D%0A%0D%0AJ'ai remarqué que tu n'as pas complété ta commande. Puis-je t'aider?`}
                         className="text-xs bg-gold/20 text-gold hover:bg-gold hover:text-midnight font-bold px-3 py-1.5 rounded-lg transition-colors inline-block"
                       >
                         Contacter

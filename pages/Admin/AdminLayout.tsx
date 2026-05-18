@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import {
-  Feather,
   LayoutDashboard,
   ShoppingCart,
   FileText,
@@ -19,9 +18,14 @@ import {
   Mic,
   Globe,
   Users,
+  Eye,
+  Tag,
   Menu,
   X,
+  MessageSquareQuote,
+  Download,
 } from 'lucide-react';
+import QuillIcon from '../../components/QuillIcon';
 
 const NavLink = ({ to, icon, label, onClick }: { to: string; icon: React.ReactNode; label: string; onClick?: () => void }) => {
   const location = useLocation();
@@ -66,7 +70,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         </button>
         <div className="flex items-center gap-2">
           <div className="bg-gold p-1.5 rounded-lg text-midnight">
-            <Feather className="w-4 h-4" />
+            <QuillIcon size={16} />
           </div>
           <span className="font-serif text-sm font-bold text-white">Espace Auteure</span>
         </div>
@@ -96,7 +100,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-gold p-2 rounded-xl text-midnight">
-              <Feather className="w-5 h-5" />
+              <QuillIcon size={20} />
             </div>
             <div>
               <h2 className="font-serif text-lg font-bold tracking-wide">Espace Auteure</h2>
@@ -123,9 +127,13 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/interviews" icon={<Mic />} label="Interviews & Médias" onClick={closeSidebar} />
           <NavLink to="/admin/medias" icon={<ImageIcon />} label="Médiathèque" onClick={closeSidebar} />
           <NavLink to="/admin/produits" icon={<Package />} label="Inventaire Livres" onClick={closeSidebar} />
+          <NavLink to="/admin/codes-promo" icon={<Tag />} label="Codes Promo" onClick={closeSidebar} />
+          <NavLink to="/admin/temoignages" icon={<MessageSquareQuote />} label="Témoignages" onClick={closeSidebar} />
+          <NavLink to="/admin/lead-magnet" icon={<Download />} label="Aimant à courriels" onClick={closeSidebar} />
           <NavLink to="/admin/kanban" icon={<CheckSquare />} label="Kanban" onClick={closeSidebar} />
-          <NavLink to="/admin/communaute" icon={<Users />} label="Communauté" onClick={closeSidebar} />
+          <NavLink to="/admin/communaute" icon={<Users />} label="Espace client" onClick={closeSidebar} />
           <div className="my-2 border-t border-white/5" />
+          <NavLink to="/admin/visibilite" icon={<Eye />} label="Masquer / Afficher" onClick={closeSidebar} />
           <NavLink to="/admin/editeur" icon={<Globe />} label="Modifier le site" onClick={closeSidebar} />
         </nav>
 

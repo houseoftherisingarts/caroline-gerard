@@ -4,10 +4,12 @@ import { Lock, User } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 
-// Usernames are mapped to internal non-guessable emails.
-// Firebase Auth requires an email format, but we hide this from the UI entirely.
-const toInternalEmail = (username: string) =>
-  `${username.trim().toLowerCase()}@admin.local`;
+// If the username already contains @, use it as a full email.
+// Otherwise append @admin.local (legacy shorthand for Caroline's account).
+const toInternalEmail = (username: string) => {
+  const u = username.trim().toLowerCase();
+  return u.includes('@') ? u : `${u}@admin.local`;
+};
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');

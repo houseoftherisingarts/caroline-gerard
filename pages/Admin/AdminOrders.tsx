@@ -3,6 +3,7 @@ import { Download, Eye, Truck, Search, Package } from 'lucide-react';
 import { Order } from '../../types';
 import { subscribeToOrders, updateOrderStatus } from '../../lib/firestore';
 import Modal from '../../components/Modal';
+import { printReceipt } from '../../lib/receipt';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -60,7 +61,7 @@ const AdminOrders = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">Commandes</h1>
-          <p className="text-slate-400 mt-1 text-sm">Gérez vos expéditions et suivis</p>
+          <p className="text-slate-400 mt-1 text-sm">Gère tes expéditions et suivis</p>
         </div>
         <button
           onClick={handleExport}
@@ -207,6 +208,26 @@ const AdminOrders = () => {
               <p className="text-xs text-slate-600 font-mono">Square ID: {selectedOrder.squarePaymentId}</p>
             )}
 
+            <button
+              onClick={() => printReceipt({
+                orderId: selectedOrder.id,
+                date: selectedOrder.date,
+                customerName: selectedOrder.customerName,
+                email: selectedOrder.email,
+                address: selectedOrder.address ?? '',
+                items: selectedOrder.items,
+                subtotal: selectedOrder.subtotal ?? selectedOrder.total,
+                discount: 0,
+                delivery: selectedOrder.delivery ?? 0,
+                tps: selectedOrder.tps ?? 0,
+                tvq: selectedOrder.tvq ?? 0,
+                total: selectedOrder.total,
+              })}
+              className="w-full bg-white/10 text-white font-bold py-3 rounded-xl hover:bg-white/20 transition-colors flex items-center justify-center gap-2"
+            >
+              <Download size={18} /> Télécharger le reçu (PDF)
+            </button>
+
             {selectedOrder.status === 'Payé' && (
               <button
                 onClick={() => handleUpdateStatus(selectedOrder.id, 'Envoyé')}
@@ -215,6 +236,13 @@ const AdminOrders = () => {
                 <Truck size={18} /> Marquer comme Envoyé
               </button>
             )}
+
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="w-full bg-white/5 text-slate-400 font-bold py-3 rounded-xl hover:bg-white/10 hover:text-white transition-colors"
+            >
+              Fermer
+            </button>
           </div>
         </Modal>
       )}

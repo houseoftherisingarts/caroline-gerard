@@ -35,7 +35,7 @@ const AdminInterviews: React.FC<AdminInterviewsProps> = ({ interviews, setInterv
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet entretien ?')) {
+    if (window.confirm('Es-tu sûr(e) de vouloir supprimer cet entretien ?')) {
       setInterviews(interviews.filter(i => i.id !== id));
       if (editingId === id) resetForm();
     }
@@ -64,7 +64,7 @@ const AdminInterviews: React.FC<AdminInterviewsProps> = ({ interviews, setInterv
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold text-white">Interviews & Médias</h1>
-          <p className="text-slate-400 mt-1">Gérez vos passages médias, podcasts et interviews vidéo.</p>
+          <p className="text-slate-400 mt-1">Gère tes passages médias, podcasts et interviews vidéo.</p>
         </div>
         {editingId && (
           <button 
@@ -231,7 +231,7 @@ const AdminInterviews: React.FC<AdminInterviewsProps> = ({ interviews, setInterv
                 <FileText className="text-slate-500 w-8 h-8" />
               </div>
               <h3 className="text-xl font-serif text-white mb-2">Aucun média enregistré</h3>
-              <p className="text-slate-400">Commencez par ajouter votre première interview ou podcast.</p>
+              <p className="text-slate-400">Commence par ajouter ta première interview ou podcast.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

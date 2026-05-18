@@ -1,18 +1,56 @@
+// AEO updated 2026-05-06
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import EditableText from '../components/EditableText';
 import EditableImage from '../components/EditableImage';
 import NewsletterForm from '../components/NewsletterForm';
+import TestimonialsSection from '../components/TestimonialsSection';
+import { VisibilitySettings, DEFAULT_VIS } from '../lib/firestore';
 
-const AProposPage = () => {
+const AProposPage = ({ vis = DEFAULT_VIS }: { vis?: VisibilitySettings }) => {
+  const canonicalUrl = 'https://carolinegerard.ca/a-propos';
+  const aboutJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'À Propos — Caroline Gérard et William Lorrain',
+    url: canonicalUrl,
+    inLanguage: 'fr-CA',
+    description: "Histoire de Caroline Gérard, auteure jeunesse, et de son fils William Lorrain, coauteur de la série « William et les univers invisibles ».",
+    mainEntity: [
+      {
+        '@type': 'Person',
+        name: 'Caroline Gérard',
+        jobTitle: 'Auteure jeunesse',
+        knowsAbout: ['Littérature jeunesse', 'Écriture coécrite parent-enfant', 'Différence et neurodiversité'],
+        nationality: { '@type': 'Country', name: 'Canada' },
+        url: 'https://carolinegerard.ca/',
+      },
+      {
+        '@type': 'Person',
+        name: 'William Lorrain',
+        jobTitle: 'Coauteur',
+        description: "Adolescent atypique à l'imagination sans limites, coauteur de William et les univers invisibles.",
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen pt-20 md:pt-32 pb-12 w-full overflow-hidden">
       <Helmet>
-        <title>Caroline Gérard | À Propos</title>
-        <meta name="description" content="Découvrez l'histoire de Caroline Gérard et de son fils William Lorrain, auteurs de William et les univers invisibles." />
+        <title>À Propos | Caroline Gérard et William Lorrain — Auteurs jeunesse</title>
+        <meta name="description" content="Découvrez l'histoire de Caroline Gérard, auteure jeunesse du Québec, et de son fils William Lorrain, coauteur de « William et les univers invisibles »." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:locale" content="fr_CA" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content="À Propos — Caroline Gérard et William Lorrain" />
+        <meta property="og:description" content="Histoire d'une mère et de son fils auteurs, et de la naissance de William et les univers invisibles." />
+        <script type="application/ld+json">{JSON.stringify(aboutJsonLd)}</script>
       </Helmet>
 
       {/* About Story Section — Caroline */}
+      {!vis.hideAProposCaroline && (
       <section className="w-full py-12 md:py-24 px-5 md:px-16 lg:px-24 bg-white/5 backdrop-blur-md border-y border-white/5 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8 md:gap-16">
           <div className="flex-1 relative">
@@ -40,8 +78,10 @@ const AProposPage = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* William Presentation Section */}
+      {!vis.hideAProposWilliam && (
       <section className="w-full py-12 md:py-24 px-5 md:px-16 lg:px-24 bg-midnight/40 backdrop-blur-md border-b border-white/5 relative overflow-hidden">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row-reverse items-center gap-8 md:gap-16">
           <div className="flex-1 relative">
@@ -68,8 +108,37 @@ const AProposPage = () => {
           </div>
         </div>
       </section>
+      )}
 
-      <NewsletterForm />
+      {/* Liens internes contextuels (AEO) */}
+      <section className="w-full px-5 md:px-16 lg:px-24 py-8 md:py-12">
+        <div className="max-w-4xl mx-auto text-center text-slate-400 text-sm md:text-base leading-relaxed space-y-3">
+          <p>
+            <EditableText tag="span" contentKey="apropos_links_intro" defaultValue="Pour découvrir le premier tome de notre histoire, visite la " />
+            <Link to="/boutique" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="apropos_links_boutique" defaultValue="boutique en ligne" />
+            </Link>
+            <EditableText tag="span" contentKey="apropos_links_seg2" defaultValue=". Tu peux aussi nous rencontrer en personne lors de nos prochains " />
+            <Link to="/evenements" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="apropos_links_evenements" defaultValue="salons et lancements" />
+            </Link>
+            <EditableText tag="span" contentKey="apropos_links_seg3" defaultValue=", écouter nos " />
+            <Link to="/interviews" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="apropos_links_interviews" defaultValue="interviews et entrevues" />
+            </Link>
+            <EditableText tag="span" contentKey="apropos_links_seg4" defaultValue=", ou nous écrire via notre " />
+            <Link to="/contact" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="apropos_links_contact" defaultValue="page contact" />
+            </Link>
+            <EditableText tag="span" contentKey="apropos_links_outro" defaultValue="." />
+          </p>
+        </div>
+      </section>
+
+      {/* Social proof */}
+      <TestimonialsSection page="apropos" />
+
+      {!vis.hideAProposNewsletter && <NewsletterForm hideMemberCta={vis.hideMemberCta} />}
     </div>
   );
 };

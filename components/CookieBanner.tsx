@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Cookie, X, Check } from 'lucide-react';
+import EditableText from './EditableText';
 
 const CONSENT_KEY = '_cg_consent';
 
@@ -54,12 +55,11 @@ const CookieBanner: React.FC = () => {
             <Cookie className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-white font-bold text-sm mb-0.5">Ce site utilise des témoins (cookies)</p>
+            <EditableText tag="p" contentKey="cookie_banner_title" defaultValue="Ce site utilise des témoins (cookies)" className="text-white font-bold text-sm mb-0.5" />
             <p className="text-slate-400 text-xs leading-relaxed">
-              Nous utilisons des cookies analytiques (Firebase / Google) pour mesurer l'audience, avec votre
-              consentement. Les cookies essentiels sont toujours actifs.{' '}
+              <EditableText tag="span" contentKey="cookie_banner_msg" defaultValue="Nous utilisons des cookies analytiques (Firebase / Google) pour mesurer l'audience, avec ton consentement. Les cookies essentiels sont toujours actifs." />{' '}
               <Link to="/conditions#cookies" className="text-gold hover:underline underline-offset-2">
-                En savoir plus
+                <EditableText tag="span" contentKey="cookie_banner_more_link" defaultValue="En savoir plus" />
               </Link>
             </p>
           </div>
@@ -69,13 +69,13 @@ const CookieBanner: React.FC = () => {
             onClick={handleDecline}
             className="flex items-center gap-1.5 px-4 py-2 text-slate-400 hover:text-white border border-white/10 hover:border-white/30 rounded-xl text-sm font-bold transition-colors"
           >
-            <X className="w-3.5 h-3.5" /> Refuser
+            <X className="w-3.5 h-3.5" /> <EditableText tag="span" contentKey="cookie_banner_decline_btn" defaultValue="Refuser" />
           </button>
           <button
             onClick={handleAccept}
             className="flex items-center gap-1.5 px-5 py-2 bg-gold text-midnight rounded-xl text-sm font-bold hover:bg-white transition-colors"
           >
-            <Check className="w-3.5 h-3.5" /> Accepter
+            <Check className="w-3.5 h-3.5" /> <EditableText tag="span" contentKey="cookie_banner_accept_btn" defaultValue="Accepter" />
           </button>
         </div>
       </div>

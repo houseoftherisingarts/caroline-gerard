@@ -1,18 +1,183 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { subscribeToInvoices, saveInvoice, deleteInvoice, StoredInvoice } from '../../lib/firestore';
-import { 
-  Plus, 
-  Trash2, 
-  Printer, 
-  Mail, 
-  MapPin, 
-  Phone, 
-  FileText, 
-  User, 
-  Truck, 
+import {
+  Plus,
+  Trash2,
+  Printer,
+  Mail,
+  MapPin,
+  Phone,
+  FileText,
+  User,
+  Truck,
   CheckCircle2,
-  Circle
+  Circle,
+  Save,
 } from 'lucide-react';
+
+// ── localStorage keys ──────────────────────────────────────────────────────────
+const LS_BILL  = 'cg_inv_billTo';
+const LS_SHIP  = 'cg_inv_shipTo';
+const LS_SHIP2 = 'cg_inv_shipping';
+const LS_TERMS = 'cg_inv_terms';
+
+function lsGet<T>(key: string, fallback: T): T {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+}
+function lsSet(key: string, value: unknown) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* quota */ }
+}
+
+// ── Invoice print (new window — perfect replica) ───────────────────────────────
+function printInvoiceWindow(params: {
+  meta: { number: string; date: string; dueDate: string; terms: string };
+  billTo: { name: string; address: string; email: string };
+  shipTo: { name: string; address: string; phone: string };
+  items: { description: string; isTaxable: boolean; quantity: number; rate: number }[];
+  shipping: { method: string; cost: number };
+  totals: { subtotal: number; shipping: number; tps: number; tvq: number; grandTotal: number };
+}) {
+  const { meta, billTo, shipTo, items, shipping, totals } = params;
+  const itemRows = items.map(it => `
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;">
+        <strong style="color:#1e293b;">${it.description || '—'}</strong>
+        ${it.isTaxable ? '<br/><span style="font-size:10px;color:#94a3b8;background:#f1f5f9;padding:1px 5px;border-radius:3px;">Taxable</span>' : ''}
+      </td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:center;color:#64748b;">${it.quantity}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:right;color:#64748b;">${it.rate.toFixed(2)}&nbsp;$</td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:right;font-weight:700;color:#1e293b;">${(it.quantity * it.rate).toFixed(2)}&nbsp;$</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <title>Facture ${meta.number}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Lato',sans-serif;background:#fff;color:#334155;max-width:820px;margin:0 auto;padding:48px 40px;}
+    .serif{font-family:'Playfair Display',serif;}
+    @media print{body{padding:0 24px;}.no-print{display:none!important;}@page{margin:1cm;size:letter;}}
+    .btn{display:inline-block;background:#d4af37;color:#fff;border:none;padding:10px 28px;font-size:14px;border-radius:8px;cursor:pointer;margin-bottom:28px;font-weight:700;}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #f1f5f9;padding-bottom:32px;margin-bottom:32px;}
+    .from h2{font-family:'Playfair Display',serif;font-size:28px;color:#0f172a;margin-bottom:4px;}
+    .from p{color:#94a3b8;font-size:13px;font-weight:700;letter-spacing:.05em;}
+    .from-meta{margin-top:16px;font-size:13px;color:#64748b;line-height:1.7;}
+    .inv-label{font-family:'Playfair Display',serif;font-size:48px;font-weight:700;color:#e2e8f0;letter-spacing:-.03em;line-height:1;}
+    .inv-meta{margin-top:12px;font-size:13px;text-align:right;line-height:1.8;}
+    .inv-meta span{color:#94a3b8;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-right:8px;}
+    .addresses{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:40px;}
+    .addr-label{font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid #f1f5f9;padding-bottom:4px;margin-bottom:10px;}
+    .addr-name{font-size:17px;font-weight:700;color:#0f172a;margin-bottom:4px;}
+    .addr-detail{font-size:13px;color:#64748b;white-space:pre-wrap;line-height:1.6;}
+    table{width:100%;border-collapse:collapse;}
+    thead tr{border-bottom:2px solid #0f172a;}
+    th{padding:12px 0;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;}
+    th:nth-child(2){text-align:center;width:60px;}
+    th:nth-child(3),th:last-child{text-align:right;width:100px;}
+    .totals-wrap{display:flex;justify-content:flex-end;margin-top:40px;padding-top:24px;border-top:2px solid #0f172a;}
+    .totals{width:300px;}
+    .totals-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:#64748b;}
+    .totals-row span:last-child{font-weight:700;color:#0f172a;}
+    .totals-grand{display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;margin-top:12px;padding-top:14px;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .totals-grand span:last-child{color:#d4af37;}
+    .footer{margin-top:48px;padding-top:24px;border-top:1px solid #f1f5f9;display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+    .footer-label{font-size:10px;font-weight:700;color:#94a3b8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px;}
+    .footer-text{font-size:12px;color:#64748b;line-height:1.6;}
+    .footer-right{text-align:right;}
+    .foot-stamp{margin-top:28px;text-align:center;font-size:10px;color:#cbd5e1;letter-spacing:.2em;text-transform:uppercase;}
+  </style>
+</head>
+<body>
+  <button class="btn no-print" onclick="window.print()">⎙ &nbsp;Imprimer / Enregistrer PDF</button>
+  <div class="header">
+    <div class="from">
+      <h2>Caroline Gérard</h2>
+      <p>Auteure</p>
+      <div class="from-meta">
+        <div>📍 501 Chemin-du-Lac-à-la-Perchaude, Saint-Tite QC G0X 3H0</div>
+        <div>📞 819 993-0714</div>
+        <div>✉️ caroline@carolinegerard.ca</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div class="inv-label">Facture</div>
+      <div class="inv-meta">
+        <div><span>N° Facture</span>${meta.number}</div>
+        <div><span>Date</span>${meta.date}</div>
+        <div><span>Échéance</span>${meta.dueDate}</div>
+        <div><span>Conditions</span>${meta.terms}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="addresses">
+    <div>
+      <div class="addr-label">Facturé À</div>
+      <div class="addr-name">${billTo.name || '—'}</div>
+      <div class="addr-detail">${billTo.address || ''}</div>
+      ${billTo.email ? `<div class="addr-detail">${billTo.email}</div>` : ''}
+    </div>
+    <div>
+      <div class="addr-label">Livré À</div>
+      <div class="addr-name">${shipTo.name || '—'}</div>
+      <div class="addr-detail">${shipTo.address || ''}</div>
+      ${shipTo.phone ? `<div class="addr-detail">${shipTo.phone}</div>` : ''}
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="text-align:left;">Description</th>
+        <th>Qté</th>
+        <th>Taux</th>
+        <th>Montant</th>
+      </tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+  </table>
+
+  <div class="totals-wrap">
+    <div class="totals">
+      <div class="totals-row"><span>Sous-total</span><span>${totals.subtotal.toFixed(2)} $</span></div>
+      <div class="totals-row"><span>Livraison (${shipping.method})</span><span>${totals.shipping.toFixed(2)} $</span></div>
+      <div class="totals-row"><span>TPS (5 % — livres + livraison)</span><span>${totals.tps.toFixed(2)} $</span></div>
+      <div class="totals-row"><span>TVQ (9,975 % — livraison seul.)</span><span>${totals.tvq.toFixed(2)} $</span></div>
+      <div class="totals-grand"><span>Total CAD</span><span>${totals.grandTotal.toFixed(2)} $</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <div class="footer-label">Instructions de paiement</div>
+      <div class="footer-text">
+        Virement Interac à <strong>caroline@carolinegerard.ca</strong><br/>
+        Mot de passe : <strong>livre</strong><br/>
+        Merci de ton achat !
+      </div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-label">Informations fiscales</div>
+      <div class="footer-text">
+        N° TPS/TVH : 781718333 RT0001<br/>
+        N° TVQ : 1041635416 TQ0001
+      </div>
+    </div>
+  </div>
+  <div class="foot-stamp">Caroline Gérard — Auteure — Saint-Tite, Québec</div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=1050,scrollbars=yes');
+  if (!win) { alert('Autorisez les pop-ups pour imprimer.'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 600);
+}
 
 interface InvoiceItem {
   id: string;
@@ -23,47 +188,49 @@ interface InvoiceItem {
 }
 
 const AdminInvoices = () => {
-  // --- State ---
+  // ── State — pre-filled from localStorage ──────────────────────────────────
   const [invoiceMeta, setInvoiceMeta] = useState({
-    number: `FAC-${Math.floor(Math.random() * 9000) + 1000}`,
+    number: `FAC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`,
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date().toISOString().split('T')[0],
-    terms: 'Payable dès réception'
+    terms: lsGet(LS_TERMS, 'Payable dès réception') as string,
   });
 
-  const [billTo, setBillTo] = useState({
-    name: '',
-    address: '',
-    email: ''
-  });
+  const [billTo, setBillTo] = useState(
+    lsGet(LS_BILL, { name: '', address: '', email: '' }) as { name: string; address: string; email: string }
+  );
 
-  const [shipTo, setShipTo] = useState({
-    name: '',
-    address: '',
-    phone: ''
-  });
+  const [shipTo, setShipTo] = useState(
+    lsGet(LS_SHIP, { name: '', address: '', phone: '' }) as { name: string; address: string; phone: string }
+  );
 
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: '1', description: '', isTaxable: true, quantity: 1, rate: 0 }
   ]);
 
-  const [shipping, setShipping] = useState({
-    method: 'Livraison standard 3-5 jours',
-    cost: 12.00
-  });
+  const [shipping, setShipping] = useState(
+    lsGet(LS_SHIP2, { method: 'Livraison standard 3-5 jours', cost: 6.00 }) as { method: string; cost: number }
+  );
+
+  // Persist defaults whenever these fields change
+  useEffect(() => { lsSet(LS_BILL,  billTo);           }, [billTo]);
+  useEffect(() => { lsSet(LS_SHIP,  shipTo);           }, [shipTo]);
+  useEffect(() => { lsSet(LS_SHIP2, shipping);         }, [shipping]);
+  useEffect(() => { lsSet(LS_TERMS, invoiceMeta.terms);}, [invoiceMeta.terms]);
 
   // --- Calculations ---
   const totals = useMemo(() => {
     const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-    
-    // Taxes are calculated on taxable items + shipping
-    const taxableItemsTotal = items.reduce((sum, item) => 
+
+    // Quebec tax rules for books:
+    // TPS (5 %) applies to taxable items (books) + shipping
+    // TVQ (9,975 %) applies to shipping ONLY — books are TVQ-exempt in Quebec
+    const taxableItemsTotal = items.reduce((sum, item) =>
       item.isTaxable ? sum + (item.quantity * item.rate) : sum, 0
     );
-    
-    const taxBase = taxableItemsTotal + shipping.cost;
-    const tps = taxBase * 0.05;
-    const tvq = taxBase * 0.09975;
+
+    const tps = (taxableItemsTotal + shipping.cost) * 0.05;
+    const tvq = shipping.cost * 0.09975; // shipping only, not books
     const grandTotal = subtotal + shipping.cost + tps + tvq;
 
     return {
@@ -118,6 +285,11 @@ const AdminInvoices = () => {
       shipping,
     };
     await saveInvoice(invoice);
+    // Persist defaults for next session
+    lsSet(LS_BILL,  billTo);
+    lsSet(LS_SHIP,  shipTo);
+    lsSet(LS_SHIP2, shipping);
+    lsSet(LS_TERMS, invoiceMeta.terms);
     setSaveMsg('Facture sauvegardée !');
     setTimeout(() => setSaveMsg(''), 3000);
   };
@@ -130,44 +302,34 @@ const AdminInvoices = () => {
     setShipping(inv.shipping);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = useCallback(() => {
+    printInvoiceWindow({ meta: invoiceMeta, billTo, shipTo, items, shipping, totals });
+  }, [invoiceMeta, billTo, shipTo, items, shipping, totals]);
 
   return (
     <div className="min-h-screen animate-fade-in">
-      {/* Global Print Styles to hide sidebar and other elements */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          aside, nav, footer, .no-print { display: none !important; }
-          main { margin-left: 0 !important; padding: 0 !important; }
-          .print-only { display: block !important; }
-          body { background: white !important; }
-          @page { margin: 1cm; }
-        }
-      `}} />
 
       <div className="flex flex-col xl:flex-row gap-8">
         {/* --- EDITOR (Left) --- */}
         <div className="flex-1 space-y-8 no-print">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-white">Créateur de Facture</h1>
-              <p className="text-slate-400 mt-1">Générez vos documents professionnels</p>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-white">Créateur de Facture</h1>
+              <p className="text-slate-400 mt-1 text-sm">Génère tes documents professionnels</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {saveMsg && <span className="text-green-400 text-sm font-bold">{saveMsg}</span>}
               <button
                 onClick={handleSave}
-                className="bg-white/10 text-white px-4 py-3 rounded-xl font-bold hover:bg-white/20 transition-all flex items-center gap-2"
+                className="bg-white/10 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-white/20 transition-all flex items-center gap-2 text-sm"
               >
-                <FileText size={18} /> Sauvegarder
+                <Save size={16} /> Sauvegarder
               </button>
               <button
                 onClick={handlePrint}
-                className="bg-gold text-midnight px-6 py-3 rounded-xl font-bold hover:bg-white transition-all flex items-center gap-2 shadow-lg shadow-gold/20"
+                className="bg-gold text-midnight px-4 py-2.5 rounded-xl font-bold hover:bg-white transition-all flex items-center gap-2 shadow-lg shadow-gold/20 text-sm"
               >
-                <Printer size={20} /> Imprimer / PDF
+                <Printer size={16} /> PDF parfait
               </button>
             </div>
           </div>
@@ -199,7 +361,7 @@ const AdminInvoices = () => {
             <h3 className="text-lg font-bold text-gold flex items-center gap-2">
               <FileText size={18} /> Informations Générales
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">N° Facture</label>
                 <input 
@@ -341,7 +503,7 @@ const AdminInvoices = () => {
                     <button 
                       onClick={() => updateItem(item.id, 'isTaxable', !item.isTaxable)}
                       className={`mt-4 p-2 rounded-lg transition-colors ${item.isTaxable ? 'text-gold bg-gold/10' : 'text-slate-500 bg-white/5'}`}
-                      title="Taxable ?"
+                      title="Sujet à la TPS ? (les livres imprimés sont exempts de TVQ au Québec)"
                     >
                       {item.isTaxable ? <CheckCircle2 size={18} /> : <Circle size={18} />}
                     </button>
@@ -362,7 +524,7 @@ const AdminInvoices = () => {
             <h3 className="text-lg font-bold text-gold flex items-center gap-2">
               <Truck size={18} /> Livraison
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mode de livraison</label>
                 <input 
@@ -387,7 +549,9 @@ const AdminInvoices = () => {
 
         {/* --- LIVE PREVIEW (Right) --- */}
         <div className="xl:w-[800px] print:w-full">
-          <div className="bg-white text-black p-12 shadow-2xl min-h-[1056px] flex flex-col print:shadow-none print:p-0">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 xl:hidden no-print">Aperçu de la facture (défilement horizontal)</p>
+          <div className="overflow-x-auto rounded-xl xl:overflow-visible">
+          <div className="bg-white text-black p-12 shadow-2xl min-h-[1056px] flex flex-col print:shadow-none print:p-0 w-[800px] xl:w-full">
             {/* Header */}
             <div className="flex justify-between items-start border-b-2 border-slate-100 pb-8 mb-8">
               <div>
@@ -396,7 +560,7 @@ const AdminInvoices = () => {
                 <div className="mt-4 space-y-1 text-sm text-slate-600">
                   <p className="flex items-center gap-2"><MapPin size={14} /> 501 Chemin-du-Lac-à-la-Perchaude, Saint-Tite QC G0X 3H0</p>
                   <p className="flex items-center gap-2"><Phone size={14} /> 819 993-0714</p>
-                  <p className="flex items-center gap-2"><Mail size={14} /> caroline.gerard@live.ca</p>
+                  <p className="flex items-center gap-2"><Mail size={14} /> caroline@carolinegerard.ca</p>
                 </div>
               </div>
               <div className="text-right">
@@ -468,11 +632,11 @@ const AdminInvoices = () => {
                   <span className="font-bold text-slate-900">{totals.shipping.toFixed(2)} $</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 font-bold uppercase">TPS (5%)</span>
+                  <span className="text-slate-500 font-bold uppercase">TPS 5% <span className="font-normal normal-case">(livres + livraison)</span></span>
                   <span className="font-bold text-slate-900">{totals.tps.toFixed(2)} $</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 font-bold uppercase">TVQ (9.975%)</span>
+                  <span className="text-slate-500 font-bold uppercase">TVQ 9,975% <span className="font-normal normal-case">(livraison seul.)</span></span>
                   <span className="font-bold text-slate-900">{totals.tvq.toFixed(2)} $</span>
                 </div>
                 <div className="flex justify-between text-xl border-t border-slate-200 pt-3">
@@ -488,7 +652,7 @@ const AdminInvoices = () => {
                 <div>
                   <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Instructions de Paiement</h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Pour un paiement par virement bancaire, utiliser l&apos;adresse <span className="font-bold text-slate-900">caroline.gerard@live.ca</span> et le mot de passe: <span className="font-bold text-slate-900">livre</span>. Merci de votre achat!
+                    Pour un paiement par virement bancaire, utiliser l&apos;adresse <span className="font-bold text-slate-900">caroline@carolinegerard.ca</span> et le mot de passe: <span className="font-bold text-slate-900">livre</span>. Merci de ton achat!
                   </p>
                 </div>
                 <div className="text-right">
@@ -503,6 +667,7 @@ const AdminInvoices = () => {
                 <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em]">Caroline Gérard — Auteure — Saint-Tite, Québec</p>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

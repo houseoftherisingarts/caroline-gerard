@@ -6,6 +6,8 @@ export interface ReceiptData {
   address: string;
   items: { title: string; price: number; quantity: number }[];
   subtotal: number;
+  discount?: number;
+  discountPct?: number;
   delivery: number;
   tps: number;
   tvq: number;
@@ -15,7 +17,7 @@ export interface ReceiptData {
 export function printReceipt(data: ReceiptData): void {
   const win = window.open('', '_blank', 'width=820,height=1000,scrollbars=yes');
   if (!win) {
-    alert('Veuillez autoriser les fenêtres pop-up pour télécharger votre reçu.');
+    alert('Veuillez autoriser les fenêtres pop-up pour télécharger ton reçu.');
     return;
   }
   win.document.write(buildReceiptHtml(data));
@@ -131,6 +133,7 @@ function buildReceiptHtml(data: ReceiptData): string {
 
   <table class="totals">
     <tr><td>Sous-total</td><td>${data.subtotal.toFixed(2)} $</td></tr>
+    ${data.discount && data.discount > 0 ? `<tr style="color:#4ade80;"><td>Réduction (${data.discountPct}%)</td><td>−${data.discount.toFixed(2)} $</td></tr>` : ''}
     <tr><td>Livraison</td><td>${data.delivery.toFixed(2)} $</td></tr>
     <tr><td>TPS (5%)</td><td>${data.tps.toFixed(2)} $</td></tr>
     <tr><td>TVQ (9,975% sur livraison)</td><td>${data.tvq.toFixed(2)} $</td></tr>
@@ -138,8 +141,8 @@ function buildReceiptHtml(data: ReceiptData): string {
   </table>
 
   <div class="footer">
-    <p>Merci pour votre commande! Votre livre sera expédié sous 3 à 5 jours ouvrables.</p>
-    <p style="margin-top:8px;">Questions? <a href="mailto:caroline.gerard@live.ca" style="color:#C8A96E;">caroline.gerard@live.ca</a></p>
+    <p>Merci pour ta commande! Ton livre sera expédié sous 3 à 5 jours ouvrables.</p>
+    <p style="margin-top:8px;">Questions? <a href="mailto:caroline@carolinegerard.ca" style="color:#C8A96E;">caroline@carolinegerard.ca</a></p>
     <p style="margin-top:16px;font-size:11px;color:#ccc;">Ce reçu fait foi de paiement. Paiement traité de façon sécurisée par Square.</p>
   </div>
 </body>

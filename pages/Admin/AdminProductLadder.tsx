@@ -63,7 +63,7 @@ const AdminProductLadder = () => {
     <div className="space-y-8 animate-fade-in-up h-full flex flex-col">
       <div>
         <h1 className="text-3xl font-serif font-bold text-white">Échelle de Produits</h1>
-        <p className="text-slate-400 mt-1">Structurez votre pipeline d&apos;offres pour visualiser le parcours client.</p>
+        <p className="text-slate-400 mt-1">Structure ton pipeline d&apos;offres pour visualiser le parcours client.</p>
       </div>
 
       {/* Financial Dashboard */}

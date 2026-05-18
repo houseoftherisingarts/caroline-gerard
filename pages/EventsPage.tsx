@@ -1,4 +1,7 @@
+// AEO updated 2026-05-06
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import { MapPin, ExternalLink, X } from 'lucide-react';
 import { AppEvent } from '../types';
 import BlockRenderer from '../components/BlockRenderer';
@@ -27,10 +30,53 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
   const getYear = (dateStr: string) => dateStr.split('-')[0];
   const getDay = (dateStr: string) => dateStr.split('-')[2];
 
-  const publishedEvents = events.filter(e => e.isPublished);
+  const publishedEvents = events
+    .filter(e => e.isPublished)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const canonicalUrl = 'https://carolinegerard.ca/evenements';
+  const eventJsonLdBlocks = publishedEvents.map(e => ({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: e.title,
+    startDate: e.date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: {
+      '@type': 'Place',
+      name: e.location,
+      address: { '@type': 'PostalAddress', addressLocality: e.location, addressRegion: 'QC', addressCountry: 'CA' },
+    },
+    description: e.description,
+    image: getFirstImage(e.image, e.content) || undefined,
+    organizer: { '@type': 'Person', name: 'Caroline Gérard', url: 'https://carolinegerard.ca/' },
+    performer: { '@type': 'Person', name: 'Caroline Gérard' },
+    url: e.link || canonicalUrl,
+    offers: {
+      '@type': 'Offer',
+      url: e.link || canonicalUrl,
+      availability: 'https://schema.org/InStock',
+      price: '0',
+      priceCurrency: 'CAD',
+      validFrom: new Date().toISOString(),
+    },
+  }));
 
   return (
     <>
+      <Helmet>
+        <title>Événements | Caroline Gérard — Salons du livre, dédicaces, lancements</title>
+        <meta name="description" content="Rencontrez Caroline Gérard et William Lorrain en personne lors des prochains salons du livre, dédicaces et lancements au Québec." />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="fr_CA" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content="Événements à venir — Caroline Gérard" />
+        <meta property="og:description" content="Salons, dédicaces et lancements à venir." />
+        {eventJsonLdBlocks.map((e, i) => (
+          <script key={i} type="application/ld+json">{JSON.stringify(e)}</script>
+        ))}
+      </Helmet>
       <div className="min-h-screen pt-24 md:pt-40 pb-20 w-full px-4 md:px-16">
         <div className="w-full mb-10 md:mb-16 flex flex-col items-center text-center">
           <EditableText tag="span" contentKey="events_label" defaultValue="Agenda" className="text-gold uppercase tracking-widest text-sm font-bold mb-4" />
@@ -59,8 +105,27 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
               )}
             </div>
           )) : (
-            <p className="text-center text-slate-500 italic">Aucun événement prévu pour le moment.</p>
+            <EditableText tag="p" contentKey="events_empty_msg" defaultValue="Aucun événement prévu pour le moment." className="text-center text-slate-500 italic" />
           )}
+        </div>
+
+        {/* Liens internes contextuels (AEO) */}
+        <div className="max-w-3xl mx-auto mt-16 text-center text-slate-400 text-sm leading-relaxed">
+          <p>
+            <EditableText tag="span" contentKey="events_links_intro" defaultValue="Pour réserver le livre avant un salon, visite la " />
+            <Link to="/boutique" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="events_links_boutique" defaultValue="boutique" />
+            </Link>
+            <EditableText tag="span" contentKey="events_links_seg2" defaultValue=". Pour organiser une rencontre en milieu scolaire ou corporatif, vois nos " />
+            <Link to="/conferences" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="events_links_conferences" defaultValue="conférences" />
+            </Link>
+            <EditableText tag="span" contentKey="events_links_seg3" defaultValue=". Tu peux aussi nous écrire via la " />
+            <Link to="/contact" className="text-gold hover:underline">
+              <EditableText tag="span" contentKey="events_links_contact" defaultValue="page contact" />
+            </Link>
+            <EditableText tag="span" contentKey="events_links_outro" defaultValue="." />
+          </p>
         </div>
       </div>
 
@@ -76,7 +141,7 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
               </div>
               {selectedEvent.link && (
                 <a href={selectedEvent.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-white hover:text-gold transition-colors font-bold">
-                  En savoir plus <ExternalLink size={16} />
+                  <EditableText tag="span" contentKey="events_more_info_link" defaultValue="En savoir plus" /> <ExternalLink size={16} />
                 </a>
               )}
             </div>

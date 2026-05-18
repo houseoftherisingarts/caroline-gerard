@@ -146,7 +146,7 @@ const AdminKanban = () => {
       <div className="flex-shrink-0 flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
             <h1 className="text-3xl font-serif font-bold text-white">Gestion de Projets</h1>
-            <p className="text-slate-400 mt-1">Organisez vos tâches avec la vue Kanban ou Calendrier.</p>
+            <p className="text-slate-400 mt-1">Organise tes tâches avec la vue Kanban ou Calendrier.</p>
         </div>
         <div className="flex items-center gap-4 bg-midnight/60 border border-white/10 p-2 rounded-xl">
           <select value={activeProjectId} onChange={e => setActiveProjectId(e.target.value)} className="bg-black/20 text-white rounded-lg p-2 border border-transparent focus:outline-none focus:border-gold">

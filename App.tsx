@@ -4,8 +4,7 @@ import { auth } from './firebase';
 import { trackAddToCart, trackBeginCheckout, trackPageView } from './lib/analytics';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { 
-  Feather,
+import {
   ShoppingCart,
   Menu,
   X,
@@ -14,6 +13,7 @@ import {
   Eye,
   Scale,
 } from 'lucide-react';
+import QuillIcon from './components/QuillIcon';
 
 import StarField from './components/StarField';
 import CartDrawer from './components/CartDrawer';
@@ -42,6 +42,10 @@ import AdminKanban from './pages/Admin/AdminKanban';
 import AdminInterviews from './pages/Admin/AdminInterviews';
 import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
 import AdminCommunaute from './pages/Admin/AdminCommunaute';
+import AdminVisibilite from './pages/Admin/AdminVisibilite';
+import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
+import AdminTestimonials from './pages/Admin/AdminTestimonials';
+import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
 import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
@@ -50,7 +54,7 @@ import NewsletterForm from './components/NewsletterForm';
 import CookieBanner from './components/CookieBanner';
 import { SiteContentProvider } from './contexts/SiteContentContext';
 
-import { recentOrders, salesData, blogPosts } from './data';
+import { recentOrders, salesData, blogPosts, books } from './data';
 import { Book, Order, ProductOffer, CartItem, BlogPost, Conference, Lead, AppEvent, Interview } from './types';
 import {
   subscribeToPosts, savePost, deletePost,
@@ -60,10 +64,12 @@ import {
   subscribeToSettings, saveSettings,
   subscribeToLeads,
   subscribeToSiteContent, saveSiteContent,
+  subscribeToBooks, saveBook, deleteBook,
   seedIfEmpty,
   incrementVisitorCount,
+  DEFAULT_VIS, VIS_KEYS,
 } from './lib/firestore';
-import type { SiteContent } from './lib/firestore';
+import type { SiteContent, VisibilitySettings } from './lib/firestore';
 
 // --- Layout Components ---
 
@@ -78,7 +84,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: () => void }) => {
+const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenCart: () => void, vis: VisibilitySettings }) => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
@@ -88,23 +94,26 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
   return (
     <nav className="fixed w-full z-50 top-0 px-3 py-3 lg:px-6 lg:py-6 transition-all duration-300">
       <div className="w-full bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3 lg:px-8 lg:py-4 flex justify-between items-center shadow-2xl">
-        <Link to="/" className="flex items-center group">
+        <Link to="/" className="flex items-center gap-3 group" aria-label="Caroline Gérard — retour à l'accueil">
           <div className="bg-gold/20 p-2 rounded-full group-hover:bg-gold/40 transition-colors">
-            <Feather className="text-gold w-6 h-6" />
+            <QuillIcon className="text-gold w-6 h-6" />
           </div>
+          <span className="font-serif text-gold text-lg lg:text-xl tracking-wide whitespace-nowrap">
+            Caroline <span className="italic">Gérard</span>
+          </span>
         </Link>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-8 xl:gap-10">
           <Link to="/" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
-          <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>
-          <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>
-          <Link to="/evenements" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>
-          <Link to="/interviews" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>
-          <Link to="/conferences" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>
-          <Link to="/blog" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Blog</Link>
-          <Link to="/contact" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Contact</Link>
-          <Link to="/communaute" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase border border-gold/30 px-3 py-1.5 rounded-lg hover:border-gold">Communauté</Link>
+          {!vis.hidePageAPropos && <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>}
+          {!vis.hidePageBoutique && <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>}
+          {!vis.hidePageEvenements && <Link to="/evenements" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>}
+          {!vis.hidePageInterviews && <Link to="/interviews" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>}
+          {!vis.hideConferences && <Link to="/conferences" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>}
+          {!vis.hidePageBlog && <Link to="/blog" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Blog</Link>}
+          {!vis.hidePageContact && <Link to="/contact" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Contact</Link>}
+          {!vis.hideEspaceClient && <Link to="/communaute" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase border border-gold/30 px-3 py-1.5 rounded-lg hover:border-gold">Espace client</Link>}
         </div>
 
         <div className="flex items-center gap-4">
@@ -135,7 +144,7 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
             {/* Menu header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
               <div className="bg-gold/20 p-1.5 rounded-full">
-                <Feather className="text-gold w-5 h-5" />
+                <QuillIcon className="text-gold w-5 h-5" />
               </div>
               <button onClick={() => setIsOpen(false)} className="p-2 text-slate-400 hover:text-white transition-colors">
                 <X size={22} />
@@ -143,32 +152,37 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
             </div>
             {/* Links */}
             <div className="flex flex-col py-4 px-4 gap-1">
-              {[
-                { to: '/', label: 'Accueil' },
-                { to: '/a-propos', label: 'À Propos' },
-                { to: '/boutique', label: 'Boutique' },
-                { to: '/evenements', label: 'Événements' },
-                { to: '/interviews', label: 'Médias' },
-                { to: '/conferences', label: 'Conférence' },
-                { to: '/blog', label: 'Blog' },
-                { to: '/contact', label: 'Contact' },
-              ].map(({ to, label }) => (
+              {([
+                { to: '/', label: 'Accueil', hidden: false },
+                { to: '/a-propos', label: 'À Propos', hidden: vis.hidePageAPropos },
+                { to: '/boutique', label: 'Boutique', hidden: vis.hidePageBoutique },
+                { to: '/evenements', label: 'Événements', hidden: vis.hidePageEvenements },
+                { to: '/interviews', label: 'Médias', hidden: vis.hidePageInterviews },
+                { to: '/conferences', label: 'Conférence', hidden: vis.hideConferences },
+                { to: '/blog', label: 'Blog', hidden: vis.hidePageBlog },
+                { to: '/contact', label: 'Contact', hidden: vis.hidePageContact },
+              ] as { to: string; label: string; hidden: boolean }[])
+                .filter(item => !item.hidden)
+                .map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setIsOpen(false)}
+                    className="text-lg font-serif text-white hover:text-gold transition-colors px-4 py-3 rounded-xl hover:bg-white/5 active:bg-white/10"
+                  >
+                    {label}
+                  </Link>
+                ))
+              }
+              {!vis.hideEspaceClient && (
                 <Link
-                  key={to}
-                  to={to}
+                  to="/communaute"
                   onClick={() => setIsOpen(false)}
-                  className="text-lg font-serif text-white hover:text-gold transition-colors px-4 py-3 rounded-xl hover:bg-white/5 active:bg-white/10"
+                  className="text-lg font-serif text-gold border border-gold/30 rounded-xl py-3 px-4 text-center mt-2 hover:bg-gold hover:text-midnight transition-all"
                 >
-                  {label}
+                  Espace client
                 </Link>
-              ))}
-              <Link
-                to="/communaute"
-                onClick={() => setIsOpen(false)}
-                className="text-lg font-serif text-gold border border-gold/30 rounded-xl py-3 px-4 text-center mt-2 hover:bg-gold hover:text-midnight transition-all"
-              >
-                Communauté
-              </Link>
+              )}
             </div>
           </div>
         </>
@@ -177,9 +191,9 @@ const Navigation = ({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: 
   );
 };
 
-const Footer = ({ visitorCount, showVisitorCount }: { visitorCount: number, showVisitorCount: boolean }) => (
+const Footer = ({ visitorCount, showVisitorCount, vis }: { visitorCount: number, showVisitorCount: boolean, vis: VisibilitySettings }) => (
   <footer className="bg-midnight/60 backdrop-blur-md border-t border-white/5 relative z-10 w-full">
-    <NewsletterForm compact />
+    {!vis.hideFooterNewsletter && <NewsletterForm compact hideMemberCta={vis.hideMemberCta} />}
     <div className="w-full flex flex-col md:flex-row justify-between items-center gap-6 py-8 md:py-12 px-6 md:px-8">
       <div className="text-center md:text-left">
         <h3 className="font-serif text-2xl md:text-3xl text-gold mb-2">Caroline Gérard</h3>
@@ -225,7 +239,7 @@ const App = () => {
   // Lifted state for Offers to share between Admin and Public
   const [offers] = useState<ProductOffer[]>([
     { id: '1', title: 'Guide PDF Gratuit', price: 0, category: 'freemium', description: 'Lead magnet pour capturer des emails', status: 'active', type: 'product', isPublished: true },
-    { id: '2', title: 'Atelier Découverte', price: 47, category: 'low', description: 'Session zoom de 1h pour découvrir votre potentiel', status: 'active', type: 'service', isPublished: true },
+    { id: '2', title: 'Atelier Découverte', price: 47, category: 'low', description: 'Session zoom de 1h pour découvrir ton potentiel', status: 'active', type: 'service', isPublished: true },
     { id: '3', title: 'Formation En Ligne', price: 197, category: 'mid', description: 'Accès à vie au portail de formation', status: 'planned', type: 'product', isPublished: false },
     { id: '4', title: 'Coaching de Groupe', price: 997, category: 'high', description: '12 semaines intensives de transformation', status: 'concept', type: 'service', isPublished: false },
     { id: '5', title: 'Mentorat Privé', price: 2500, category: 'premium', description: 'Accompagnement VIP 1-on-1', status: 'active', type: 'service', isPublished: false },
@@ -238,11 +252,15 @@ const App = () => {
   const [mediaLibrary, setMediaLibrary] = useState<string[]>([]);
   const [visitorCount] = useState(0); // now driven by AdminDashboard's own Firestore sub
   const [showVisitorCount, setShowVisitorCount] = useState(true);
+  const [sphereImageScale, setSphereImageScale] = useState(0.42);
+  const [sphereGalleryImages, setSphereGalleryImages] = useState<{ id: string; url: string; alt: string }[]>([]);
+  const [vis, setVis] = useState<VisibilitySettings>(DEFAULT_VIS);
   const [conferences, setConferences] = useState<Conference[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [siteContent, setSiteContent] = useState<SiteContent>({});
+  const [firestoreBooks, setFirestoreBooks] = useState<Book[]>([]);
 
   const addToCart = (book: Book) => {
     setCartItems(prev => {
@@ -277,7 +295,8 @@ const App = () => {
   useEffect(() => {
     return onAuthStateChanged(auth, user => {
       setIsAuthenticated(!!user);
-      setIsAdmin(!!user && (user.email?.endsWith('@admin.local') ?? false));
+      const ADMIN_EMAILS = ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com'];
+      setIsAdmin(!!user && (!!user.email && (ADMIN_EMAILS.includes(user.email) || user.email.endsWith('@admin.local'))));
     });
   }, []);
 
@@ -293,10 +312,21 @@ const App = () => {
         if (s.mediaLibrary) setMediaLibrary(s.mediaLibrary);
         if (s.profileImage) setProfileImage(s.profileImage);
         if (s.showVisitorCount !== undefined) setShowVisitorCount(s.showVisitorCount);
+        if (s.sphereImageScale !== undefined) setSphereImageScale(s.sphereImageScale);
+        if (s.sphereGalleryImages) setSphereGalleryImages(s.sphereGalleryImages);
+        setVis(prev => {
+          const next = { ...prev };
+          VIS_KEYS.forEach(k => {
+            const v = (s as Record<string, unknown>)[k];
+            if (v !== undefined) (next as Record<string, boolean>)[k] = v as boolean;
+          });
+          return next;
+        });
       }),
       subscribeToSiteContent(setSiteContent),
+      subscribeToBooks(setFirestoreBooks),
     ];
-    seedIfEmpty(blogPosts);
+    seedIfEmpty(blogPosts, books);
     return () => unsubs.forEach(u => u());
   }, []);
 
@@ -378,6 +408,29 @@ const App = () => {
     saveSettings({ showVisitorCount: show });
   }, []);
 
+  const handleSetVis = useCallback((key: keyof VisibilitySettings, value: boolean) => {
+    setVis(prev => ({ ...prev, [key]: value }));
+    saveSettings({ [key]: value } as Record<string, boolean>);
+  }, []);
+
+  const handleSetSphereImageScale = useCallback((scale: number) => {
+    setSphereImageScale(scale);
+    saveSettings({ sphereImageScale: scale });
+  }, []);
+
+  const handleSetSphereGalleryImages = useCallback((imgs: { id: string; url: string; alt: string }[]) => {
+    setSphereGalleryImages(imgs);
+    saveSettings({ sphereGalleryImages: imgs });
+  }, []);
+
+  const handleSaveBook = useCallback((book: Book) => {
+    saveBook(book);
+  }, []);
+
+  const handleDeleteBook = useCallback((id: string) => {
+    deleteBook(id);
+  }, []);
+
   return (
     <HelmetProvider>
       {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
@@ -406,13 +459,17 @@ const App = () => {
                   <Route path="studio" element={<AdminSocialStudio mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} />} />
                   <Route path="contenu" element={<AdminBlog posts={posts} setPosts={handleSetPosts} mediaLibrary={mediaLibrary} />} />
                   <Route path="evenements" element={<AdminEvents events={events} setEvents={handleSetEvents} mediaLibrary={mediaLibrary} />} />
-                  <Route path="medias" element={<AdminMedia profileImage={profileImage} setProfileImage={handleSetProfileImage} mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} />} />
-                  <Route path="produits" element={<AdminInventory />} />
+                  <Route path="medias" element={<AdminMedia profileImage={profileImage} setProfileImage={handleSetProfileImage} mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} sphereGalleryImages={sphereGalleryImages} onSetSphereGalleryImages={handleSetSphereGalleryImages} />} />
+                  <Route path="produits" element={<AdminInventory books={firestoreBooks} onSave={handleSaveBook} onDelete={handleDeleteBook} mediaLibrary={mediaLibrary} />} />
+                  <Route path="codes-promo" element={<AdminPromoCodes />} />
+                  <Route path="temoignages" element={<AdminTestimonials />} />
+                  <Route path="lead-magnet" element={<AdminLeadMagnet />} />
                   <Route path="conferences" element={<AdminConferences conferences={conferences} setConferences={handleSetConferences} mediaLibrary={mediaLibrary} />} />
                   <Route path="interviews" element={<AdminInterviews interviews={interviews} setInterviews={handleSetInterviews} />} />
                   <Route path="kanban" element={<AdminKanban />} />
                   <Route path="communaute" element={<AdminCommunaute />} />
-                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} events={events} conferences={conferences} interviews={interviews} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
+                  <Route path="visibilite" element={<AdminVisibilite vis={vis} onSetVis={handleSetVis} sphereImageScale={sphereImageScale} onSetSphereImageScale={handleSetSphereImageScale} />} />
+                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} events={events} conferences={conferences} interviews={interviews} books={firestoreBooks} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
                   <Route path="*" element={<div className="text-center p-12 text-slate-500">Section en développement...</div>} />
                 </Routes>
               </AdminLayout>
@@ -424,7 +481,7 @@ const App = () => {
           {/* Public Routes */}
           <Route path="*" element={
             <div className="relative min-h-screen text-white">
-              <Navigation cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} />
+              <Navigation cartCount={cartCount} onOpenCart={() => setIsCartOpen(true)} vis={vis} />
               <CartDrawer 
                 isOpen={isCartOpen} 
                 onClose={() => setIsCartOpen(false)} 
@@ -433,89 +490,46 @@ const App = () => {
                 onRemoveItem={removeItem}
               />
               <Routes>
-                <Route path="/" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Accueil</title>
-                      <meta name="description" content="Bienvenue dans l'univers de Caroline Gérard et William Lorrain." />
-                    </Helmet>
-                    <HomePage profileImage={profileImage} />
-                  </>
-                } />
+                <Route path="/" element={<HomePage profileImage={profileImage} vis={vis} sphereImageScale={sphereImageScale} sphereGalleryImages={sphereGalleryImages.length > 0 ? sphereGalleryImages : undefined} />} />
                 <Route path="/a-propos" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | À Propos</title>
-                      <meta name="description" content="Découvrez l'histoire de Caroline Gérard et de son fils William Lorrain." />
-                    </Helmet>
-                    <AProposPage />
-                  </>
+                  vis.hidePageAPropos ? <Navigate to="/" replace /> : <AProposPage vis={vis} />
                 } />
                 <Route path="/boutique" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Boutique</title>
-                      <meta name="description" content="Découvrez nos livres et laissez-vous emporter par la magie des mots." />
-                    </Helmet>
-                    <ShopPage addToCart={addToCart} />
-                  </>
+                  vis.hidePageBoutique ? <Navigate to="/" replace /> : <ShopPage books={firestoreBooks} addToCart={addToCart} />
                 } />
                 <Route path="/checkout" element={
                   <>
                     <Helmet>
                       <title>Caroline Gérard | Caisse</title>
+                      <meta name="robots" content="noindex, nofollow" />
                     </Helmet>
                     <CheckoutPage cartItems={cartItems} total={cartTotal} onOrderComplete={() => setCartItems([])} />
                   </>
                 } />
                 <Route path="/blog" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Blog</title>
-                    </Helmet>
-                    <BlogPage posts={posts} />
-                  </>
+                  vis.hidePageBlog ? <Navigate to="/" replace /> : <BlogPage posts={posts} />
                 } />
                 <Route path="/evenements" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Événements</title>
-                    </Helmet>
-                    <EventsPage events={events} />
-                  </>
+                  vis.hidePageEvenements ? <Navigate to="/" replace /> : <EventsPage events={events} />
                 } />
                 <Route path="/conferences" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Conférences</title>
-                    </Helmet>
-                    <ConferencesPage conferences={conferences} />
-                  </>
+                  vis.hideConferences ? <Navigate to="/" replace /> : <ConferencesPage conferences={conferences} />
                 } />
                 <Route path="/interviews" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Interviews & Médias</title>
-                    </Helmet>
-                    <InterviewsPage interviews={interviews} />
-                  </>
+                  vis.hidePageInterviews ? <Navigate to="/" replace /> : <InterviewsPage interviews={interviews} />
                 } />
                 <Route path="/contact" element={
-                  <>
-                    <Helmet>
-                      <title>Caroline Gérard | Contact</title>
-                    </Helmet>
-                    <ContactPage />
-                  </>
+                  vis.hidePageContact ? <Navigate to="/" replace /> : <ContactPage vis={vis} />
                 } />
                 <Route path="/communaute" element={
+                  vis.hideEspaceClient ? <Navigate to="/" replace /> :
                   <CommunautePage posts={posts} events={events} conferences={conferences} />
                 } />
                 <Route path="/conditions" element={<TermsPage />} />
                 {/* Fallback to Home if unknown route in public section */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-              <Footer visitorCount={visitorCount} showVisitorCount={showVisitorCount} />
+              <Footer visitorCount={visitorCount} showVisitorCount={showVisitorCount} vis={vis} />
               <CookieBanner />
             </div>
           } />

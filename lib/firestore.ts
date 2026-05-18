@@ -14,7 +14,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage } from '../types';
+import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial } from '../types';
 
 // --- Generic helper ---
 
@@ -23,6 +23,34 @@ function subscribeToCollection<T>(name: string, cb: (items: T[]) => void) {
     cb(snap.docs.map(d => d.data() as T));
   });
 }
+
+// --- Books ---
+
+export const subscribeToBooks = (cb: (books: Book[]) => void) =>
+  subscribeToCollection<Book>('books', cb);
+
+export const saveBook = (book: Book) =>
+  setDoc(doc(db, 'books', book.id), book);
+
+export const deleteBook = (id: string) =>
+  deleteDoc(doc(db, 'books', id));
+
+// --- Promo Codes ---
+
+export const subscribeToPromoCodes = (cb: (codes: PromoCode[]) => void) =>
+  subscribeToCollection<PromoCode>('promoCodes', cb);
+
+export const savePromoCode = (code: PromoCode) =>
+  setDoc(doc(db, 'promoCodes', code.id), code);
+
+export const deletePromoCode = (id: string) =>
+  deleteDoc(doc(db, 'promoCodes', id));
+
+export const getPromoCode = (code: string) =>
+  getDoc(doc(db, 'promoCodes', code.toUpperCase().trim()));
+
+export const incrementPromoUse = (id: string) =>
+  updateDoc(doc(db, 'promoCodes', id), { usedCount: increment(1) });
 
 // --- Blog Posts ---
 
@@ -68,13 +96,30 @@ export const saveInterview = (interview: Interview) =>
 export const deleteInterview = (id: string) =>
   deleteDoc(doc(db, 'interviews', id));
 
-// --- Leads ---
+// --- Leads (CRM — formulaire de contact, demandes de conférence) ---
 
 export const subscribeToLeads = (cb: (leads: Lead[]) => void) =>
   subscribeToCollection<Lead>('leads', cb);
 
 export const saveLead = (lead: Lead) =>
   setDoc(doc(db, 'leads', lead.id), lead);
+
+export const markLeadRead = (id: string, isRead = true) =>
+  updateDoc(doc(db, 'leads', id), { isRead });
+
+export const archiveLead = (id: string, archived = true) =>
+  updateDoc(doc(db, 'leads', id), { archived });
+
+export const deleteLead = (id: string) =>
+  deleteDoc(doc(db, 'leads', id));
+
+// --- Email log (audit trail of all outbound mail from Cloud Functions) ---
+
+export const subscribeToEmailLog = (cb: (entries: EmailLog[]) => void) =>
+  subscribeToCollection<EmailLog>('emailLog', cb);
+
+export const deleteEmailLogEntry = (id: string) =>
+  deleteDoc(doc(db, 'emailLog', id));
 
 // --- Kanban ---
 
@@ -183,11 +228,70 @@ export const saveSiteContent = (content: SiteContent) =>
 
 // --- Site Settings ---
 
+export type VisibilitySettings = {
+  // Pages (hides nav link + redirects route when true)
+  hideConferences: boolean;
+  hideEspaceClient: boolean;
+  hidePageAPropos: boolean;
+  hidePageBoutique: boolean;
+  hidePageEvenements: boolean;
+  hidePageInterviews: boolean;
+  hidePageBlog: boolean;
+  hidePageContact: boolean;
+  // Sections — Accueil
+  hideHomeHero: boolean;
+  hideHomeMission: boolean;
+  hideHomeGallery: boolean;
+  hideHomeNewsletter: boolean;
+  hideHomeLireLeBlog: boolean;
+  // Sections — Contact
+  hideContactForm: boolean;
+  // Sections — À Propos
+  hideAProposCaroline: boolean;
+  hideAProposWilliam: boolean;
+  hideAProposNewsletter: boolean;
+  // Éléments communs
+  hideFooterNewsletter: boolean;
+  hideMemberCta: boolean;
+};
+
+export const DEFAULT_VIS: VisibilitySettings = {
+  hideConferences: false,
+  hideEspaceClient: false,
+  hidePageAPropos: false,
+  hidePageBoutique: false,
+  hidePageEvenements: false,
+  hidePageInterviews: false,
+  hidePageBlog: false,
+  hidePageContact: false,
+  hideHomeHero: false,
+  hideHomeMission: false,
+  hideHomeGallery: false,
+  hideHomeNewsletter: false,
+  hideHomeLireLeBlog: false,
+  hideContactForm: false,
+  hideAProposCaroline: false,
+  hideAProposWilliam: false,
+  hideAProposNewsletter: false,
+  hideFooterNewsletter: false,
+  hideMemberCta: false,
+};
+
+export const VIS_KEYS = Object.keys(DEFAULT_VIS) as (keyof VisibilitySettings)[];
+
 export type SiteSettings = {
   mediaLibrary?: string[];
   profileImage?: string;
   showVisitorCount?: boolean;
-};
+  leadMagnetEnabled?: boolean;
+  leadMagnetUrl?: string;
+  leadMagnetName?: string;
+  leadMagnetDescription?: string;
+  /** Scale factor for sphere gallery images. Default 0.28. Range 0.10–0.90. */
+  sphereImageScale?: number;
+  /** Photos displayed in the homepage sphere gallery. */
+  sphereGalleryImages?: { id: string; url: string; alt: string; description?: string; showDescription?: boolean }[];
+} & { [K in keyof VisibilitySettings]?: boolean };
 
 const settingsRef = () => doc(db, 'settings', 'main');
 
@@ -246,6 +350,20 @@ export const markMessageRead = (id: string) =>
 export const deleteCommunityMessage = (id: string) =>
   deleteDoc(doc(db, 'communityMessages', id));
 
+// --- Testimonials ---
+
+export const subscribeToTestimonials = (cb: (items: Testimonial[]) => void) =>
+  subscribeToCollection<Testimonial>('testimonials', cb);
+
+export const saveTestimonial = (t: Testimonial) =>
+  setDoc(doc(db, 'testimonials', t.id), t);
+
+export const deleteTestimonial = (id: string) =>
+  deleteDoc(doc(db, 'testimonials', id));
+
+export const toggleTestimonialPublished = (id: string, isPublished: boolean) =>
+  updateDoc(doc(db, 'testimonials', id), { isPublished });
+
 // --- Initial seed ---
 
 const DEFAULT_MEDIA = [
@@ -258,11 +376,18 @@ const DEFAULT_MEDIA = [
 const DEFAULT_PROFILE_IMAGE =
   'https://storage.googleapis.com/salondesinconnus/Caroline/Gemini_Generated_Image_8wrovw8wrovw8wro.png';
 
-export async function seedIfEmpty(initialPosts: BlogPost[]) {
+export async function seedIfEmpty(initialPosts: BlogPost[], initialBooks: Book[]) {
   const postsSnap = await getDocs(collection(db, 'posts'));
   if (postsSnap.empty && initialPosts.length > 0) {
     const batch = writeBatch(db);
     initialPosts.forEach(post => batch.set(doc(db, 'posts', post.id), post));
+    await batch.commit();
+  }
+
+  const booksSnap = await getDocs(collection(db, 'books'));
+  if (booksSnap.empty && initialBooks.length > 0) {
+    const batch = writeBatch(db);
+    initialBooks.forEach(book => batch.set(doc(db, 'books', book.id), book));
     await batch.commit();
   }
 
