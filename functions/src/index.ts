@@ -5,7 +5,7 @@ import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { SquareClient, SquareEnvironment } from 'square';
 import * as nodemailer from 'nodemailer';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
 
 initializeApp();
 const db = getFirestore();
@@ -685,6 +685,45 @@ export const sendDirectMessage = onCall(
     }
 
     return { success: true, sent: recipients.length };
+  }
+);
+
+// ── recordVisit callable — IP-unique visitor counter ─────────────────────────
+// Counts each distinct visitor IP only once, so multiple sessions/tabs/refreshes
+// from the same computer no longer inflate the count (closer to Google Analytics'
+// "users"). The raw IP is never stored — only a salted SHA-256 hash — to stay
+// aligned with Loi 25. Returns { counted: true } the first time an IP is seen.
+
+const VISITOR_SALT = 'cg-visitor-v1';
+
+export const recordVisit = onCall(
+  {
+    region: 'northamerica-northeast1',
+    invoker: 'public',
+  },
+  async (request) => {
+    const req = request.rawRequest;
+    const forwarded = (req.headers['x-forwarded-for'] as string | undefined) ?? '';
+    const ip = forwarded.split(',')[0].trim() || req.ip || '';
+    if (!ip) return { counted: false };
+
+    const ipHash = createHash('sha256').update(VISITOR_SALT + ip).digest('hex');
+    const visitorRef = db.collection('uniqueVisitors').doc(ipHash);
+    const analyticsRef = db.collection('settings').doc('analytics');
+    const nowIso = new Date().toISOString();
+
+    const counted = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(visitorRef);
+      if (snap.exists) {
+        tx.update(visitorRef, { lastSeen: nowIso, hits: FieldValue.increment(1) });
+        return false;
+      }
+      tx.set(visitorRef, { firstSeen: nowIso, lastSeen: nowIso, hits: 1 });
+      tx.set(analyticsRef, { uniqueVisitors: FieldValue.increment(1) }, { merge: true });
+      return true;
+    });
+
+    return { counted };
   }
 );
 

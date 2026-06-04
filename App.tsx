@@ -54,7 +54,7 @@ import NewsletterForm from './components/NewsletterForm';
 import CookieBanner from './components/CookieBanner';
 import { SiteContentProvider } from './contexts/SiteContentContext';
 
-import { recentOrders, salesData, blogPosts, books } from './data';
+import { blogPosts, books } from './data';
 import { Book, Order, ProductOffer, CartItem, BlogPost, Conference, Lead, AppEvent, Interview } from './types';
 import {
   subscribeToPosts, savePost, deletePost,
@@ -66,7 +66,8 @@ import {
   subscribeToSiteContent, saveSiteContent,
   subscribeToBooks, saveBook, deleteBook,
   seedIfEmpty,
-  incrementVisitorCount,
+  recordVisit,
+  subscribeToVisitorCount,
   DEFAULT_VIS, VIS_KEYS,
 } from './lib/firestore';
 import type { SiteContent, VisibilitySettings } from './lib/firestore';
@@ -210,7 +211,7 @@ const Footer = ({ visitorCount, showVisitorCount, vis }: { visitorCount: number,
           {showVisitorCount && (
             <div className="flex items-center gap-2 text-slate-500">
               <Eye size={13} />
-              <span>{visitorCount.toLocaleString('fr-FR')} Visiteurs</span>
+              <span>{visitorCount.toLocaleString('fr-FR')} Visiteurs uniques</span>
             </div>
           )}
           <Link to="/conditions" className="flex items-center gap-1.5 text-slate-500 hover:text-gold transition-colors">
@@ -245,12 +246,9 @@ const App = () => {
     { id: '5', title: 'Mentorat Privé', price: 2500, category: 'premium', description: 'Accompagnement VIP 1-on-1', status: 'active', type: 'service', isPublished: false },
   ]);
 
-  // Admin Dashboard State (mock orders kept only for type-import; real data lives in Firestore)
-  const _unusedOrders = recentOrders; void _unusedOrders;
-  const _unusedSales = salesData; void _unusedSales;
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [mediaLibrary, setMediaLibrary] = useState<string[]>([]);
-  const [visitorCount] = useState(0); // now driven by AdminDashboard's own Firestore sub
+  const [visitorCount, setVisitorCount] = useState(0); // IP-unique tally from Firestore
   const [showVisitorCount, setShowVisitorCount] = useState(true);
   const [sphereImageScale, setSphereImageScale] = useState(0.42);
   const [sphereGalleryImages, setSphereGalleryImages] = useState<{ id: string; url: string; alt: string }[]>([]);
@@ -325,16 +323,18 @@ const App = () => {
       }),
       subscribeToSiteContent(setSiteContent),
       subscribeToBooks(setFirestoreBooks),
+      subscribeToVisitorCount(setVisitorCount),
     ];
     seedIfEmpty(blogPosts, books);
     return () => unsubs.forEach(u => u());
   }, []);
 
-  // Increment visitor counter once per browser session
+  // Record the visit once per browser session; the server dedupes by hashed IP
+  // so multiple sessions from the same computer are only counted once.
   useEffect(() => {
     if (!sessionStorage.getItem('_cg_visited')) {
       sessionStorage.setItem('_cg_visited', '1');
-      incrementVisitorCount();
+      recordVisit();
     }
   }, []);
 

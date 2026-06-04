@@ -1,4 +1,4 @@
-import { Book, Order, BlogPost, SaleStats, Event, MediaItem } from './types';
+import { Book, BlogPost, Event } from './types';
 
 export const books: Book[] = [
   {
@@ -21,12 +21,6 @@ export const books: Book[] = [
     color: '#1e293b',
     comingSoon: true,
   }
-];
-
-export const recentOrders: Order[] = [
-  { id: 'CMD-001', customerName: 'Sophie Martin', email: 'sophie@example.com', address: '123 Rue des Érables, Montréal', date: '2023-10-01', total: 35.59, subtotal: 24.95, delivery: 6.00, tps: 1.55, tvq: 3.09, status: 'Payé', items: [{ title: 'William et les univers invisibles', price: 24.95, quantity: 1 }] },
-  { id: 'CMD-002', customerName: 'Marc Tremblay', email: 'marc@example.com', address: '456 Boul. St-Laurent, Québec', date: '2023-10-02', total: 63.37, subtotal: 49.90, delivery: 6.00, tps: 2.80, tvq: 4.67, status: 'Envoyé', items: [{ title: 'William et les univers invisibles', price: 24.95, quantity: 2 }] },
-  { id: 'CMD-003', customerName: 'Isabelle Roy', email: 'isa@example.com', address: '789 Av. Cartier, Gatineau', date: '2023-10-03', total: 35.59, subtotal: 24.95, delivery: 6.00, tps: 1.55, tvq: 3.09, status: 'En attente', items: [{ title: 'William et les univers invisibles', price: 24.95, quantity: 1 }] },
 ];
 
 export const blogPosts: BlogPost[] = [
@@ -54,17 +48,3 @@ export const events: Event[] = [
   }
 ];
 
-export const salesData: SaleStats[] = [
-  { month: 'Juin', sales: 450, tps: 22.50, tvq: 44.89 },
-  { month: 'Juil', sales: 620, tps: 31.00, tvq: 61.85 },
-  { month: 'Août', sales: 800, tps: 40.00, tvq: 79.80 },
-  { month: 'Sept', sales: 1200, tps: 60.00, tvq: 119.70 },
-  { month: 'Oct', sales: 950, tps: 47.50, tvq: 94.76 },
-];
-
-export const mediaItems: MediaItem[] = [
-  { id: '1', url: 'https://picsum.photos/200/200?random=20', name: 'Couverture Livre', type: 'image' },
-  { id: '2', url: 'https://picsum.photos/200/200?random=21', name: 'Photo William', type: 'image' },
-  { id: '3', url: 'https://picsum.photos/200/200?random=22', name: 'Lancement', type: 'image' },
-  { id: '4', url: 'https://picsum.photos/200/200?random=23', name: 'Atelier', type: 'image' },
-];

@@ -13,7 +13,8 @@ import {
   orderBy,
   updateDoc,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../firebase';
 import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial } from '../types';
 
 // --- Generic helper ---
@@ -194,14 +195,21 @@ export const saveAbandonedCheckout = (checkout: AbandonedCheckout) =>
 export const deleteAbandonedCheckout = (id: string) =>
   deleteDoc(doc(db, 'abandonedCheckouts', id));
 
-// --- Visitor Counter ---
+// --- Visitor Counter (IP-unique, deduped server-side by the recordVisit fn) ---
 
-export const incrementVisitorCount = () =>
-  setDoc(doc(db, 'settings', 'analytics'), { visitors: increment(1) }, { merge: true });
+const recordVisitFn = httpsCallable(functions, 'recordVisit');
+
+// Pings the server once; the function dedupes by hashed IP so the same computer
+// is only ever counted once. Failures are swallowed — a visit counter must never
+// break the page.
+export const recordVisit = (): Promise<unknown> =>
+  recordVisitFn().catch(() => null);
 
 export const subscribeToVisitorCount = (cb: (count: number) => void) =>
   onSnapshot(doc(db, 'settings', 'analytics'), snap => {
-    cb(snap.exists() ? (snap.data().visitors ?? 0) : 0);
+    const data = snap.exists() ? snap.data() : {};
+    // Prefer the new IP-unique tally; fall back to the legacy raw counter.
+    cb((data.uniqueVisitors ?? data.visitors ?? 0) as number);
   });
 
 // --- Orders ---

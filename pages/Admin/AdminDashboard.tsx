@@ -182,7 +182,7 @@ const AdminDashboard = ({
         <div className="bg-midnight/60 backdrop-blur-md p-4 md:p-6 rounded-xl shadow-lg border border-white/10 col-span-2 md:col-span-2">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Visiteurs Totaux</p>
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Visiteurs uniques</p>
               <h3 className="text-2xl font-bold text-white mt-1">{visitorCount.toLocaleString('fr-FR')}</h3>
             </div>
             <div className="p-3 bg-white/5 rounded-xl">

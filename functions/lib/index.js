@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendDirectMessage = exports.sendContactForm = exports.onConferencePublished = exports.onSubscriberCreated = exports.sendNewsletter = exports.processCheckout = void 0;
+exports.recordVisit = exports.sendDirectMessage = exports.sendContactForm = exports.onConferencePublished = exports.onSubscriberCreated = exports.sendNewsletter = exports.processCheckout = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const params_1 = require("firebase-functions/params");
@@ -536,6 +536,37 @@ exports.sendDirectMessage = (0, https_1.onCall)({
         }
     }
     return { success: true, sent: recipients.length };
+});
+// ── recordVisit callable — IP-unique visitor counter ─────────────────────────
+// Counts each distinct visitor IP only once, so multiple sessions/tabs/refreshes
+// from the same computer no longer inflate the count (closer to Google Analytics'
+// "users"). The raw IP is never stored — only a salted SHA-256 hash — to stay
+// aligned with Loi 25. Returns { counted: true } the first time an IP is seen.
+const VISITOR_SALT = 'cg-visitor-v1';
+exports.recordVisit = (0, https_1.onCall)({
+    region: 'northamerica-northeast1',
+    invoker: 'public',
+}, async (request) => {
+    const req = request.rawRequest;
+    const forwarded = req.headers['x-forwarded-for'] ?? '';
+    const ip = forwarded.split(',')[0].trim() || req.ip || '';
+    if (!ip)
+        return { counted: false };
+    const ipHash = (0, crypto_1.createHash)('sha256').update(VISITOR_SALT + ip).digest('hex');
+    const visitorRef = db.collection('uniqueVisitors').doc(ipHash);
+    const analyticsRef = db.collection('settings').doc('analytics');
+    const nowIso = new Date().toISOString();
+    const counted = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(visitorRef);
+        if (snap.exists) {
+            tx.update(visitorRef, { lastSeen: nowIso, hits: firestore_2.FieldValue.increment(1) });
+            return false;
+        }
+        tx.set(visitorRef, { firstSeen: nowIso, lastSeen: nowIso, hits: 1 });
+        tx.set(analyticsRef, { uniqueVisitors: firestore_2.FieldValue.increment(1) }, { merge: true });
+        return true;
+    });
+    return { counted };
 });
 function buildAdminNotificationHtml(order, items) {
     const o = order;
