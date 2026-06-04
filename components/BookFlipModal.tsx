@@ -135,7 +135,10 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
         <X size={22} />
       </button>
 
-      <div className="absolute top-5 left-1/2 -translate-x-1/2 text-center text-white/60 text-[10px] md:text-xs uppercase tracking-widest pointer-events-none px-12">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="absolute top-5 left-1/2 -translate-x-1/2 text-center text-white/60 text-[10px] md:text-xs uppercase tracking-widest px-12 cursor-default select-none"
+      >
         Tourne les pages — clique ou glisse les coins
       </div>
 

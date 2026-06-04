@@ -20,7 +20,13 @@ const TestimonialsSection: React.FC<Props> = ({ page }) => {
       setTestimonials(
         all
           .filter(t => t.page === page && t.isPublished)
-          .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+          .sort((a, b) => {
+            const ao = a.order, bo = b.order;
+            if (ao != null && bo != null) return ao - bo;
+            if (ao != null) return -1;
+            if (bo != null) return 1;
+            return b.createdAt.localeCompare(a.createdAt);
+          })
       );
     });
   }, [page]);

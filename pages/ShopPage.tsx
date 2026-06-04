@@ -39,17 +39,17 @@ const BookInfo: React.FC<{ book: Book }> = ({ book }) => {
   const [open, setOpen] = useState(false);
 
   const rows: [string, string][] = [
-    book.format       ? ['Format',                book.format]               : null,
-    book.pageCount    ? ['Pages',                 String(book.pageCount)]    : null,
-    book.redaction    ? ['Rédaction',             book.redaction]            : null,
-    book.direction    ? ['Idéation et direction', book.direction]            : null,
-    book.coordination ? ['Coordination',          book.coordination]         : null,
-    book.revision     ? ['Révision',              book.revision]             : null,
-    book.coverDesign  ? ['Couverture',            book.coverDesign]          : null,
-    book.layout       ? ['Mise en page',          book.layout]               : null,
-    book.isbnPrint    ? ['ISBN (imprimé)',         book.isbnPrint]            : null,
-    book.isbnPdf      ? ['ISBN (PDF)',             book.isbnPdf]              : null,
-    book.isbnEpub     ? ['ISBN (ePUB)',            book.isbnEpub]             : null,
+    book.format       ? ['Format',                  book.format]               : null,
+    book.pageCount    ? ['Pages',                   String(book.pageCount)]    : null,
+    book.redaction    ? ['Rédaction',               book.redaction]            : null,
+    book.coordination ? ['Accompagnement littéraire', book.coordination]       : null,
+    book.direction    ? ['Édition',                 book.direction]            : null,
+    book.revision     ? ['Révision',                book.revision]             : null,
+    book.coverDesign  ? ['Couverture',              book.coverDesign]          : null,
+    book.layout       ? ['Mise en page',            book.layout]               : null,
+    book.isbnPrint    ? ['ISBN (imprimé)',           book.isbnPrint]            : null,
+    book.isbnPdf      ? ['ISBN (PDF)',               book.isbnPdf]              : null,
+    book.isbnEpub     ? ['ISBN (ePUB)',              book.isbnEpub]             : null,
   ].filter(Boolean) as [string, string][];
 
   if (rows.length === 0) return null;
@@ -191,7 +191,8 @@ const BookCard: React.FC<{
           </div>
         ) : (
           /* Always Book3D — coming-soon books use their image as cover, same model */
-          <Book3D book={book} onToggle={book.comingSoon ? undefined : () => onFlip(book.id)} />
+          /* Locked books (default; isLocked !== false) get no onToggle, so clicks don't open the flip modal. */
+          <Book3D book={book} onToggle={book.comingSoon || book.isLocked !== false ? undefined : () => onFlip(book.id)} />
         )}
       </div>
 

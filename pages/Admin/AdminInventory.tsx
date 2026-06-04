@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Edit3, Trash2, Eye, EyeOff, X, Check, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, EyeOff, X, Check, ArrowLeft, ArrowRight, Lock, Unlock } from 'lucide-react';
 import { Book } from '../../types';
 import { uploadMediaFile } from '../../lib/storage';
 
@@ -22,6 +22,7 @@ const EMPTY_FORM: Omit<Book, 'id'> = {
   comingSoon: false,
   isHidden: false,
   wrapped: false,
+  isLocked: true,
   // metadata
   format: '',
   pageCount: undefined,
@@ -147,6 +148,12 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
     onSave({ ...book, isHidden: !book.isHidden });
   };
 
+  const toggleLocked = (book: Book) => {
+    // Default-locked semantics: undefined == locked, so first click unlocks.
+    const currentlyLocked = book.isLocked !== false;
+    onSave({ ...book, isLocked: !currentlyLocked });
+  };
+
   const handleDelete = (id: string) => {
     onDelete(id);
     setDeleteConfirm(null);
@@ -202,17 +209,30 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
               {book.subtitle && <p className="text-slate-400 text-xs">{book.subtitle}</p>}
               <p className="text-slate-500 text-xs line-clamp-2 pt-1">{book.description}</p>
             </div>
-            <div className="px-4 pb-4 flex items-center justify-between border-t border-white/5 pt-3 mt-1">
-              <button
-                onClick={() => toggleHidden(book)}
-                className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
-                  book.isHidden
-                    ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {book.isHidden ? <><Eye size={13} /> Afficher</> : <><EyeOff size={13} /> Masquer</>}
-              </button>
+            <div className="px-4 pb-4 flex items-center justify-between gap-2 border-t border-white/5 pt-3 mt-1 flex-wrap">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => toggleHidden(book)}
+                  className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                    book.isHidden
+                      ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                      : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {book.isHidden ? <><Eye size={13} /> Afficher</> : <><EyeOff size={13} /> Masquer</>}
+                </button>
+                <button
+                  onClick={() => toggleLocked(book)}
+                  title={book.isLocked !== false ? 'Le livre est verrouillé — cliquer pour déverrouiller' : 'Le livre est déverrouillé — cliquer pour verrouiller'}
+                  className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                    book.isLocked !== false
+                      ? 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20'
+                      : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                  }`}
+                >
+                  {book.isLocked !== false ? <><Lock size={13} /> Verrouillé</> : <><Unlock size={13} /> Ouvrable</>}
+                </button>
+              </div>
               <div className="flex gap-2">
                 <button onClick={() => openEdit(book)} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors">
                   <Edit3 size={15} />
@@ -431,6 +451,14 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
                     onChange={handleChange} className="w-4 h-4 accent-gold" />
                   Masqué dans la boutique
                 </label>
+                <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+                  <input type="checkbox" name="isLocked" checked={formData.isLocked !== false}
+                    onChange={handleChange} className="w-4 h-4 accent-gold" />
+                  <span>
+                    <Lock size={13} className="inline mr-1 -mt-0.5" />
+                    Verrouillé <span className="text-xs text-slate-500">— désactive l'ouverture du livre feuilletable</span>
+                  </span>
+                </label>
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative">
                     <input type="checkbox" name="wrapped" checked={formData.wrapped ?? false}
@@ -468,13 +496,13 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
                     <input name="redaction" value={formData.redaction ?? ''} onChange={handleChange}
                       placeholder="ex : Collectif d'écriture..." className={inputCls} />
                   </Field>
-                  <Field label="Idéation et direction">
-                    <input name="direction" value={formData.direction ?? ''} onChange={handleChange}
-                      placeholder="ex : Jérémy Parent" className={inputCls} />
-                  </Field>
-                  <Field label="Coordination et accompagnement">
+                  <Field label="Accompagnement littéraire">
                     <input name="coordination" value={formData.coordination ?? ''} onChange={handleChange}
                       placeholder="ex : Julie L'Archer, legardiendephare.com" className={inputCls} />
+                  </Field>
+                  <Field label="Édition">
+                    <input name="direction" value={formData.direction ?? ''} onChange={handleChange}
+                      placeholder="ex : Jérémy Parent" className={inputCls} />
                   </Field>
                   <Field label="Révision">
                     <input name="revision" value={formData.revision ?? ''} onChange={handleChange}

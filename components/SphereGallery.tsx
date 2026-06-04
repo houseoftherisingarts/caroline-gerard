@@ -115,9 +115,12 @@ const Lightbox: React.FC<{ img: SphereImage; onClose: () => void }> = ({ img, on
           padding: 12,
           animation: 'sphSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
           cursor: 'default',
-          display: 'flex',
+          // inline-flex shrinks the card to its widest child (the image),
+          // so the description below inherits exactly the image's rendered width.
+          display: 'inline-flex',
           flexDirection: 'column',
           alignItems: 'center',
+          maxWidth: 'calc(80vw + 24px)',
         }}
       >
         <img
@@ -135,18 +138,22 @@ const Lightbox: React.FC<{ img: SphereImage; onClose: () => void }> = ({ img, on
         {img.showDescription && img.description && (
           <>
             <div style={{
+              alignSelf: 'stretch',
               height: 2,
-              width: '100%',
               background: 'linear-gradient(90deg, transparent, #C8A96E, transparent)',
               marginTop: 10, borderRadius: 1,
             }} />
             <p style={{
-              marginTop: 12,
+              // width:0 + minWidth:100% keeps the paragraph from pushing the card wider
+              // than the image; it still fills the card's actual width.
+              width: 0,
+              minWidth: '100%',
+              boxSizing: 'border-box',
+              margin: '12px 0 0',
               color: 'rgba(200,169,110,0.9)',
               fontSize: 14,
               lineHeight: 1.6,
               textAlign: 'center',
-              width: '100%',
               fontStyle: 'italic',
               letterSpacing: '0.02em',
               overflowWrap: 'break-word',

@@ -23,6 +23,7 @@ export interface Book {
   isbnPdf?: string;      // ISBN PDF
   isbnEpub?: string;     // ISBN ePUB
   wrapped?: boolean;     // show as sealed gift instead of 3D book
+  isLocked?: boolean;    // when true (or undefined), clicking the cover does NOT open the flip modal
 }
 
 export type PromoCode = {
@@ -173,6 +174,7 @@ export type Testimonial = {
   isPublished: boolean;
   createdAt: string;
   email?: string;
+  order?: number; // smaller = earlier; falls back to createdAt desc when absent
 };
 
 export type Member = {

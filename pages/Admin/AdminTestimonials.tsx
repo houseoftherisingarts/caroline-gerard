@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Eye, EyeOff, MessageSquareQuote, BookOpen, User } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, MessageSquareQuote, BookOpen, User, ArrowUp, ArrowDown, Edit3 } from 'lucide-react';
 import { subscribeToTestimonials, saveTestimonial, deleteTestimonial, toggleTestimonialPublished } from '../../lib/firestore';
 import { Testimonial } from '../../types';
 
@@ -10,8 +10,9 @@ const AdminTestimonials = () => {
   const [filter, setFilter] = useState<PageFilter>('all');
   const [showForm, setShowForm] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // New testimonial form state
+  // Form state (reused for new + edit)
   const [newQuote, setNewQuote] = useState('');
   const [newSignature, setNewSignature] = useState('');
   const [newPage, setNewPage] = useState<'boutique' | 'apropos'>('boutique');
@@ -20,31 +21,65 @@ const AdminTestimonials = () => {
 
   useEffect(() => {
     return subscribeToTestimonials(all => {
-      setTestimonials(all.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+      setTestimonials(all.sort((a, b) => {
+        const ao = a.order, bo = b.order;
+        if (ao != null && bo != null) return ao - bo;
+        if (ao != null) return -1;
+        if (bo != null) return 1;
+        return b.createdAt.localeCompare(a.createdAt);
+      }));
     });
   }, []);
 
   const filtered = filter === 'all' ? testimonials : testimonials.filter(t => t.page === filter);
+
+  const resetForm = () => {
+    setNewQuote('');
+    setNewSignature('');
+    setNewPage('boutique');
+    setNewPublished(true);
+    setEditingId(null);
+  };
+
+  const openEdit = (t: Testimonial) => {
+    setEditingId(t.id);
+    setNewQuote(t.quote);
+    setNewSignature(t.signature);
+    setNewPage(t.page);
+    setNewPublished(t.isPublished);
+    setShowForm(true);
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newQuote.trim() || !newSignature.trim()) return;
     setSaving(true);
     try {
-      const id = `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-      await saveTestimonial({
-        id,
-        quote: newQuote.trim(),
-        signature: newSignature.trim(),
-        page: newPage,
-        type: 'admin',
-        isPublished: newPublished,
-        createdAt: new Date().toISOString(),
-      });
-      setNewQuote('');
-      setNewSignature('');
-      setNewPage('boutique');
-      setNewPublished(true);
+      if (editingId) {
+        const existing = testimonials.find(t => t.id === editingId);
+        if (existing) {
+          await saveTestimonial({
+            ...existing,
+            quote: newQuote.trim(),
+            signature: newSignature.trim(),
+            page: newPage,
+            isPublished: newPublished,
+          });
+        }
+      } else {
+        const id = `t_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+        await saveTestimonial({
+          id,
+          quote: newQuote.trim(),
+          signature: newSignature.trim(),
+          page: newPage,
+          type: 'admin',
+          isPublished: newPublished,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      resetForm();
       setShowForm(false);
     } finally {
       setSaving(false);
@@ -60,6 +95,21 @@ const AdminTestimonials = () => {
     await toggleTestimonialPublished(t.id, !t.isPublished);
   };
 
+  // Swap order with the adjacent testimonial in the current filtered view.
+  // If either is missing an `order`, assign one based on current visible position.
+  const move = async (t: Testimonial, dir: -1 | 1) => {
+    const i = filtered.findIndex(x => x.id === t.id);
+    const j = i + dir;
+    if (j < 0 || j >= filtered.length) return;
+    const a = filtered[i], b = filtered[j];
+    const ao = a.order ?? i;
+    const bo = b.order ?? j;
+    await Promise.all([
+      saveTestimonial({ ...a, order: bo }),
+      saveTestimonial({ ...b, order: ao }),
+    ]);
+  };
+
   return (
     <div className="max-w-4xl animate-fade-in">
 
@@ -72,7 +122,15 @@ const AdminTestimonials = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowForm(v => !v)}
+          onClick={() => {
+            if (showForm) {
+              resetForm();
+              setShowForm(false);
+            } else {
+              resetForm();
+              setShowForm(true);
+            }
+          }}
           className="flex items-center gap-2 px-5 py-2.5 bg-gold text-midnight font-bold rounded-xl hover:bg-white transition-colors text-sm"
         >
           <Plus size={16} /> Ajouter une citation
@@ -85,7 +143,9 @@ const AdminTestimonials = () => {
           onSubmit={handleSave}
           className="bg-midnight/60 border border-gold/20 rounded-2xl p-6 mb-8 space-y-4"
         >
-          <h2 className="text-white font-bold text-base mb-2">Nouvelle citation</h2>
+          <h2 className="text-white font-bold text-base mb-2">
+            {editingId ? 'Modifier la citation' : 'Nouvelle citation'}
+          </h2>
           <textarea
             value={newQuote}
             onChange={e => setNewQuote(e.target.value)}
@@ -130,11 +190,11 @@ const AdminTestimonials = () => {
               disabled={saving}
               className="px-6 py-2.5 bg-gold text-midnight font-bold rounded-xl hover:bg-white transition-colors text-sm disabled:opacity-50"
             >
-              {saving ? 'Enregistrement...' : 'Enregistrer'}
+              {saving ? 'Enregistrement...' : editingId ? 'Mettre à jour' : 'Enregistrer'}
             </button>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={() => { resetForm(); setShowForm(false); }}
               className="px-6 py-2.5 bg-white/5 text-slate-300 rounded-xl hover:bg-white/10 transition-colors text-sm"
             >
               Annuler
@@ -168,10 +228,10 @@ const AdminTestimonials = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {filtered.map(t => (
+          {filtered.map((t, idx) => (
             <div
               key={t.id}
-              className={`bg-midnight/60 border rounded-2xl px-6 py-5 transition-colors ${t.isPublished ? 'border-white/10' : 'border-red-500/20'}`}
+              className={`bg-midnight/60 border rounded-2xl px-6 py-5 transition-colors ${editingId === t.id ? 'border-gold/40' : t.isPublished ? 'border-white/10' : 'border-red-500/20'}`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
@@ -208,7 +268,32 @@ const AdminTestimonials = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => move(t, -1)}
+                      disabled={idx === 0}
+                      title="Monter"
+                      className="p-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      onClick={() => move(t, 1)}
+                      disabled={idx === filtered.length - 1}
+                      title="Descendre"
+                      className="p-1 rounded-lg bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => openEdit(t)}
+                    title="Modifier"
+                    className="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-blue-500/10 hover:text-blue-400 transition-colors"
+                  >
+                    <Edit3 size={16} />
+                  </button>
                   <button
                     onClick={() => handleToggle(t)}
                     title={t.isPublished ? 'Masquer' : 'Publier'}
