@@ -61,11 +61,13 @@ function googleCalendarLink(event: AppEvent): string {
 async function ensureMemberSaved(user: User) {
   if (user.email?.endsWith('@admin.local')) return;
   try {
+    // Jamais de champ undefined : Firestore rejette le document au complet,
+    // et les membres « courriel » (sans photo) n'étaient jamais enregistrés.
     await saveMember({
       id: user.uid, uid: user.uid,
       email: user.email ?? '',
       displayName: user.displayName ?? user.email ?? '',
-      photoURL: user.photoURL ?? undefined,
+      ...(user.photoURL ? { photoURL: user.photoURL } : {}),
       provider: user.providerData[0]?.providerId === 'google.com' ? 'google' : 'email',
       joinedAt: new Date().toISOString(),
     });
