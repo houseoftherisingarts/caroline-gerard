@@ -183,7 +183,7 @@ const ArcCard: React.FC<{
       }}
     >
       <img
-        src={img.url}
+        src={thumb(img.url, 600)}
         alt={img.alt}
         draggable={false}
         style={{
