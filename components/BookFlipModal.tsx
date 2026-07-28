@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { X, ShoppingCart } from 'lucide-react';
 import { Book } from '../types';
+import { thumb } from '../lib/img';
 
 interface BookFlipModalProps {
   book: Book;
