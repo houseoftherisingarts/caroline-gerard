@@ -91,7 +91,7 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
         {conferences.filter(c => c.isPublished).map(conference => (
           <div key={conference.id} className="bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden flex flex-col group">
             <div className="aspect-video bg-slate-800 overflow-hidden cursor-pointer" onClick={() => setDetailsModalOpen(conference)}>
-              <img src={conference.image} alt={conference.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <img src={thumb(conference.image, 600)} alt={conference.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
             <div className="p-6 flex flex-col flex-1">
               <h3 className="text-2xl font-serif font-bold text-white mb-3 cursor-pointer" onClick={() => setDetailsModalOpen(conference)}>{conference.title}</h3>
