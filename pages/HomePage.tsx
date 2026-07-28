@@ -191,7 +191,7 @@ const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGal
               </div>
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-white mb-4">
                 <EditableText tag="span" contentKey="home_gallery_title_line1" defaultValue="Quelques " />
-                <EditableText tag="span" contentKey="home_gallery_title_italic" defaultValue="moments précieux" className="italic text-gold" />
+                <EditableText tag="span" contentKey="home_gallery_title_italic" defaultValue="moments précieux" className="text-gold font-medium" />
               </h2>
               <EditableText
                 tag="p"
