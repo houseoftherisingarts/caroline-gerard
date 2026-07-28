@@ -287,7 +287,7 @@ const BookCard: React.FC<{
             </button>
             {showBack && (
               <img
-                src={book.backImage}
+                src={thumb(book.backImage, 800)}
                 alt={backCoverAlt}
                 style={{
                   width: '100%',
