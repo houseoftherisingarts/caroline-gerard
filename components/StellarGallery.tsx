@@ -8,6 +8,7 @@ import * as THREE from 'three'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Html, Sphere } from '@react-three/drei'
 import { X } from 'lucide-react'
+import { thumb } from '../lib/img'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
