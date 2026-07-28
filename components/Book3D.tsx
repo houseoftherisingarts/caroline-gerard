@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import { Book } from '../types';
+import { thumb } from '../lib/img';
 
 // ─── Dimensions ───────────────────────────────────────────────────────────────
 const W = 200;   // cover width  (px) — 200×300 = 2:3 ratio matches 400×600 cover images
