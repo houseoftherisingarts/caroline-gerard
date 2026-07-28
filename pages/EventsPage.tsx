@@ -101,7 +101,7 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
               </div>
               {getFirstImage(event.image, event.content) && (
                 <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
-                  <img src={getFirstImage(event.image, event.content)} alt={event.title} className="w-full h-full object-cover" />
+                  <img src={thumb(getFirstImage(event.image, event.content), 200)} alt={event.title} className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
