@@ -98,7 +98,7 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
     pages.push(
       <Page key="cta">
         <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
-          <p className="font-serif italic text-slate-500 text-sm mb-2">Découvre la suite…</p>
+          <p className="font-serif text-slate-500 text-sm mb-2">Découvre la suite…</p>
           <p className="font-serif text-slate-700 text-base mb-8">Le livre complet t'attend.</p>
           {onAddToCart && !book.comingSoon && book.price > 0 && (
             <button
