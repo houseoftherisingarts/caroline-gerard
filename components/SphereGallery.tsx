@@ -561,7 +561,7 @@ const SphereGallery: React.FC<SphereGalleryProps> = ({
                       }}
                     >
                       <img
-                        src={image.url}
+                        src={thumb(image.url, 400)}
                         alt={image.alt}
                         draggable={false}
                         loading={index < 4 ? 'eager' : 'lazy'}
