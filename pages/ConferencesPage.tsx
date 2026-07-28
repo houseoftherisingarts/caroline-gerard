@@ -8,6 +8,7 @@ import BlockRenderer from '../components/BlockRenderer';
 import { saveLead } from '../lib/firestore';
 import { trackConferenceBooking } from '../lib/analytics';
 import EditableText from '../components/EditableText';
+import { thumb } from '../lib/img';
 
 const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () => void }) => (
   <div className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-end sm:items-center justify-center animate-fade-in" onClick={onClose}>
