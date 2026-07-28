@@ -101,7 +101,7 @@ const Book3D: React.FC<Book3DProps> = ({ book, isOpen, onToggle, onAddToCart }) 
           >
             {/* Cover image */}
             <img
-              src={book.image}
+              src={thumb(book.image, 600)}
               alt={book.title}
               draggable={false}
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
