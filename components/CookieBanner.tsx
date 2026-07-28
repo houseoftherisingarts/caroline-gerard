@@ -48,7 +48,7 @@ const CookieBanner: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[500] p-4 animate-fade-in">
+    <div className="fixed bottom-0 left-0 right-0 z-[45] p-4 animate-fade-in">
       <div className="max-w-5xl mx-auto bg-midnight border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="bg-gold/15 p-2 rounded-xl text-gold shrink-0 mt-0.5">
