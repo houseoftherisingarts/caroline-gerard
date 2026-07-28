@@ -306,7 +306,6 @@ const App = () => {
       subscribeToEvents(setEvents),
       subscribeToConferences(setConferences),
       subscribeToInterviews(setInterviews),
-      subscribeToLeads(setLeads),
       subscribeToSettings(s => {
         if (s.mediaLibrary) setMediaLibrary(s.mediaLibrary);
         if (s.profileImage) setProfileImage(s.profileImage);
