@@ -125,7 +125,7 @@ const Lightbox: React.FC<{ img: SphereImage; onClose: () => void }> = ({ img, on
         }}
       >
         <img
-          src={img.url}
+          src={thumb(img.url, 1600)}
           alt={img.alt}
           style={{
             display: 'block',
