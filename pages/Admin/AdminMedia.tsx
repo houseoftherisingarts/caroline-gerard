@@ -161,7 +161,7 @@ const AdminMedia = ({
           <Globe size={20} className="text-gold" /> Galerie Sphère (Accueil)
         </h3>
         <p className="text-slate-500 text-xs mb-4">
-          Clique sur <span className="text-gold font-bold">⊕</span> sur une image ci-dessous pour l'ajouter à la sphère. {sphereGalleryImages.length === 0 && <span className="italic">Aucune sélection — galerie par défaut affichée.</span>}
+          Clique sur <span className="text-gold font-bold">⊕</span> sur une image ci-dessous pour l'ajouter à la sphère. {sphereGalleryImages.length === 0 && <span className="text-slate-500">Aucune sélection — galerie par défaut affichée.</span>}
         </p>
 
         {sphereGalleryImages.length > 0 && (
