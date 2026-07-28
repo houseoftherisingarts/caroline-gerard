@@ -142,7 +142,7 @@ const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGal
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-600/10 rounded-full blur-[100px]" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-gold/10 rounded-full blur-[60px]" />
             <img
-              src={profileImage}
+              src={thumb(profileImage, 800)}
               alt="Caroline et William"
               className="relative z-10 rounded-[60px] border-4 border-white/10 shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700 w-[75%] object-cover object-top aspect-square"
             />
