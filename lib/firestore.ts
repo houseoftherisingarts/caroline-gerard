@@ -358,6 +358,26 @@ export const markMessageRead = (id: string) =>
 export const deleteCommunityMessage = (id: string) =>
   deleteDoc(doc(db, 'communityMessages', id));
 
+// --- Consignations (dépositaires) ---
+
+export const subscribeToConsignmentLocations = (cb: (items: ConsignmentLocation[]) => void) =>
+  subscribeToCollection<ConsignmentLocation>('consignmentLocations', cb);
+
+export const saveConsignmentLocation = (loc: ConsignmentLocation) =>
+  setDoc(doc(db, 'consignmentLocations', loc.id), loc);
+
+export const deleteConsignmentLocation = (id: string) =>
+  deleteDoc(doc(db, 'consignmentLocations', id));
+
+export const subscribeToConsignmentMovements = (cb: (items: ConsignmentMovement[]) => void) =>
+  subscribeToCollection<ConsignmentMovement>('consignmentMovements', cb);
+
+export const saveConsignmentMovement = (mov: ConsignmentMovement) =>
+  setDoc(doc(db, 'consignmentMovements', mov.id), mov);
+
+export const deleteConsignmentMovement = (id: string) =>
+  deleteDoc(doc(db, 'consignmentMovements', id));
+
 // --- Testimonials ---
 
 export const subscribeToTestimonials = (cb: (items: Testimonial[]) => void) =>
