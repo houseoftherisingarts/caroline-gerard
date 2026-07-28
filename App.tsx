@@ -101,7 +101,7 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
             <QuillIcon className="text-gold w-6 h-6" />
           </div>
           <span className="font-serif text-gold text-lg lg:text-xl tracking-wide whitespace-nowrap">
-            Caroline <span className="italic">Gérard</span>
+            Caroline <span className="font-semibold">Gérard</span>
           </span>
         </Link>
 
