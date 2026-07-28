@@ -477,6 +477,31 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
                     onChange={handleChange} className="w-4 h-4 accent-gold" />
                   À venir (comingSoon)
                 </label>
+                {formData.comingSoon && (
+                  <div className="ml-6 border border-gold/25 bg-gold/5 rounded-xl p-4 space-y-3">
+                    <p className="flex items-center gap-2 text-xs font-bold text-gold uppercase tracking-widest">
+                      <Sparkles size={13} /> Textes de la carte « à venir »
+                    </p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed -mt-1">
+                      Ces textes s'affichent sur la carte du livre dans la boutique. Modifie la date ici si la sortie est repoussée.
+                    </p>
+                    <Field label="Étiquette (ex : Tome 2)">
+                      <input value={comingSoonTexts.tome_label}
+                        onChange={e => setComingSoonTexts(t => ({ ...t, tome_label: e.target.value }))}
+                        className={inputCls} />
+                    </Field>
+                    <Field label="Badge de sortie (ex : À venir début 2027)">
+                      <input value={comingSoonTexts.coming_soon_badge}
+                        onChange={e => setComingSoonTexts(t => ({ ...t, coming_soon_badge: e.target.value }))}
+                        className={inputCls} />
+                    </Field>
+                    <Field label="Petit texte sous le badge">
+                      <input value={comingSoonTexts.coming_soon_sub}
+                        onChange={e => setComingSoonTexts(t => ({ ...t, coming_soon_sub: e.target.value }))}
+                        className={inputCls} />
+                    </Field>
+                  </div>
+                )}
                 <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
                   <input type="checkbox" name="isHidden" checked={formData.isHidden ?? false}
                     onChange={handleChange} className="w-4 h-4 accent-gold" />
