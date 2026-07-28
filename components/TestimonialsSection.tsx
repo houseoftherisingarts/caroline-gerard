@@ -99,7 +99,7 @@ const TestimonialsSection: React.FC<Props> = ({ page }) => {
                 className="bg-midnight/60 backdrop-blur-md border border-gold/15 rounded-2xl px-7 py-8 shadow-lg relative group hover:border-gold/30 transition-colors"
               >
                 <MessageSquareQuote className="w-7 h-7 text-gold/30 absolute top-6 right-6 group-hover:text-gold/50 transition-colors" />
-                <p className="text-slate-200 text-base leading-relaxed italic mb-6 pr-8">
+                <p className="text-slate-200 text-base leading-relaxed mb-6 pr-8">
                   &ldquo;{t.quote}&rdquo;
                 </p>
                 <footer className="flex items-center gap-3">
