@@ -67,7 +67,7 @@ const CookieBanner: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handleDecline}
-            className="flex items-center gap-1.5 px-4 py-2 text-slate-400 hover:text-white border border-white/10 hover:border-white/30 rounded-xl text-sm font-bold transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 min-h-[44px] text-slate-400 hover:text-white border border-white/10 hover:border-white/30 rounded-xl text-sm font-bold transition-colors"
           >
             <X className="w-3.5 h-3.5" /> <EditableText tag="span" contentKey="cookie_banner_decline_btn" defaultValue="Refuser" />
           </button>
