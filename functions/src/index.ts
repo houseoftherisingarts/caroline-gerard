@@ -601,12 +601,11 @@ export const sendContactForm = onCall(
     invoker: 'public',
   },
   async (request) => {
-    const { name, email, subject, message, destination } = request.data as {
+    const { name, email, subject, message } = request.data as {
       name: string;
       email: string;
       subject?: string;
       message: string;
-      destination?: string;
     };
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -615,10 +614,13 @@ export const sendContactForm = onCall(
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new HttpsError('invalid-argument', 'Adresse courriel invalide.');
     }
+    if (name.length > 300 || (subject ?? '').length > 300 || message.length > 10000) {
+      throw new HttpsError('invalid-argument', 'Message trop long.');
+    }
 
-    const safeDest = destination && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destination)
-      ? destination
-      : 'caroline@carolinegerard.ca';
+    // Destination fixe — un paramètre libre ferait du formulaire un relais de
+    // pourriel vers n'importe quelle adresse, au nom de Caroline.
+    const safeDest = 'caroline@carolinegerard.ca';
 
     const user = emailUser.value();
     const pass = emailPass.value();
