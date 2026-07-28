@@ -170,7 +170,7 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
           disableFlipByClick={false}
         >
           <Page cover className="rounded-r-md shadow-2xl">
-            <img src={book.image} alt={book.title} className="w-full h-full object-cover" draggable={false} />
+            <img src={thumb(book.image, 1000)} alt={book.title} className="w-full h-full object-cover" draggable={false} />
           </Page>
 
           {paddedInteriorPages}
