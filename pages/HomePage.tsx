@@ -117,7 +117,7 @@ const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGal
             <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight text-white drop-shadow-2xl">
               <EditableText tag="span" contentKey="home_hero_title_line1" defaultValue="Croire en ses rêves," />
               <br />
-              <EditableText tag="span" contentKey="home_hero_title_italic" defaultValue="un mot à la fois." className="italic text-gold" />
+              <EditableText tag="span" contentKey="home_hero_title_italic" defaultValue="un mot à la fois." className="text-gold font-medium" />
             </h1>
             <EditableText
               tag="p"
