@@ -234,6 +234,11 @@ export const subscribeToSiteContent = (cb: (content: SiteContent) => void) =>
 export const saveSiteContent = (content: SiteContent) =>
   setDoc(siteContentRef(), content);
 
+// Merge a handful of keys without touching the rest of the document —
+// used by admin forms that edit specific texts outside of edit mode.
+export const saveSiteContentKeys = (partial: SiteContent) =>
+  setDoc(siteContentRef(), partial, { merge: true });
+
 // --- Site Settings ---
 
 export type VisibilitySettings = {
