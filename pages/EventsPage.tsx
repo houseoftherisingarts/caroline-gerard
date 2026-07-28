@@ -105,7 +105,7 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
               )}
             </div>
           )) : (
-            <EditableText tag="p" contentKey="events_empty_msg" defaultValue="Aucun événement prévu pour le moment." className="text-center text-slate-500 italic" />
+            <EditableText tag="p" contentKey="events_empty_msg" defaultValue="Aucun événement prévu pour le moment." className="text-center text-slate-500" />
           )}
         </div>
 
