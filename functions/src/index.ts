@@ -684,6 +684,8 @@ export const sendDirectMessage = onCall(
     invoker: 'public',
   },
   async (request) => {
+    assertAdmin(request);
+
     const { recipients, subject, body } = request.data as {
       recipients: string[];
       subject: string;
