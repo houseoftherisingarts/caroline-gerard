@@ -6,6 +6,7 @@ import { MapPin, ExternalLink, X } from 'lucide-react';
 import { AppEvent } from '../types';
 import BlockRenderer from '../components/BlockRenderer';
 import EditableText from '../components/EditableText';
+import { thumb } from '../lib/img';
 
 const getFirstImage = (image: string | undefined, content: string): string => {
   if (image) return image;
