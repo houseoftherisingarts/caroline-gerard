@@ -160,6 +160,13 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
         Object.entries({ ...formData, id: editingBook.id }).filter(([, v]) => v !== undefined)
       ) as Book;
       await onSave(clean);
+      if (formData.comingSoon) {
+        await saveSiteContentKeys({
+          [`book_${editingBook.id}_tome_label`]: comingSoonTexts.tome_label,
+          [`book_${editingBook.id}_coming_soon_badge`]: comingSoonTexts.coming_soon_badge,
+          [`book_${editingBook.id}_coming_soon_sub`]: comingSoonTexts.coming_soon_sub,
+        });
+      }
       setSaved(true);
       setTimeout(() => { setSaved(false); closeModal(); }, 800);
     } catch (err) {
