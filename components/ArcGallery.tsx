@@ -109,7 +109,7 @@ const Lightbox: React.FC<{ img: ArcImage; onClose: () => void }> = ({ img, onClo
         }}
       >
         <img
-          src={img.url}
+          src={thumb(img.url, 1600)}
           alt={img.alt}
           style={{
             display: 'block',
