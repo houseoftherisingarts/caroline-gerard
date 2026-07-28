@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial } from '../types';
+import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement } from '../types';
 
 // --- Generic helper ---
 
