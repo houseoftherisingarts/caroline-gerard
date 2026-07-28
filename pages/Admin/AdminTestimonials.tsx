@@ -251,7 +251,7 @@ const AdminTestimonials = () => {
                   </div>
 
                   {/* Quote */}
-                  <p className="text-slate-200 text-sm leading-relaxed italic mb-3">
+                  <p className="text-slate-200 text-sm leading-relaxed mb-3">
                     &ldquo;{t.quote}&rdquo;
                   </p>
 
