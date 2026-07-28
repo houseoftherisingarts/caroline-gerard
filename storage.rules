@@ -1,9 +1,22 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    // Même liste blanche que firestore.rules : les téléversements viennent
+    // uniquement de l'Espace Auteure (médiathèque, couvertures, blog...).
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid in [
+          'qieZGM8Vnie92DblUtpvi710q3F3',   // Caroline — Espace Auteure
+          'lcfLrSZjcUTxwAgMe8tkCivdXQj1'    // Alex — Vexel
+        ]
+        || (request.auth.token.email in ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com']
+            && request.auth.token.email_verified == true)
+      );
+    }
+
     match /{allPaths=**} {
       allow read;
-      allow write: if request.auth != null;
+      allow write: if isAdmin() && request.resource.size < 50 * 1024 * 1024;
     }
   }
 }
