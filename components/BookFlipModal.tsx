@@ -72,7 +72,7 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
     if (book.pageImages && book.pageImages.length > 0) {
       return book.pageImages.map((url, i) => (
         <Page key={`pg-${i}`}>
-          <img src={url} alt={`Page ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
+          <img src={thumb(url, 1000)} alt={`Page ${i + 1}`} className="w-full h-full object-cover" draggable={false} />
         </Page>
       ));
     }
