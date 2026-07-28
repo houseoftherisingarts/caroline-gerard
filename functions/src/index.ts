@@ -133,13 +133,28 @@ export const processCheckout = onCall(
     invoker: 'public',
   },
   async (request) => {
-    const { sourceId, sessionId, promoCode, cartItems, customer, shipping } = request.data as CheckoutPayload;
+    const { sourceId, sessionId, promoCode, cartItems: requestedItems, customer, shipping } = request.data as CheckoutPayload;
 
-    if (!sourceId || !customer?.email || !cartItems?.length) {
+    if (!sourceId || !customer?.email || !requestedItems?.length) {
       throw new HttpsError('invalid-argument', 'Données de commande incomplètes.');
     }
 
-    // ── 1. Recalculate totals server-side ──────────────────────────────────
+    // ── 1. Reload every price from Firestore by id — the client only names
+    // ids and quantities, the catalogue is the source of truth ─────────────
+    const cartItems: CartItemPayload[] = await Promise.all(requestedItems.map(async (item) => {
+      const qty = Math.floor(Number(item.quantity));
+      if (!item.id || !Number.isFinite(qty) || qty < 1 || qty > 50) {
+        throw new HttpsError('invalid-argument', 'Article de commande invalide.');
+      }
+      const snap = await db.collection('books').doc(String(item.id)).get();
+      if (!snap.exists) throw new HttpsError('invalid-argument', 'Livre introuvable.');
+      const book = snap.data() as { title: string; price: number; comingSoon?: boolean; isHidden?: boolean };
+      if (book.comingSoon || book.isHidden || !(book.price > 0)) {
+        throw new HttpsError('invalid-argument', `« ${book.title} » n'est pas en vente.`);
+      }
+      return { title: book.title, price: book.price, quantity: qty };
+    }));
+
     const subtotal = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
