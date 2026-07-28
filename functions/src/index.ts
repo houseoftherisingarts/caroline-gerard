@@ -470,6 +470,8 @@ export const sendNewsletter = onCall(
     invoker: 'public',
   },
   async (request) => {
+    assertAdmin(request);
+
     const { subject, title, bodyText, imageUrl } = request.data as {
       subject: string;
       title: string;
