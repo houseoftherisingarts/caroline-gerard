@@ -236,7 +236,7 @@ const BookCard: React.FC<{
           <p style={{
             fontSize: 13,
             color: '#94a3b8',
-            fontStyle: 'italic',
+            fontWeight: 500,
             marginBottom: 12,
             lineHeight: 1.5,
           }}>{book.subtitle}</p>
