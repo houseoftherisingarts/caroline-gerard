@@ -41,7 +41,7 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
   return (
     <>
       <div className="relative group">
-        <img src={src} alt={alt} className={className} style={{ objectPosition }} />
+        <img src={thumb(src, 1600)} alt={alt} className={className} style={{ objectPosition }} />
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-[inherit]">
           <button
             type="button"
