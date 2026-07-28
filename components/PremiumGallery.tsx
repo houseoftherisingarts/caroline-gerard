@@ -273,7 +273,7 @@ const Lightbox: React.FC<{
         }}
       >
         <img
-          src={img.defaultUrl}
+          src={thumb(img.defaultUrl, 1600)}
           alt={img.alt}
           style={{
             display: 'block',
