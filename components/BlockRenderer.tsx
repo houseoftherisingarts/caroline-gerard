@@ -11,7 +11,7 @@ type BlockRow = { id: string; columns: BlockColumn[] };
 const parseRichText = (text: string) => {
     if (!text) return '';
     let html = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
-    html = html.replace(/_(.*?)_/g, '<em class="text-gold italic">$1</em>');
+    html = html.replace(/_(.*?)_/g, '<em class="text-gold not-italic font-semibold">$1</em>');
     return html;
 };
 
