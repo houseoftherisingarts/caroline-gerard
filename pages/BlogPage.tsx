@@ -118,7 +118,7 @@ const BlogPage = ({ posts }: { posts: BlogPost[] }) => {
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
           <div className="w-full max-w-screen-xl mx-auto px-4 md:px-12 pt-16 md:pt-32 pb-16 md:pb-24 relative">
             <button onClick={() => setSelectedPost(null)} className="fixed top-4 right-4 md:top-6 md:right-6 z-10 p-2.5 text-slate-400 hover:text-white bg-black/40 rounded-full transition-colors"><X size={20} /></button>
-            {getFirstImage(selectedPost.image, selectedPost.content) && <img src={getFirstImage(selectedPost.image, selectedPost.content)} alt={selectedPost.title} className="w-full h-[30vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />}
+            {getFirstImage(selectedPost.image, selectedPost.content) && <img src={thumb(getFirstImage(selectedPost.image, selectedPost.content), 1600)} alt={selectedPost.title} className="w-full h-[30vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />}
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif text-white mb-4">{selectedPost.title}</h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between border-b border-white/10 pb-6 md:pb-8 mb-8 md:mb-12">
               <div className="flex items-center gap-2 text-sm text-gold"><Calendar size={14} /><span><EditableText tag="span" contentKey="blog_published_prefix" defaultValue="Publié le" /> {selectedPost.date}</span></div>
