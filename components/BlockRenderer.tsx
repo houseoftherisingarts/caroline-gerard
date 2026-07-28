@@ -1,4 +1,5 @@
 import React from 'react';
+import { thumb } from '../lib/img';
 
 // --- Types ---
 type Alignment = 'left' | 'center' | 'right' | 'justify';
