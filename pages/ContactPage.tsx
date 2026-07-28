@@ -98,7 +98,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
           email: lead.email,
           subject: subject || '(sans sujet)',
           message: message.trim(),
-          destination: formDestination,
         });
       } catch {
         // Non-blocking: lead is saved in Firestore even if email forwarding fails
