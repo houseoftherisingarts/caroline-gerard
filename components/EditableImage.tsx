@@ -91,7 +91,7 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
                       className="aspect-square rounded-lg overflow-hidden hover:ring-2 hover:ring-gold transition-all"
                       onClick={() => { updateContent(contentKey, imgUrl); setIsPickerOpen(false); }}
                     >
-                      <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                      <img src={thumb(imgUrl, 300)} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
