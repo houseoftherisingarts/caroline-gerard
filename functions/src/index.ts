@@ -101,11 +101,18 @@ interface CartItemPayload {
   quantity: number;
 }
 
+// What the client sends: only ids and quantities. Titles and prices are
+// reloaded server-side from the books collection — never trusted.
+interface CartItemRequest {
+  id: string;
+  quantity: number;
+}
+
 interface CheckoutPayload {
   sourceId: string;
   sessionId?: string;
   promoCode?: string | null;
-  cartItems: CartItemPayload[];
+  cartItems: CartItemRequest[];
   customer: {
     email: string;
     firstName: string;
