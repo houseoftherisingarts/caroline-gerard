@@ -313,7 +313,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems, total, onOrderCo
               {(step === 4 ? frozenCart : cartItems).map((item) => (
                 <div key={item.book.id} className="flex gap-4 py-4">
                   <div className="w-20 h-28 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 relative">
-                    <img src={item.book.image} alt={item.book.title} className="w-full h-full object-cover" />
+                    <img src={thumb(item.book.image, 200)} alt={item.book.title} className="w-full h-full object-cover" />
                     <span className="absolute top-0 right-0 bg-gold text-midnight text-xs font-bold px-2 py-1 rounded-bl-lg">
                       x{item.quantity}
                     </span>
