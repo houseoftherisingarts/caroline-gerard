@@ -67,7 +67,7 @@ const AProposPage = ({ vis = DEFAULT_VIS }: { vis?: VisibilitySettings }) => {
             <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white">
               <EditableText tag="span" contentKey="home_about_h2_line1" defaultValue="Une histoire" />
               <br />
-              <EditableText tag="span" contentKey="home_about_h2_line2" defaultValue="d'amour et de mots" className="italic text-gold" />
+              <EditableText tag="span" contentKey="home_about_h2_line2" defaultValue="d'amour et de mots" className="text-gold font-medium" />
             </h2>
             <div className="space-y-6 text-slate-300 text-lg leading-relaxed font-light">
               <EditableText tag="p" contentKey="home_about_p1" defaultValue="Je suis une femme passionnée par la vie, les livres et l'aventure, ainsi qu'une maman comblée de bonheur. L'année 2025 a marqué un tournant décisif dans ma vie : j'ai réalisé l'un de mes plus grands rêves, celui de devenir une auteure publiée." />
