@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, Edit3, Trash2, Eye, EyeOff, X, Check, ArrowLeft, ArrowRight, Lock, Unlock, Sparkles } from 'lucide-react';
 import { Book } from '../../types';
 import { uploadMediaFile } from '../../lib/storage';
