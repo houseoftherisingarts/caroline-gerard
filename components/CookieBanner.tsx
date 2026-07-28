@@ -73,7 +73,7 @@ const CookieBanner: React.FC = () => {
           </button>
           <button
             onClick={handleAccept}
-            className="flex items-center gap-1.5 px-5 py-2 bg-gold text-midnight rounded-xl text-sm font-bold hover:bg-white transition-colors"
+            className="flex items-center gap-1.5 px-5 py-2 min-h-[44px] bg-gold text-midnight rounded-xl text-sm font-bold hover:bg-white transition-colors"
           >
             <Check className="w-3.5 h-3.5" /> <EditableText tag="span" contentKey="cookie_banner_accept_btn" defaultValue="Accepter" />
           </button>
