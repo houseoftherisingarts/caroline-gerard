@@ -618,9 +618,15 @@ export const sendContactForm = onCall(
       throw new HttpsError('invalid-argument', 'Message trop long.');
     }
 
-    // Destination fixe — un paramètre libre ferait du formulaire un relais de
-    // pourriel vers n'importe quelle adresse, au nom de Caroline.
-    const safeDest = 'caroline@carolinegerard.ca';
+    // La destination vient de settings/siteContent (clé modifiable par Caroline
+    // dans l'éditeur du site), jamais du payload : un paramètre libre ferait du
+    // formulaire un relais de pourriel vers n'importe quelle adresse.
+    const contentSnap = await db.collection('settings').doc('siteContent').get();
+    const configuredDest = ((contentSnap.data() ?? {}) as Record<string, string>)['contact_form_destination'] ?? '';
+    const cleanedDest = configuredDest.replace(/<[^>]*>/g, '').trim();
+    const safeDest = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedDest)
+      ? cleanedDest
+      : 'caroline@carolinegerard.ca';
 
     const user = emailUser.value();
     const pass = emailPass.value();

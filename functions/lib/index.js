@@ -20,9 +20,21 @@ const squareEnvironment = (0, params_1.defineString)('SQUARE_ENVIRONMENT', { def
 const squareLocationId = (0, params_1.defineString)('SQUARE_LOCATION_ID');
 const emailHost = (0, params_1.defineString)('EMAIL_HOST', { default: 'smtp.gmail.com' });
 // Server-side pricing constants (source of truth — never trust client prices)
-const DELIVERY_FEE = 6.00;
+const DELIVERY_FEE = 6.00; // per copy — must match CheckoutPage display
 const TPS_RATE = 0.05;
 const TVQ_RATE = 0.09975;
+// Admin allowlist — mirror of isAdmin() in firestore.rules. The @admin.local
+// suffix is deliberately NOT trusted here: anyone can self-register one.
+const ADMIN_UIDS = ['qieZGM8Vnie92DblUtpvi710q3F3', 'lcfLrSZjcUTxwAgMe8tkCivdXQj1'];
+const ADMIN_EMAILS = ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com'];
+function assertAdmin(request) {
+    const auth = request.auth;
+    const isAdmin = !!auth && (ADMIN_UIDS.includes(auth.uid)
+        || (!!auth.token.email && ADMIN_EMAILS.includes(auth.token.email) && auth.token.email_verified === true));
+    if (!isAdmin) {
+        throw new https_1.HttpsError('permission-denied', "Réservé à l'administratrice du site.");
+    }
+}
 const stripHtml = (html) => html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<[^>]+>/g, ' ')
@@ -58,11 +70,26 @@ exports.processCheckout = (0, https_1.onCall)({
     secrets: [squareAccessToken, emailUser, emailPass],
     invoker: 'public',
 }, async (request) => {
-    const { sourceId, sessionId, promoCode, cartItems, customer, shipping } = request.data;
-    if (!sourceId || !customer?.email || !cartItems?.length) {
+    const { sourceId, sessionId, promoCode, cartItems: requestedItems, customer, shipping } = request.data;
+    if (!sourceId || !customer?.email || !requestedItems?.length) {
         throw new https_1.HttpsError('invalid-argument', 'Données de commande incomplètes.');
     }
-    // ── 1. Recalculate totals server-side ──────────────────────────────────
+    // ── 1. Reload every price from Firestore by id — the client only names
+    // ids and quantities, the catalogue is the source of truth ─────────────
+    const cartItems = await Promise.all(requestedItems.map(async (item) => {
+        const qty = Math.floor(Number(item.quantity));
+        if (!item.id || !Number.isFinite(qty) || qty < 1 || qty > 50) {
+            throw new https_1.HttpsError('invalid-argument', 'Article de commande invalide.');
+        }
+        const snap = await db.collection('books').doc(String(item.id)).get();
+        if (!snap.exists)
+            throw new https_1.HttpsError('invalid-argument', 'Livre introuvable.');
+        const book = snap.data();
+        if (book.comingSoon || book.isHidden || !(book.price > 0)) {
+            throw new https_1.HttpsError('invalid-argument', `« ${book.title} » n'est pas en vente.`);
+        }
+        return { title: book.title, price: book.price, quantity: qty };
+    }));
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     // ── 1b. Validate & apply promo code if provided ────────────────────────
     let discountPct = 0;
@@ -83,10 +110,13 @@ exports.processCheckout = (0, https_1.onCall)({
         }
     }
     const discountedSubtotal = parseFloat((subtotal - discount).toFixed(2));
+    // Delivery is charged per copy — same formula as the checkout page display.
+    const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const deliveryFee = parseFloat((DELIVERY_FEE * totalQty).toFixed(2));
     // Books are zero-rated for TVQ in Quebec; TPS applies to discounted subtotal + delivery.
-    const tps = parseFloat(((discountedSubtotal + DELIVERY_FEE) * TPS_RATE).toFixed(2));
-    const tvq = parseFloat((DELIVERY_FEE * TVQ_RATE).toFixed(2));
-    const grandTotal = parseFloat((discountedSubtotal + DELIVERY_FEE + tps + tvq).toFixed(2));
+    const tps = parseFloat(((discountedSubtotal + deliveryFee) * TPS_RATE).toFixed(2));
+    const tvq = parseFloat((deliveryFee * TVQ_RATE).toFixed(2));
+    const grandTotal = parseFloat((discountedSubtotal + deliveryFee + tps + tvq).toFixed(2));
     const amountInCents = BigInt(Math.round(grandTotal * 100));
     // ── 2. Charge via Square ───────────────────────────────────────────────
     const squareToken = squareAccessToken.value();
@@ -155,7 +185,7 @@ exports.processCheckout = (0, https_1.onCall)({
         discount,
         discountPct,
         promoCode: appliedPromoId,
-        delivery: DELIVERY_FEE,
+        delivery: deliveryFee,
         tps,
         tvq,
         total: grandTotal,
@@ -229,7 +259,7 @@ exports.processCheckout = (0, https_1.onCall)({
         subtotal,
         discount,
         discountPct,
-        delivery: DELIVERY_FEE,
+        delivery: deliveryFee,
         tps,
         tvq,
         date: now,
@@ -330,6 +360,7 @@ exports.sendNewsletter = (0, https_1.onCall)({
     secrets: [emailUser, emailPass],
     invoker: 'public',
 }, async (request) => {
+    assertAdmin(request);
     const { subject, title, bodyText, imageUrl } = request.data;
     if (!subject?.trim() || !title?.trim() || !bodyText?.trim()) {
         throw new https_1.HttpsError('invalid-argument', 'Sujet, titre et texte sont requis.');
@@ -434,16 +465,19 @@ exports.sendContactForm = (0, https_1.onCall)({
     secrets: [emailUser, emailPass],
     invoker: 'public',
 }, async (request) => {
-    const { name, email, subject, message, destination } = request.data;
+    const { name, email, subject, message } = request.data;
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
         throw new https_1.HttpsError('invalid-argument', 'Nom, courriel et message sont requis.');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         throw new https_1.HttpsError('invalid-argument', 'Adresse courriel invalide.');
     }
-    const safeDest = destination && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destination)
-        ? destination
-        : 'caroline@carolinegerard.ca';
+    if (name.length > 300 || (subject ?? '').length > 300 || message.length > 10000) {
+        throw new https_1.HttpsError('invalid-argument', 'Message trop long.');
+    }
+    // Destination fixe — un paramètre libre ferait du formulaire un relais de
+    // pourriel vers n'importe quelle adresse, au nom de Caroline.
+    const safeDest = 'caroline@carolinegerard.ca';
     const user = emailUser.value();
     const pass = emailPass.value();
     if (!user || !pass) {
@@ -499,6 +533,7 @@ exports.sendDirectMessage = (0, https_1.onCall)({
     secrets: [emailUser, emailPass],
     invoker: 'public',
 }, async (request) => {
+    assertAdmin(request);
     const { recipients, subject, body } = request.data;
     if (!recipients?.length || !subject || !body) {
         throw new https_1.HttpsError('invalid-argument', 'Données incomplètes.');
