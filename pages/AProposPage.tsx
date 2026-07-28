@@ -98,7 +98,7 @@ const AProposPage = ({ vis = DEFAULT_VIS }: { vis?: VisibilitySettings }) => {
             <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white">
               <EditableText tag="span" contentKey="home_william_h2_line1" defaultValue="William Lorrain" />
               <br />
-              <EditableText tag="span" contentKey="home_william_h2_line2" defaultValue="L'imagination sans limites" className="italic text-gold" />
+              <EditableText tag="span" contentKey="home_william_h2_line2" defaultValue="L'imagination sans limites" className="text-gold font-medium" />
             </h2>
             <div className="space-y-6 text-slate-300 text-lg leading-relaxed font-light">
               <EditableText tag="p" contentKey="home_william_p1" defaultValue="Je suis un adolescent doté d'une imagination sans limites, en mission sur la Terre. J'adore explorer le monde et écrire des aventures. J'aime aussi lire, dessiner et jouer au basketball." />
