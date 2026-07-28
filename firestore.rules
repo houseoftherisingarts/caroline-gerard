@@ -2,41 +2,107 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Orders: written only by the Cloud Function (admin SDK bypasses these rules).
-    // Authenticated admin users can read & update status; no client-side creates.
+    // ── Admin : liste blanche par UID (comptes réels), avec repli sur les
+    // courriels Vexel VÉRIFIÉS (connexion Google). Le motif @admin.local n'est
+    // volontairement PAS reconnu ici : n'importe qui peut créer un compte avec
+    // ce suffixe via l'inscription membre.
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid in [
+          'qieZGM8Vnie92DblUtpvi710q3F3',   // Caroline — Espace Auteure
+          'lcfLrSZjcUTxwAgMe8tkCivdXQj1'    // Alex — Vexel
+        ]
+        || (request.auth.token.email in ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com']
+            && request.auth.token.email_verified == true)
+      );
+    }
+
+    function keysOnly(allowed) {
+      return request.resource.data.keys().hasOnly(allowed);
+    }
+
+    // ── Contenu public du site : lecture libre, écriture admin ──
+    match /books/{id}       { allow read: if true; allow write: if isAdmin(); }
+    match /posts/{id}       { allow read: if true; allow write: if isAdmin(); }
+    match /events/{id}      { allow read: if true; allow write: if isAdmin(); }
+    match /conferences/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /interviews/{id}  { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{id}    { allow read: if true; allow write: if isAdmin(); }
+
+    // Témoignages : le public peut en soumettre un (jamais publié d'office)
+    match /testimonials/{id} {
+      allow read: if true;
+      allow create: if isAdmin() || (
+        keysOnly(['id', 'quote', 'signature', 'page', 'type', 'isPublished', 'createdAt', 'email'])
+        && request.resource.data.type == 'client'
+        && request.resource.data.isPublished == false
+        && request.resource.data.quote is string && request.resource.data.quote.size() <= 2000
+        && request.resource.data.signature is string && request.resource.data.signature.size() <= 200
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // Codes promo : lecture directe par code à la caisse, jamais de liste publique
+    match /promoCodes/{id} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── Formulaires publics : création contrainte, lecture admin seulement ──
+    match /subscribers/{id} {
+      allow create: if keysOnly(['id', 'email', 'subscribedAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 320
+        && request.resource.data.email.matches('.+@.+[.].+');
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /leads/{id} {
+      allow create: if keysOnly(['id', 'source', 'name', 'email', 'message', 'date', 'isRead', 'archived'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 300
+        && request.resource.data.email is string && request.resource.data.email.size() <= 320
+        && request.resource.data.message is string && request.resource.data.message.size() <= 10000
+        && request.resource.data.isRead == false;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /abandonedCheckouts/{id} {
+      allow create, update: if keysOnly(['id', 'email', 'firstName', 'lastName', 'phone',
+        'address', 'city', 'postalCode', 'cartItems', 'subtotal', 'startedAt']);
+      allow read, delete: if isAdmin();
+    }
+
+    // ── Espace client ──
+    match /members/{memberId} {
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == memberId);
+    }
+
+    match /communityMessages/{id} {
+      allow create: if request.auth != null
+        && (isAdmin() || request.resource.data.memberId == request.auth.uid);
+      allow read: if isAdmin() || (request.auth != null && resource.data.memberId == request.auth.uid);
+      allow update: if (isAdmin() || (request.auth != null && resource.data.memberId == request.auth.uid))
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isAdmin();
+    }
+
+    // ── Commandes : créées uniquement par la Cloud Function (SDK admin) ──
     match /orders/{orderId} {
-      allow read: if request.auth != null;
-      allow update: if request.auth != null
+      allow read: if isAdmin();
+      allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
       allow create, delete: if false;
     }
 
-    // Newsletter subscribers: anyone can subscribe (create), only admin reads
-    match /subscribers/{subId} {
-      allow read: if request.auth != null;
-      allow create: if true;
-      allow update, delete: if request.auth != null;
-    }
+    // ── Outils internes de l'Espace Auteure ──
+    match /emailLog/{id}             { allow read, delete: if isAdmin(); allow create, update: if false; }
+    match /kanban/{id}               { allow read, write: if isAdmin(); }
+    match /invoices/{id}             { allow read, write: if isAdmin(); }
+    match /consignmentLocations/{id} { allow read, write: if isAdmin(); }
+    match /consignmentMovements/{id} { allow read, write: if isAdmin(); }
 
-    // Community members: user can write their own doc, admin reads all
-    match /members/{memberId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == memberId;
-    }
-
-    // Community messages: member can read/write their own thread; anyone authenticated can write
-    match /communityMessages/{msgId} {
-      allow read: if request.auth != null &&
-        (resource.data.memberId == request.auth.uid || true); // admin reads all
-      allow create: if request.auth != null;
-      allow update: if request.auth != null; // for marking read
-      allow delete: if request.auth != null;
-    }
-
-    // All other collections (posts, events, leads, settings, etc.)
-    match /{document=**} {
-      allow read: if true;
-      allow write: if true;
-    }
+    // uniqueVisitors : réservé au SDK admin (recordVisit).
+    // Toute collection absente de cette liste est refusée par défaut.
   }
 }
