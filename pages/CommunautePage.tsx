@@ -12,6 +12,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 import { saveMember, subscribeToMemberMessages, sendCommunityMessage, markMessageRead } from '../lib/firestore';
 import { BlogPost, AppEvent, Conference, Member, Order, CommunityMessage } from '../types';
+import { thumb } from '../lib/img';
 import EditableText from '../components/EditableText';
 import { useEditableString } from '../components/EditableField';
 import {
