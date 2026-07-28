@@ -462,6 +462,7 @@ const App = () => {
                   <Route path="evenements" element={<AdminEvents events={events} setEvents={handleSetEvents} mediaLibrary={mediaLibrary} />} />
                   <Route path="medias" element={<AdminMedia profileImage={profileImage} setProfileImage={handleSetProfileImage} mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} sphereGalleryImages={sphereGalleryImages} onSetSphereGalleryImages={handleSetSphereGalleryImages} />} />
                   <Route path="produits" element={<AdminInventory books={firestoreBooks} onSave={handleSaveBook} onDelete={handleDeleteBook} mediaLibrary={mediaLibrary} />} />
+                  <Route path="depositaires" element={<AdminConsignations books={firestoreBooks} />} />
                   <Route path="codes-promo" element={<AdminPromoCodes />} />
                   <Route path="temoignages" element={<AdminTestimonials />} />
                   <Route path="lead-magnet" element={<AdminLeadMagnet />} />
