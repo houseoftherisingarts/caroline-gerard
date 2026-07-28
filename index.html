@@ -36,32 +36,8 @@
     <meta name="geo.placename" content="Québec" />
     <meta name="ICBM" content="46.8139, -71.2080" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind est compilé au build (tailwind.config.js) — plus de CDN runtime -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'midnight': '#0f172a',
-              'deep-blue': '#1e293b',
-              'starlight': '#fbbf24',
-              'gold': '#d4af37',
-              'paper': '#f8fafc',
-            },
-            fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              sans: ['"Lato"', 'sans-serif'],
-            },
-            borderRadius: {
-              'xl': '30px',
-              '2xl': '30px',
-              '3xl': '30px',
-            }
-          }
-        }
-      }
-    </script>
     <style>
       body, html, #root {
         background-color: transparent !important;
