@@ -342,7 +342,7 @@ const IntroScreen = ({ onDone }: { onDone: () => void }) => {
           style={{ fontSize: 'clamp(3rem, 10vw, 8rem)', lineHeight: 1.05, letterSpacing: '-0.01em' }}
         >
           Caroline{' '}
-          <span style={{ color: '#d4af37', fontStyle: 'italic' }}>Gérard</span>
+          <span style={{ color: '#d4af37', fontWeight: 600 }}>Gérard</span>
         </h1>
 
         <p style={{ color: 'rgba(212,175,55,0.7)', letterSpacing: '0.45em', fontSize: '0.75rem', fontWeight: 300, marginTop: '1.25rem', textTransform: 'uppercase' }}>
