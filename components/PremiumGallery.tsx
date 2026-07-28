@@ -4,6 +4,7 @@
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { X, ZoomIn } from 'lucide-react';
+import { thumb } from '../lib/img';
 import EditableImage from './EditableImage';
 
 export interface GalleryImage {
