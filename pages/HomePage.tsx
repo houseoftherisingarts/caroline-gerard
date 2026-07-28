@@ -7,6 +7,7 @@ import EditableText from '../components/EditableText';
 import NewsletterForm from '../components/NewsletterForm';
 import SphereGallery, { SphereImage } from '../components/SphereGallery';
 import { VisibilitySettings, DEFAULT_VIS } from '../lib/firestore';
+import { thumb } from '../lib/img';
 
 const HOME_GALLERY_IMAGES: SphereImage[] = [
   { id: '1', url: 'https://storage.googleapis.com/salondesinconnus/Caroline/615078333_26281261438145401_6607312617290889589_n.jpg', alt: 'Caroline Gérard et William Lorrain — Galerie photo 1' },
