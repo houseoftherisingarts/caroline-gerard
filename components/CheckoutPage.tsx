@@ -5,6 +5,7 @@ import { PaymentForm, CreditCard } from 'react-square-web-payments-sdk';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getApp } from 'firebase/app';
 import { CartItem, PromoCode, Book } from '../types';
+import { thumb } from '../lib/img';
 import { printReceipt, ReceiptData } from '../lib/receipt';
 import { saveAbandonedCheckout, getPromoCode } from '../lib/firestore';
 import EditableText from './EditableText';
