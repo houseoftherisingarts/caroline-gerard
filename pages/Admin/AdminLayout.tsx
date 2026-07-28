@@ -24,6 +24,7 @@ import {
   X,
   MessageSquareQuote,
   Download,
+  Store,
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
