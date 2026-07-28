@@ -294,8 +294,15 @@ const App = () => {
   useEffect(() => {
     return onAuthStateChanged(auth, user => {
       setIsAuthenticated(!!user);
+      // Miroir de isAdmin() dans firestore.rules : UID d'abord, courriels
+      // Vexel vérifiés en repli. Le suffixe @admin.local seul ne suffit plus
+      // (n'importe qui peut créer un compte membre avec ce suffixe).
+      const ADMIN_UIDS = ['qieZGM8Vnie92DblUtpvi710q3F3', 'lcfLrSZjcUTxwAgMe8tkCivdXQj1'];
       const ADMIN_EMAILS = ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com'];
-      setIsAdmin(!!user && (!!user.email && (ADMIN_EMAILS.includes(user.email) || user.email.endsWith('@admin.local'))));
+      setIsAdmin(!!user && (
+        ADMIN_UIDS.includes(user.uid)
+        || (!!user.email && ADMIN_EMAILS.includes(user.email) && user.emailVerified)
+      ));
     });
   }, []);
 
