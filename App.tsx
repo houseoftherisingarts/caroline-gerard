@@ -31,6 +31,7 @@ import AdminLayout from './pages/Admin/AdminLayout';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminOrders from './pages/Admin/AdminOrders';
 import AdminInventory from './pages/Admin/AdminInventory';
+import AdminConsignations from './pages/Admin/AdminConsignations';
 import AdminBlog from './pages/Admin/AdminBlog';
 import AdminEvents from './pages/Admin/AdminEvents';
 import AdminInvoices from './pages/Admin/AdminInvoices';
