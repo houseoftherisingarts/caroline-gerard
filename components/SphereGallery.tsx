@@ -154,7 +154,7 @@ const Lightbox: React.FC<{ img: SphereImage; onClose: () => void }> = ({ img, on
               fontSize: 14,
               lineHeight: 1.6,
               textAlign: 'center',
-              fontStyle: 'italic',
+              fontWeight: 500,
               letterSpacing: '0.02em',
               overflowWrap: 'break-word',
               wordBreak: 'break-word',
