@@ -48,9 +48,20 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 
 const inputCls = "w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder-slate-600 focus:outline-none focus:border-gold/50 transition-colors";
 
+// Textes de la carte « livre à venir » sur la boutique (badge, étiquette, sous-texte).
+// Stockés dans settings/siteContent sous les mêmes clés que le mode édition du site.
+const COMING_SOON_DEFAULTS = {
+  tome_label: 'Tome 2',
+  coming_soon_badge: 'À venir fin 2026',
+  coming_soon_sub: 'Bientôt disponible',
+};
+type ComingSoonTexts = typeof COMING_SOON_DEFAULTS;
+
 const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInventoryProps) => {
+  const { content: siteContent } = useSiteContent();
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState<Omit<Book, 'id'>>(EMPTY_FORM);
+  const [comingSoonTexts, setComingSoonTexts] = useState<ComingSoonTexts>(COMING_SOON_DEFAULTS);
   const [isUploading, setIsUploading] = useState<'front' | 'back' | 'pages' | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
