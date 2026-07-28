@@ -10,6 +10,7 @@ import { Book } from '../types';
 import EditableText from '../components/EditableText';
 import { useEditableString } from '../components/EditableField';
 import { useSiteContent } from '../contexts/SiteContentContext';
+import { thumb } from '../lib/img';
 
 interface ShopPageProps {
   books: Book[];
