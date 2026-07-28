@@ -342,7 +342,7 @@ export const processCheckout = onCall(
       subtotal,
       discount,
       discountPct,
-      delivery: DELIVERY_FEE,
+      delivery: deliveryFee,
       tps,
       tvq,
       date: now,
