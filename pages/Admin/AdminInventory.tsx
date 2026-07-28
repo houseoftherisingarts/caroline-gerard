@@ -72,14 +72,25 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
   const backInputRef = useRef<HTMLInputElement>(null);
   const pagesInputRef = useRef<HTMLInputElement>(null);
 
+  const loadComingSoonTexts = (bookId: string) => {
+    setComingSoonTexts({
+      tome_label: siteContent[`book_${bookId}_tome_label`] ?? COMING_SOON_DEFAULTS.tome_label,
+      coming_soon_badge: siteContent[`book_${bookId}_coming_soon_badge`] ?? COMING_SOON_DEFAULTS.coming_soon_badge,
+      coming_soon_sub: siteContent[`book_${bookId}_coming_soon_sub`] ?? COMING_SOON_DEFAULTS.coming_soon_sub,
+    });
+  };
+
   const openNew = () => {
+    const id = `book-${Date.now()}`;
     setFormData(EMPTY_FORM);
-    setEditingBook({ id: `book-${Date.now()}`, ...EMPTY_FORM });
+    setEditingBook({ id, ...EMPTY_FORM });
+    loadComingSoonTexts(id);
   };
 
   const openEdit = (book: Book) => {
     setFormData({ ...EMPTY_FORM, ...book });
     setEditingBook(book);
+    loadComingSoonTexts(book.id);
   };
 
   const closeModal = () => {
