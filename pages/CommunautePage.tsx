@@ -361,7 +361,7 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
                   ))}
                   {publishedPosts.slice(0, 6).map(post => (
                     <div key={post.id} className="bg-midnight/60 border border-white/10 rounded-xl p-6 flex gap-4 items-start hover:border-gold/30 transition-colors">
-                      {post.image && <img src={post.image} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />}
+                      {post.image && <img src={thumb(post.image, 200)} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />}
                       <div className="flex-1 min-w-0">
                         <EditableText tag="span" contentKey="comm_actualites_blog_badge" defaultValue="Article de blog" className="text-xs text-blue-400 font-bold uppercase tracking-wider" />
                         <h3 className="text-white font-bold mt-1">{post.title}</h3>
