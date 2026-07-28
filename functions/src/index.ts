@@ -187,10 +187,13 @@ export const processCheckout = onCall(
     }
 
     const discountedSubtotal = parseFloat((subtotal - discount).toFixed(2));
+    // Delivery is charged per copy — same formula as the checkout page display.
+    const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const deliveryFee = parseFloat((DELIVERY_FEE * totalQty).toFixed(2));
     // Books are zero-rated for TVQ in Quebec; TPS applies to discounted subtotal + delivery.
-    const tps = parseFloat(((discountedSubtotal + DELIVERY_FEE) * TPS_RATE).toFixed(2));
-    const tvq = parseFloat((DELIVERY_FEE * TVQ_RATE).toFixed(2));
-    const grandTotal = parseFloat((discountedSubtotal + DELIVERY_FEE + tps + tvq).toFixed(2));
+    const tps = parseFloat(((discountedSubtotal + deliveryFee) * TPS_RATE).toFixed(2));
+    const tvq = parseFloat((deliveryFee * TVQ_RATE).toFixed(2));
+    const grandTotal = parseFloat((discountedSubtotal + deliveryFee + tps + tvq).toFixed(2));
     const amountInCents = BigInt(Math.round(grandTotal * 100));
 
     // ── 2. Charge via Square ───────────────────────────────────────────────
