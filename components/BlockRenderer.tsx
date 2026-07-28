@@ -39,7 +39,7 @@ const BlockRenderer = ({ content }: { content: string }) => {
                                     <div className={getPublicTextStyle(col)} dangerouslySetInnerHTML={{ __html: parseRichText(col.value) }} />
                                 )}
                                 {col.type === 'image' && (
-                                    <img src={col.value} alt="Contenu du blog" className="w-full h-auto object-cover rounded-2xl shadow-xl" />
+                                    <img src={thumb(col.value, 1200)} alt="Contenu du blog" className="w-full h-auto object-cover rounded-2xl shadow-xl" />
                                 )}
                             </div>
                         ))}
