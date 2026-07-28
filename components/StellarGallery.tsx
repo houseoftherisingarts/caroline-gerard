@@ -93,7 +93,7 @@ function FloatingCard({
           }}
         >
           <img
-            src={image.url}
+            src={thumb(image.url, 600)}
             alt={image.alt}
             draggable={false}
             style={{
