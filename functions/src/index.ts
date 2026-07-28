@@ -265,7 +265,7 @@ export const processCheckout = onCall(
       discount,
       discountPct,
       promoCode: appliedPromoId,
-      delivery: DELIVERY_FEE,
+      delivery: deliveryFee,
       tps,
       tvq,
       total: grandTotal,
