@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Camera, UploadCloud, Library, X, Crop, RotateCcw } from 'lucide-react';
 import { useSiteContent } from '../contexts/SiteContentContext';
 import { uploadMediaFile } from '../lib/storage';
+import { thumb } from '../lib/img';
 
 interface EditableImageProps {
   contentKey: string;
