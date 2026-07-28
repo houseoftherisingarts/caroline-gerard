@@ -21,9 +21,25 @@ const squareLocationId = defineString('SQUARE_LOCATION_ID');
 const emailHost = defineString('EMAIL_HOST', { default: 'smtp.gmail.com' });
 
 // Server-side pricing constants (source of truth — never trust client prices)
-const DELIVERY_FEE = 6.00;
+const DELIVERY_FEE = 6.00; // per copy — must match CheckoutPage display
 const TPS_RATE = 0.05;
 const TVQ_RATE = 0.09975;
+
+// Admin allowlist — mirror of isAdmin() in firestore.rules. The @admin.local
+// suffix is deliberately NOT trusted here: anyone can self-register one.
+const ADMIN_UIDS = ['qieZGM8Vnie92DblUtpvi710q3F3', 'lcfLrSZjcUTxwAgMe8tkCivdXQj1'];
+const ADMIN_EMAILS = ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com'];
+
+function assertAdmin(request: CallableRequest): void {
+  const auth = request.auth;
+  const isAdmin = !!auth && (
+    ADMIN_UIDS.includes(auth.uid)
+    || (!!auth.token.email && ADMIN_EMAILS.includes(auth.token.email) && auth.token.email_verified === true)
+  );
+  if (!isAdmin) {
+    throw new HttpsError('permission-denied', "Réservé à l'administratrice du site.");
+  }
+}
 
 // ── Email audit log ──────────────────────────────────────────────────────────
 // Persists every outbound mail (success or failure) to Firestore `emailLog`
