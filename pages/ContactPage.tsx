@@ -17,7 +17,6 @@ interface ContactPageProps {
 const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
   const { content } = useSiteContent();
   const email = (content['contact_email'] ?? 'caroline@carolinegerard.ca').replace(/<[^>]*>/g, '').trim();
-  const formDestination = (content['contact_form_destination'] ?? 'caroline@carolinegerard.ca').replace(/<[^>]*>/g, '').trim();
   const phone = (content['contact_phone'] ?? '').replace(/<[^>]*>/g, '').trim();
 
   const [name, setName] = useState('');
