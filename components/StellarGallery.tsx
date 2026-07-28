@@ -231,7 +231,7 @@ function GalleryModal() {
         }}
       >
         <img
-          src={selected.url}
+          src={thumb(selected.url, 1600)}
           alt={selected.alt}
           style={{
             display: 'block',
