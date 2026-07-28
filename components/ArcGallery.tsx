@@ -4,6 +4,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { X } from 'lucide-react'
+import { thumb } from '../lib/img'
 
 export interface ArcImage {
   id: string
