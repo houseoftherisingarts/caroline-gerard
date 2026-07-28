@@ -157,7 +157,7 @@ const NewsletterForm = ({ compact = false, hideMemberCta = false }: { compact?: 
               tag="span"
               contentKey="newsletter_title_italic"
               defaultValue="des rêves"
-              className="italic text-gold"
+              className="text-gold font-medium"
             />
           </h2>
 
