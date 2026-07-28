@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { Book, ConsignmentLocation, ConsignmentMovement, ConsignmentMovementType } from '../../types';
 import {
-  subscribeToConsignmentLocations, saveConsignmentLocation, deleteConsignmentLocation,
+  subscribeToConsignmentLocations, saveConsignmentLocation,
   subscribeToConsignmentMovements, saveConsignmentMovement, deleteConsignmentMovement,
 } from '../../lib/firestore';
 
