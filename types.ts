@@ -177,6 +177,35 @@ export type Testimonial = {
   order?: number; // smaller = earlier; falls back to createdAt desc when absent
 };
 
+// --- Consignations (livres en dépôt chez des détaillants) ---
+
+export type ConsignmentLocation = {
+  id: string;
+  name: string;
+  commissionPct: number;   // % retenu par le dépositaire — Caroline l'inscrit elle-même
+  contactName?: string;
+  contactInfo?: string;    // téléphone / courriel, texte libre
+  notes?: string;
+  createdAt: string;
+};
+
+export type ConsignmentMovementType = 'depot' | 'vente' | 'retour' | 'paiement';
+
+export type ConsignmentMovement = {
+  id: string;
+  locationId: string;
+  type: ConsignmentMovementType;
+  bookId?: string;
+  bookTitle?: string;      // dénormalisé pour l'affichage historique
+  qty?: number;            // depot / vente / retour
+  unitPrice?: number;      // vente : prix unitaire au moment de la vente
+  commissionPct?: number;  // vente : % retenu, figé au moment de la saisie
+  amount?: number;         // paiement : montant reçu du dépositaire
+  date: string;            // jour de l'événement (ISO)
+  note?: string;
+  createdAt: string;
+};
+
 export type Member = {
   id: string;
   uid: string;
