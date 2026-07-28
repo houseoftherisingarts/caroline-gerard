@@ -81,7 +81,7 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
         <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
           <span className="text-[10px] uppercase tracking-[0.35em] text-amber-700/80 mb-6">Caroline Gérard</span>
           <h1 className="font-serif text-2xl md:text-3xl text-slate-800 leading-tight mb-3">{book.title}</h1>
-          {book.subtitle && <p className="font-serif italic text-slate-500 text-sm md:text-base">{book.subtitle}</p>}
+          {book.subtitle && <p className="font-serif text-slate-500 text-sm md:text-base">{book.subtitle}</p>}
           <div className="mt-8 w-12 h-px bg-amber-700/40" />
         </div>
       </Page>
