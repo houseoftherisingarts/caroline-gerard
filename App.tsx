@@ -325,9 +325,16 @@ const App = () => {
       subscribeToBooks(setFirestoreBooks),
       subscribeToVisitorCount(setVisitorCount),
     ];
-    seedIfEmpty(blogPosts, books);
+    seedIfEmpty(blogPosts, books).catch(() => null);
     return () => unsubs.forEach(u => u());
   }, []);
+
+  // Les leads sont réservés à l'admin par les règles Firestore — ne s'y
+  // abonner qu'une fois connectée, sinon chaque visiteur génère une erreur.
+  useEffect(() => {
+    if (!isAdmin) return;
+    return subscribeToLeads(setLeads);
+  }, [isAdmin]);
 
   // Record the visit once per browser session; the server dedupes by hashed IP
   // so multiple sessions from the same computer are only counted once.
