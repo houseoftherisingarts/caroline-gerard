@@ -179,7 +179,7 @@ const BookFlipModal: React.FC<BookFlipModalProps> = ({ book, isOpen, onClose, on
               <img src={book.backImage} alt="4e de couverture" className="w-full h-full object-cover" draggable={false} />
             ) : (
               <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                <span className="text-white/60 text-sm font-serif italic">Fin</span>
+                <span className="text-white/60 text-sm font-serif">Fin</span>
               </div>
             )}
           </Page>
