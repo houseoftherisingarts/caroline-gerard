@@ -134,7 +134,7 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
         <div className="fixed inset-0 z-[100] bg-midnight overflow-y-auto w-full h-full animate-fade-in">
           <div className="w-full max-w-screen-xl mx-auto px-4 md:px-12 pt-16 md:pt-32 pb-16 md:pb-24 relative">
             <button onClick={() => setSelectedEvent(null)} className="fixed top-4 right-4 md:top-6 md:right-6 z-10 p-2.5 text-slate-400 hover:text-white bg-black/40 rounded-full transition-colors"><X size={20} /></button>
-            {getFirstImage(selectedEvent.image, selectedEvent.content) && <img src={getFirstImage(selectedEvent.image, selectedEvent.content)} alt={selectedEvent.title} className="w-full h-[25vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />}
+            {getFirstImage(selectedEvent.image, selectedEvent.content) && <img src={thumb(getFirstImage(selectedEvent.image, selectedEvent.content), 1600)} alt={selectedEvent.title} className="w-full h-[25vh] md:h-[50vh] object-cover rounded-2xl mb-6 md:mb-8 shadow-lg" />}
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif text-white mb-4">{selectedEvent.title}</h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between border-b border-white/10 pb-6 md:pb-8 mb-8 md:mb-12">
               <div className="flex items-center gap-4 text-sm text-gold">
