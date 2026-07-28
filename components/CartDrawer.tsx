@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { X, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import { CartItem } from '../types';
+import { thumb } from '../lib/img';
 import EditableText from './EditableText';
 
 interface CartDrawerProps {
