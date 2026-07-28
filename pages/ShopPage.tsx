@@ -504,7 +504,7 @@ const ShopPage: React.FC<ShopPageProps> = ({ books, addToCart }) => {
 
         {/* ── Book grid ── */}
         {visibleBooks.length === 0 ? (
-          <p className="text-center text-slate-500 italic py-20">Aucun livre disponible pour l'instant.</p>
+          <p className="text-center text-slate-500 py-20">Aucun livre disponible pour l'instant.</p>
         ) : (
           <div style={gridStyle}>
             {visibleBooks.map((book, i) => (
