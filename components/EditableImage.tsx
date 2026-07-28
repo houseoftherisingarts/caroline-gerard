@@ -35,7 +35,7 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
   };
 
   if (!isEditMode) {
-    return <img src={src} alt={alt} className={className} style={{ objectPosition }} />;
+    return <img src={thumb(src, 1600)} alt={alt} className={className} style={{ objectPosition }} />;
   }
 
   return (
