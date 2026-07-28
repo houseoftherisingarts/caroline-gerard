@@ -212,9 +212,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({ cartItems, total, onOrderCo
         sourceId: tokenResult.token,
         sessionId,
         promoCode: promoApplied?.code ?? null,
+        // Seulement les ids et quantités — le serveur recharge les prix
+        // depuis le catalogue, jamais depuis le navigateur.
         cartItems: cartItems.map(item => ({
-          title: item.book.title,
-          price: item.book.price,
+          id: item.book.id,
           quantity: item.quantity,
         })),
         customer: {
