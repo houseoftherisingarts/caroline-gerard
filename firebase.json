@@ -3,8 +3,13 @@
     {
       "source": "functions",
       "codebase": "default",
-      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"],
-      "ignore": ["node_modules", ".git"]
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "ignore": [
+        "node_modules",
+        ".git"
+      ]
     }
   ],
   "hosting": {
@@ -29,8 +34,8 @@
             "value": "no-cache, no-store, must-revalidate"
           },
           {
-            "key": "X-Frame-Options",
-            "value": "SAMEORIGIN"
+            "key": "Content-Security-Policy",
+            "value": "frame-ancestors 'self' https://vexelwebstudio.com https://www.vexelwebstudio.com https://vexel-webstudio.web.app"
           },
           {
             "key": "X-Content-Type-Options",
