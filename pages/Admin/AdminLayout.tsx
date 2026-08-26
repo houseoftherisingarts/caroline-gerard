@@ -25,6 +25,7 @@ import {
   MessageSquareQuote,
   Download,
   Store,
+  BadgeDollarSign,
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
@@ -129,6 +130,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/medias" icon={<ImageIcon />} label="Médiathèque" onClick={closeSidebar} />
           <NavLink to="/admin/produits" icon={<Package />} label="Inventaire Livres" onClick={closeSidebar} />
           <NavLink to="/admin/depositaires" icon={<Store />} label="Dépositaires" onClick={closeSidebar} />
+          <NavLink to="/admin/ventes" icon={<BadgeDollarSign />} label="Ventes & stock" onClick={closeSidebar} />
           <NavLink to="/admin/codes-promo" icon={<Tag />} label="Codes Promo" onClick={closeSidebar} />
           <NavLink to="/admin/temoignages" icon={<MessageSquareQuote />} label="Témoignages" onClick={closeSidebar} />
           <NavLink to="/admin/lead-magnet" icon={<Download />} label="Aimant à courriels" onClick={closeSidebar} />

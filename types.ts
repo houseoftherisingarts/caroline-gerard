@@ -204,6 +204,28 @@ export type ConsignmentMovement = {
   date: string;            // jour de l'événement (ISO)
   note?: string;
   createdAt: string;
+  order?: string;          // ordre manuel dans une même journée (défaut : createdAt)
+};
+
+// --- Stock personnel et ventes directes (événements, en main propre, site) ---
+
+export type StockMovementType = 'entree' | 'vente' | 'ajustement';
+export type PaymentMethod = 'comptant' | 'square' | 'virement' | 'web' | 'autre';
+
+export type StockMovement = {
+  id: string;
+  type: StockMovementType;
+  bookId: string;
+  bookTitle: string;       // dénormalisé pour l'historique
+  qty: number;             // entree : livres reçus · vente : livres vendus · ajustement : +/- (inventaire de départ, perte, don)
+  unitPrice?: number;      // vente
+  payment?: PaymentMethod; // vente
+  tip?: number;            // vente : sous donnés en plus (le petit cochon de William)
+  eventName?: string;      // vente : nom de l'événement / du marché
+  eventCost?: number;      // vente : coût du kiosque, inscrit une fois par événement
+  date: string;            // ISO jour
+  note?: string;
+  createdAt: string;
 };
 
 export type Member = {

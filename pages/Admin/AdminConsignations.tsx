@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Plus, Store, Edit3, Trash2, X, Check, PackagePlus, PackageMinus,
-  BadgeDollarSign, HandCoins, History, Sparkles,
+  BadgeDollarSign, HandCoins, History, Sparkles, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { Book, ConsignmentLocation, ConsignmentMovement, ConsignmentMovementType } from '../../types';
 import {
@@ -38,6 +38,23 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
 
 const money = (n: number) => `${n.toFixed(2)} $`;
 const today = () => new Date().toISOString().slice(0, 10);
+// Ordre d'affichage : jour le plus récent en haut; dans une même journée, l'ordre de saisie
+// (ou l'ordre choisi avec les flèches), pour qu'un dépôt inscrit après les ventes reste dessous.
+const orderKey = (m: ConsignmentMovement) => m.order ?? m.createdAt;
+const sortMovements = (ms: ConsignmentMovement[]) =>
+  [...ms].sort((a, b) => b.date.localeCompare(a.date) || orderKey(a).localeCompare(orderKey(b)));
+
+// Livres encore en main chez un dépositaire, titre par titre.
+function onHandByBook(locId: string, movements: ConsignmentMovement[]): { title: string; qty: number }[] {
+  const map = new Map<string, { title: string; qty: number }>();
+  movements.filter(m => m.locationId === locId && m.type !== 'paiement').forEach(m => {
+    const key = m.bookId ?? m.bookTitle ?? '?';
+    const cur = map.get(key) ?? { title: m.bookTitle ?? 'Livre', qty: 0 };
+    cur.qty += m.type === 'depot' ? (m.qty ?? 0) : -(m.qty ?? 0);
+    map.set(key, cur);
+  });
+  return [...map.values()].filter(b => b.qty !== 0);
+}
 
 type LocationStats = {
   deposited: number;
@@ -157,27 +174,29 @@ const LocationModal = ({ location, onClose, onSave }: {
 };
 
 // ── Formulaire mouvement ─────────────────────────────────────────────────────
-const MovementModal = ({ location, books, onClose, onSave }: {
+const MovementModal = ({ location, books, existing, onClose, onSave }: {
   location: ConsignmentLocation;
   books: Book[];
+  existing?: ConsignmentMovement;   // présent = on modifie ce mouvement au lieu d'en créer un
   onClose: () => void;
   onSave: (mov: ConsignmentMovement) => Promise<void>;
 }) => {
   const sellableBooks = books.filter(b => !b.comingSoon);
-  const defaultBook = sellableBooks[0];
-  const [type, setType] = useState<ConsignmentMovementType>('depot');
+  const defaultBook = sellableBooks.find(b => b.id === existing?.bookId) ?? sellableBooks[0];
+  const [type, setType] = useState<ConsignmentMovementType>(existing?.type ?? 'depot');
   const [bookId, setBookId] = useState(defaultBook?.id ?? '');
-  const [qty, setQty] = useState(1);
-  const [unitPrice, setUnitPrice] = useState(defaultBook?.price ?? 0);
-  const [amount, setAmount] = useState(0);
-  const [date, setDate] = useState(today());
-  const [note, setNote] = useState('');
+  const [qty, setQty] = useState(existing?.qty ?? 1);
+  const [unitPrice, setUnitPrice] = useState(existing?.unitPrice ?? defaultBook?.price ?? 0);
+  const [amount, setAmount] = useState(existing?.amount ?? 0);
+  const [date, setDate] = useState(existing?.date ?? today());
+  const [note, setNote] = useState(existing?.note ?? '');
   const [saveError, setSaveError] = useState('');
 
   const book = sellableBooks.find(b => b.id === bookId);
   const isMoney = type === 'paiement';
   const isSale = type === 'vente';
-  const netPreview = isSale ? qty * unitPrice * (1 - location.commissionPct / 100) : 0;
+  const commissionPct = existing?.commissionPct ?? location.commissionPct;
+  const netPreview = isSale ? qty * unitPrice * (1 - commissionPct / 100) : 0;
 
   const pickBook = (id: string) => {
     setBookId(id);
@@ -191,18 +210,19 @@ const MovementModal = ({ location, books, onClose, onSave }: {
     setSaveError('');
     try {
       const mov: ConsignmentMovement = {
-        id: `mov-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        id: existing?.id ?? `mov-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         locationId: location.id,
         type,
         date,
-        createdAt: new Date().toISOString(),
+        createdAt: existing?.createdAt ?? new Date().toISOString(),
+        ...(existing?.order ? { order: existing.order } : {}),
         ...(note.trim() ? { note: note.trim() } : {}),
         ...(isMoney
           ? { amount }
           : {
               qty,
               ...(book ? { bookId: book.id, bookTitle: book.title } : {}),
-              ...(isSale ? { unitPrice, commissionPct: location.commissionPct } : {}),
+              ...(isSale ? { unitPrice, commissionPct } : {}),
             }),
       };
       await onSave(mov);
@@ -218,7 +238,7 @@ const MovementModal = ({ location, books, onClose, onSave }: {
       <div className="bg-slate-900 border border-white/10 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto">
         <div className="sticky top-0 bg-slate-900 border-b border-white/10 px-6 py-4 flex items-center justify-between z-10">
           <div>
-            <h2 className="font-serif text-lg text-white font-bold">Nouveau mouvement</h2>
+            <h2 className="font-serif text-lg text-white font-bold">{existing ? 'Modifier le mouvement' : 'Nouveau mouvement'}</h2>
             <p className="text-slate-500 text-xs mt-0.5">{location.name}</p>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-white transition-colors"><X size={18} /></button>
@@ -263,7 +283,7 @@ const MovementModal = ({ location, books, onClose, onSave }: {
               {isSale && (
                 <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 space-y-1">
                   <div className="flex justify-between"><span className="text-slate-500">Montant brut</span><span>{money(qty * unitPrice)}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Commission ({location.commissionPct}%)</span><span>−{money(qty * unitPrice * location.commissionPct / 100)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">Commission ({commissionPct}%)</span><span>−{money(qty * unitPrice * commissionPct / 100)}</span></div>
                   <div className="flex justify-between font-bold text-gold border-t border-white/10 pt-1.5 mt-1.5"><span>Qui te revient</span><span>{money(netPreview)}</span></div>
                 </div>
               )}
@@ -308,6 +328,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
   const [loaded, setLoaded] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Partial<ConsignmentLocation> | null>(null);
   const [movementFor, setMovementFor] = useState<ConsignmentLocation | null>(null);
+  const [editingMovement, setEditingMovement] = useState<ConsignmentMovement | null>(null);
   const [historyFilter, setHistoryFilter] = useState<string>('all');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
@@ -317,9 +338,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
       setLocations(ls.sort((a, b) => a.name.localeCompare(b.name, 'fr')));
       setLoaded(true);
     });
-    const u2 = subscribeToConsignmentMovements(ms =>
-      setMovements(ms.sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt)))
-    );
+    const u2 = subscribeToConsignmentMovements(ms => setMovements(sortMovements(ms)));
     return () => { u1(); u2(); };
   }, []);
 
@@ -355,6 +374,25 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
   const handleDeleteMovement = (id: string) => {
     deleteConsignmentMovement(id);
     setDeleteConfirm(null);
+  };
+
+  const openEdit = (m: ConsignmentMovement) => {
+    const loc = locations.find(l => l.id === m.locationId);
+    if (!loc) return;
+    setEditingMovement(m);
+    setMovementFor(loc);
+  };
+
+  // Échange l'ordre de deux mouvements voisins d'une même journée (dans la liste affichée).
+  const nudge = async (index: number, dir: -1 | 1) => {
+    const a = filteredMovements[index];
+    const b = filteredMovements[index + dir];
+    if (!a || !b || a.date !== b.date) return;
+    const ka = orderKey(a), kb = orderKey(b);
+    await Promise.all([
+      saveConsignmentMovement({ ...a, order: kb }),
+      saveConsignmentMovement({ ...b, order: ka }),
+    ]);
   };
 
   return (
@@ -433,7 +471,10 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
               </div>
 
               <div className="px-5 py-3 text-xs text-slate-500 space-y-0.5">
-                <div className="flex justify-between"><span>Déposés au total</span><span className="text-slate-300">{s.deposited}</span></div>
+                {onHandByBook(loc.id, movements).map(b => (
+                  <div key={b.title} className="flex justify-between"><span className="text-slate-400 truncate pr-3">{b.title}</span><span className="text-white font-bold">{b.qty} en consigne</span></div>
+                ))}
+                <div className="flex justify-between pt-1"><span>Déposés au total</span><span className="text-slate-300">{s.deposited}</span></div>
                 <div className="flex justify-between"><span>Ventes nettes de commission</span><span className="text-slate-300">{money(s.netOwed)}</span></div>
                 <div className="flex justify-between"><span>Paiements reçus</span><span className="text-slate-300">{money(s.paid)}</span></div>
               </div>
@@ -471,19 +512,22 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                     <th className="px-5 py-3">Date</th>
                     <th className="px-5 py-3">Dépositaire</th>
                     <th className="px-5 py-3">Type</th>
+                    <th className="px-5 py-3">Livre</th>
                     <th className="px-5 py-3 text-right">Quantité</th>
                     <th className="px-5 py-3 text-right">Montant</th>
                     <th className="px-5 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {filteredMovements.map(m => {
+                  {filteredMovements.map((m, i) => {
                     const meta = TYPE_META[m.type];
+                    const canUp = i > 0 && filteredMovements[i - 1].date === m.date;
+                    const canDown = i < filteredMovements.length - 1 && filteredMovements[i + 1].date === m.date;
                     const net = m.type === 'vente'
                       ? (m.qty ?? 0) * (m.unitPrice ?? 0) * (1 - (m.commissionPct ?? 0) / 100)
                       : null;
                     return (
-                      <tr key={m.id} className="text-slate-300 hover:bg-white/[0.03] transition-colors">
+                      <tr key={m.id} onClick={() => openEdit(m)} className="text-slate-300 hover:bg-white/[0.03] transition-colors cursor-pointer" title="Cliquer pour modifier">
                         <td className="px-5 py-3 whitespace-nowrap">{new Date(m.date + 'T12:00:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                         <td className="px-5 py-3">{locName(m.locationId)}</td>
                         <td className="px-5 py-3">
@@ -492,6 +536,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                           </span>
                           {m.note && <span className="block text-slate-600 text-xs mt-1">{m.note}</span>}
                         </td>
+                        <td className="px-5 py-3 text-slate-400">{m.bookTitle ?? '—'}</td>
                         <td className="px-5 py-3 text-right">{m.qty ?? '—'}</td>
                         <td className="px-5 py-3 text-right whitespace-nowrap">
                           {m.type === 'paiement' && <span className="text-gold font-bold">{money(m.amount ?? 0)}</span>}
@@ -503,7 +548,19 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                           )}
                           {(m.type === 'depot' || m.type === 'retour') && '—'}
                         </td>
-                        <td className="px-5 py-3 text-right">
+                        <td className="px-5 py-3 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                          <button onClick={() => nudge(i, -1)} disabled={!canUp}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-default" title="Monter (même journée)">
+                            <ArrowUp size={13} />
+                          </button>
+                          <button onClick={() => nudge(i, 1)} disabled={!canDown}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-default" title="Descendre (même journée)">
+                            <ArrowDown size={13} />
+                          </button>
+                          <button onClick={() => openEdit(m)}
+                            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-colors" title="Modifier (date, livre, quantité, prix)">
+                            <Edit3 size={13} />
+                          </button>
                           {deleteConfirm === m.id ? (
                             <span className="inline-flex gap-1">
                               <button onClick={() => handleDeleteMovement(m.id)} className="p-1.5 bg-red-500/20 rounded-lg text-red-400 hover:bg-red-500/30 transition-colors"><Check size={13} /></button>
@@ -537,7 +594,8 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
         <MovementModal
           location={movementFor}
           books={books}
-          onClose={() => setMovementFor(null)}
+          existing={editingMovement ?? undefined}
+          onClose={() => { setMovementFor(null); setEditingMovement(null); }}
           onSave={saveConsignmentMovement}
         />
       )}

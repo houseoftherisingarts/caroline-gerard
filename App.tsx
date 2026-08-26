@@ -32,6 +32,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminOrders from './pages/Admin/AdminOrders';
 import AdminInventory from './pages/Admin/AdminInventory';
 import AdminConsignations from './pages/Admin/AdminConsignations';
+import AdminVentes from './pages/Admin/AdminVentes';
 import AdminBlog from './pages/Admin/AdminBlog';
 import AdminEvents from './pages/Admin/AdminEvents';
 import AdminInvoices from './pages/Admin/AdminInvoices';
@@ -476,6 +477,7 @@ const App = () => {
                   <Route path="medias" element={<AdminMedia profileImage={profileImage} setProfileImage={handleSetProfileImage} mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} sphereGalleryImages={sphereGalleryImages} onSetSphereGalleryImages={handleSetSphereGalleryImages} />} />
                   <Route path="produits" element={<AdminInventory books={firestoreBooks} onSave={handleSaveBook} onDelete={handleDeleteBook} mediaLibrary={mediaLibrary} />} />
                   <Route path="depositaires" element={<AdminConsignations books={firestoreBooks} />} />
+                  <Route path="ventes" element={<AdminVentes books={firestoreBooks} />} />
                   <Route path="codes-promo" element={<AdminPromoCodes />} />
                   <Route path="temoignages" element={<AdminTestimonials />} />
                   <Route path="lead-magnet" element={<AdminLeadMagnet />} />

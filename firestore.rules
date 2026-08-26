@@ -101,6 +101,7 @@ service cloud.firestore {
     match /invoices/{id}             { allow read, write: if isAdmin(); }
     match /consignmentLocations/{id} { allow read, write: if isAdmin(); }
     match /consignmentMovements/{id} { allow read, write: if isAdmin(); }
+    match /stockMovements/{id}       { allow read, write: if isAdmin(); }
 
     // uniqueVisitors : réservé au SDK admin (recordVisit).
     // Toute collection absente de cette liste est refusée par défaut.

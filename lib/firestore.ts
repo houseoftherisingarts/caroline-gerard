@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement } from '../types';
+import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement, StockMovement } from '../types';
 
 // --- Generic helper ---
 
@@ -382,6 +382,17 @@ export const saveConsignmentMovement = (mov: ConsignmentMovement) =>
 
 export const deleteConsignmentMovement = (id: string) =>
   deleteDoc(doc(db, 'consignmentMovements', id));
+
+// --- Stock personnel et ventes directes ---
+
+export const subscribeToStockMovements = (cb: (items: StockMovement[]) => void) =>
+  subscribeToCollection<StockMovement>('stockMovements', cb);
+
+export const saveStockMovement = (mov: StockMovement) =>
+  setDoc(doc(db, 'stockMovements', mov.id), mov);
+
+export const deleteStockMovement = (id: string) =>
+  deleteDoc(doc(db, 'stockMovements', id));
 
 // --- Testimonials ---
 
