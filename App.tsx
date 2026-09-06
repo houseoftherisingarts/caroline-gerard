@@ -48,6 +48,7 @@ import AdminVisibilite from './pages/Admin/AdminVisibilite';
 import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
 import AdminTestimonials from './pages/Admin/AdminTestimonials';
 import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
+import AdminDemandeVexel from './pages/Admin/AdminDemandeVexel';
 import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
