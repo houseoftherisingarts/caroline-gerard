@@ -155,7 +155,7 @@ export type EmailLog = {
   meta?: Record<string, string | number | null>;
 };
 
-export type AppEvent = { id: string; title: string; date: string; location: string; description: string; image: string; link?: string; isPublished: boolean; content: string; slug: string; metaTitle: string; metaDescription: string; };
+export type AppEvent = { id: string; title: string; date: string; endDate?: string; location: string; description: string; image: string; link?: string; isPublished: boolean; content: string; slug: string; metaTitle: string; metaDescription: string; };
 
 export type Interview = { id: string; title: string; description: string; mediaType: 'video' | 'audio'; sourceType: 'youtube' | 'upload'; mediaUrl: string; date: string; isPublished: boolean; };
 

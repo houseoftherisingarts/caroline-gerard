@@ -4,6 +4,7 @@ import { PenTool, Edit, Trash2, ArrowLeft, Save, UploadCloud, Library, X as XIco
 import BlockEditor from '../../components/BlockEditor';
 import { uploadMediaFile } from '../../lib/storage';
 import NewsletterSendModal from '../../components/NewsletterSendModal';
+import { Precision, precisionOf, formatLong, MONTH_OPTIONS } from '../../lib/eventDate';
 
 // --- Helpers ---
 const getFirstImage = (image: string | undefined, content: string): string => {
@@ -74,15 +75,24 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
   const [currentEvent, setCurrentEvent] = useState<Partial<AppEvent> | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'seo'>('content');
   const [showNewsletterModal, setShowNewsletterModal] = useState(false);
+  // Précision de la date (jour exact, mois seul, année seule) et saisie mois/année en cours.
+  const [precision, setPrecision] = useState<Precision>('day');
+  const [ym, setYm] = useState({ y: '', m: '' });
+  const [error, setError] = useState('');
 
   const openEditor = (event: AppEvent | null = null) => {
+    const date = event?.date || '';
+    setPrecision(date ? precisionOf(date) : 'day');
+    setYm({ y: date.slice(0, 4), m: date.slice(5, 7) });
+    setError('');
     if (event) {
-      setCurrentEvent({ ...event });
+      setCurrentEvent({ ...event, endDate: event.endDate || '' });
     } else {
       setCurrentEvent({ 
         title: '', 
         description: '', 
         date: '', 
+        endDate: '',
         location: '', 
         image: '', 
         link: '', 
@@ -98,8 +108,25 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
   };
 
   const updateCurrentEvent = (data: Partial<AppEvent>) => {
+      setError('');
       setCurrentEvent(prev => prev ? { ...prev, ...data } : null);
   }
+
+  // Changer de précision garde ce qui peut l'être (le jour devient un mois, le mois une année); la fin ne survit qu'au jour exact.
+  const changePrecision = (p: Precision) => {
+    if (p === precision) return;
+    const d = currentEvent?.date || '';
+    const y = d.slice(0, 4), m = d.slice(5, 7);
+    setPrecision(p);
+    setYm({ y, m });
+    const date = p === 'day' ? (d.length >= 10 ? d : '') : p === 'month' ? (y && m ? `${y}-${m}` : '') : y;
+    updateCurrentEvent(p === 'day' ? { date } : { date, endDate: '' });
+  };
+  const changeYm = (next: { y: string; m: string }) => {
+    setYm(next);
+    const y = /^\d{4}$/.test(next.y) ? next.y : '';
+    updateCurrentEvent({ date: precision === 'year' ? y : (y && next.m ? `${y}-${next.m}` : '') });
+  };
 
   const executeSave = (evt: Partial<AppEvent> = currentEvent!) => {
     if (!evt) return;
@@ -115,6 +142,12 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
 
   const handleSave = () => {
     if (!currentEvent) return;
+    if (!currentEvent.title?.trim()) { setError('Un titre est requis.'); return; }
+    if (!currentEvent.date) {
+      setError(precision === 'month' ? 'Choisissez le mois et inscrivez l\'année à quatre chiffres.' : precision === 'year' ? 'Inscrivez l\'année à quatre chiffres.' : 'Choisissez la date de début.');
+      return;
+    }
+    if (currentEvent.endDate && currentEvent.endDate < currentEvent.date) { setError('La date de fin doit venir après la date de début.'); return; }
     const wasPublished = currentEvent.id
       ? (events.find(e => e.id === currentEvent.id)?.isPublished ?? false)
       : false;
@@ -131,9 +164,7 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
   };
 
   const eventDefaultBody = (e: Partial<AppEvent>) => {
-    const datePart = e.date
-      ? new Date(e.date).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-      : '';
+    const datePart = e.date ? formatLong({ date: e.date, endDate: e.endDate }) : '';
     const locationPart = e.location ? ` — ${e.location}` : '';
     return `${datePart}${locationPart}\n\n${e.description || ''}`.trim();
   };
@@ -173,6 +204,7 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
             </button>
           </div>
         </div>
+        {error && <p role="alert" className="text-red-400 text-sm font-bold text-right">{error}</p>}
         <div className="bg-midnight/60 backdrop-blur-md border border-white/10 rounded-full p-1 flex w-fit mx-auto">
             <button onClick={() => setActiveTab('content')} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === 'content' ? 'bg-gold text-midnight' : 'text-slate-400 hover:text-white'}`}>✍️ Contenu</button>
             <button onClick={() => setActiveTab('seo')} className={`px-6 py-2 rounded-full text-sm font-bold transition-colors ${activeTab === 'seo' ? 'bg-gold text-midnight' : 'text-slate-400 hover:text-white'}`}>🔍 SEO & Meta</button>
@@ -188,10 +220,42 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
                         onChange={(e) => updateCurrentEvent({ title: e.target.value })} 
                         className="w-full bg-transparent text-4xl font-serif text-white focus:outline-none placeholder-slate-600 border-b border-white/10 py-2"
                     />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input type="date" value={currentEvent.date || ''} onChange={(e) => updateCurrentEvent({ date: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
-                        <input type="text" placeholder="Lieu" value={currentEvent.location || ''} onChange={(e) => updateCurrentEvent({ location: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
+                    <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Quand</span>
+                            <div role="group" aria-label="Précision de la date" className="bg-black/20 border border-white/10 rounded-full p-1 flex">
+                                {([['day', 'Date exacte'], ['month', 'Mois seulement'], ['year', 'Année seulement']] as [Precision, string][]).map(([p, label]) => (
+                                    <button key={p} type="button" aria-pressed={precision === p} onClick={() => changePrecision(p)} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors ${precision === p ? 'bg-gold text-midnight' : 'text-slate-400 hover:text-white'}`}>{label}</button>
+                                ))}
+                            </div>
+                        </div>
+                        {precision === 'day' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <label className="block"><span className="block text-xs text-slate-500 mb-1">Début</span>
+                                    <input type="date" value={currentEvent.date || ''} onChange={(e) => updateCurrentEvent({ date: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
+                                </label>
+                                <label className="block"><span className="block text-xs text-slate-500 mb-1">Fin (facultatif, pour une période)</span>
+                                    <input type="date" value={currentEvent.endDate || ''} min={currentEvent.date || undefined} onChange={(e) => updateCurrentEvent({ endDate: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
+                                </label>
+                            </div>
+                        )}
+                        {precision === 'month' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <select aria-label="Mois" value={ym.m} onChange={(e) => changeYm({ ...ym, m: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white">
+                                    <option value="" className="text-slate-900">Mois</option>
+                                    {MONTH_OPTIONS.map(o => <option key={o.value} value={o.value} className="text-slate-900">{o.label}</option>)}
+                                </select>
+                                <input type="number" inputMode="numeric" aria-label="Année" placeholder="Année (ex. 2027)" min={2020} max={2100} value={ym.y} onChange={(e) => changeYm({ ...ym, y: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
+                            </div>
+                        )}
+                        {precision === 'year' && (
+                            <input type="number" inputMode="numeric" aria-label="Année" placeholder="Année (ex. 2027)" min={2020} max={2100} value={ym.y} onChange={(e) => changeYm({ ...ym, y: e.target.value })} className="w-full md:w-1/2 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
+                        )}
+                        {precision !== 'day' && (
+                            <p className="text-xs text-slate-500">Sans jour précis, l'événement s'affiche au bas de la liste avec la mention « date à confirmer ».</p>
+                        )}
                     </div>
+                    <input type="text" placeholder="Lieu" value={currentEvent.location || ''} onChange={(e) => updateCurrentEvent({ location: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
                     <input type="text" placeholder="Lien (Billet/Infos)" value={currentEvent.link || ''} onChange={(e) => updateCurrentEvent({ link: e.target.value })} className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white" />
                     <textarea 
                         placeholder="Description courte (pour l'aperçu)" 
@@ -260,6 +324,8 @@ const AdminEvents = ({ events, setEvents, mediaLibrary }: { events: AppEvent[], 
             </div>
             <div className="flex-1">
                <div className="flex items-center gap-3 mb-1">
+                <span className="text-gold text-xs font-bold uppercase tracking-wider">{formatLong(event, false)}</span>
+                <span className="w-1 h-1 rounded-full bg-slate-600"></span>
                 <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${event.isPublished ? 'bg-green-500/20 text-green-400' : 'bg-slate-600/50 text-slate-400'}`}>
                   {event.isPublished ? 'Publié' : 'Brouillon'}
                 </span>

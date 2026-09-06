@@ -7,6 +7,7 @@ import { AppEvent } from '../types';
 import BlockRenderer from '../components/BlockRenderer';
 import EditableText from '../components/EditableText';
 import { thumb } from '../lib/img';
+import { sortEvents, badge, effectiveEnd, isDateToConfirm } from '../lib/eventDate';
 
 const getFirstImage = (image: string | undefined, content: string): string => {
   if (image) return image;
@@ -24,23 +25,17 @@ const getFirstImage = (image: string | undefined, content: string): string => {
 const EventsPage = ({ events }: { events: AppEvent[] }) => {
   const [selectedEvent, setSelectedEvent] = useState<AppEvent | null>(null);
 
-  const getMonthName = (dateStr: string) => {
-    const months = ['JAN', 'FEV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOUT', 'SEPT', 'OCT', 'NOV', 'DEC'];
-    return months[new Date(dateStr).getMonth()];
-  };
-  const getYear = (dateStr: string) => dateStr.split('-')[0];
-  const getDay = (dateStr: string) => dateStr.split('-')[2];
-
-  const publishedEvents = events
-    .filter(e => e.isPublished)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const publishedEvents = sortEvents(events.filter(e => e.isPublished));
+  const firstToConfirm = publishedEvents.findIndex(isDateToConfirm);
 
   const canonicalUrl = 'https://carolinegerard.ca/evenements';
-  const eventJsonLdBlocks = publishedEvents.map(e => ({
+  // Les dates à confirmer restent hors du JSON-LD : Google exige une date complète.
+  const eventJsonLdBlocks = publishedEvents.filter(e => !isDateToConfirm(e)).map(e => ({
     '@context': 'https://schema.org',
     '@type': 'Event',
     name: e.title,
     startDate: e.date,
+    ...(effectiveEnd(e) ? { endDate: effectiveEnd(e) } : {}),
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     eventStatus: 'https://schema.org/EventScheduled',
     location: {
@@ -86,11 +81,19 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
         </div>
 
         <div className="grid gap-6 max-w-4xl mx-auto">
-          {publishedEvents.length > 0 ? publishedEvents.map(event => (
-            <div key={event.id} className="bg-midnight/60 backdrop-blur-md p-5 md:p-8 rounded-2xl border border-white/10 flex flex-col md:flex-row gap-4 md:gap-8 items-center hover:border-gold/30 transition-all cursor-pointer" onClick={() => setSelectedEvent(event)}>
+          {publishedEvents.length > 0 ? publishedEvents.map((event, i) => { const when = badge(event); return (
+            <React.Fragment key={event.id}>
+            {i === firstToConfirm && i > 0 && (
+              <div className="flex items-center gap-4 pt-4">
+                <span className="h-px flex-1 bg-white/10" />
+                <EditableText tag="span" contentKey="events_tbc_label" defaultValue="Dates à confirmer" className="text-xs uppercase tracking-widest text-slate-500 font-bold" />
+                <span className="h-px flex-1 bg-white/10" />
+              </div>
+            )}
+            <div className="bg-midnight/60 backdrop-blur-md p-5 md:p-8 rounded-2xl border border-white/10 flex flex-col md:flex-row gap-4 md:gap-8 items-center hover:border-gold/30 transition-all cursor-pointer" onClick={() => setSelectedEvent(event)}>
               <div className="bg-white/5 p-4 md:p-6 rounded-2xl text-center min-w-[100px] md:min-w-[120px] border border-white/5 self-start md:self-auto">
-                <span className="block text-4xl font-serif font-bold text-gold">{getDay(event.date)}</span>
-                <span className="block text-sm uppercase text-slate-300 tracking-widest mt-1">{getMonthName(event.date)} {getYear(event.date)}</span>
+                <span className={`block font-serif font-bold text-gold whitespace-nowrap ${when.top.length > 5 ? 'text-2xl leading-10' : 'text-4xl'}`}>{when.top}</span>
+                <span className="block text-sm uppercase text-slate-300 tracking-widest mt-1 whitespace-nowrap">{when.bottom}</span>
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-2xl font-serif text-white mb-3">{event.title}</h3>
@@ -105,7 +108,8 @@ const EventsPage = ({ events }: { events: AppEvent[] }) => {
                 </div>
               )}
             </div>
-          )) : (
+            </React.Fragment>
+          ); }) : (
             <EditableText tag="p" contentKey="events_empty_msg" defaultValue="Aucun événement prévu pour le moment." className="text-center text-slate-500" />
           )}
         </div>

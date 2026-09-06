@@ -12,6 +12,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 import { saveMember, subscribeToMemberMessages, sendCommunityMessage, markMessageRead } from '../lib/firestore';
 import { BlogPost, AppEvent, Conference, Member, Order, CommunityMessage } from '../types';
+import { sortEvents, formatLong, calendarRange } from '../lib/eventDate';
 import { thumb } from '../lib/img';
 import EditableText from '../components/EditableText';
 import { useEditableString } from '../components/EditableField';
@@ -32,16 +33,13 @@ import {
 } from 'lucide-react';
 // ─── ICS builder ─────────────────────────────────────────────────────────────
 
-function toICSDate(dateStr: string): string {
-  return new Date(dateStr).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-}
-
+// Journées entières (fin exclusive) : une période couvre tous ses jours et rien ne glisse à la veille.
 function downloadICS(event: AppEvent) {
-  const start = toICSDate(event.date);
-  const end = toICSDate(new Date(new Date(event.date).getTime() + 2 * 3600 * 1000).toISOString());
+  const range = calendarRange(event);
+  if (!range) return;
   const ics = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT',
-    `SUMMARY:${event.title}`, `DTSTART:${start}`, `DTEND:${end}`,
+    `SUMMARY:${event.title}`, `DTSTART;VALUE=DATE:${range.start}`, `DTEND;VALUE=DATE:${range.end}`,
     `LOCATION:${event.location}`,
     `DESCRIPTION:${event.description.replace(/\n/g, '\\n')}`,
     'END:VEVENT', 'END:VCALENDAR',
@@ -52,9 +50,9 @@ function downloadICS(event: AppEvent) {
 }
 
 function googleCalendarLink(event: AppEvent): string {
-  const start = toICSDate(event.date);
-  const end = toICSDate(new Date(new Date(event.date).getTime() + 2 * 3600 * 1000).toISOString());
-  return `https://calendar.google.com/calendar/render?${new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: `${start}/${end}`, details: event.description, location: event.location })}`;
+  const range = calendarRange(event);
+  if (!range) return '#';
+  return `https://calendar.google.com/calendar/render?${new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: `${range.start}/${range.end}`, details: event.description, location: event.location })}`;
 }
 
 // ─── Member registration on first sign-in ────────────────────────────────────
@@ -307,7 +305,7 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
 
   // ── Logged in ──────────────────────────────────────────────────────────────
   const publishedPosts = posts.filter(p => p.isPublished);
-  const publishedEvents = events.filter(e => e.isPublished).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const publishedEvents = sortEvents(events.filter(e => e.isPublished));
   const publishedConfs = conferences.filter(c => c.isPublished);
 
   return (
@@ -423,14 +421,14 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
                         <div className="flex items-center gap-3 mb-2">
                           <Calendar className="text-gold w-4 h-4 shrink-0" />
                           <span className="text-gold text-sm font-bold">
-                            {new Date(event.date).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                            {formatLong(event)}
                           </span>
                         </div>
                         <h3 className="text-white font-bold text-lg">{event.title}</h3>
                         <p className="text-slate-400 text-sm mt-1">{event.location}</p>
                         <p className="text-slate-500 text-sm mt-2 line-clamp-2">{event.description}</p>
                       </div>
-                      <div className="flex flex-col gap-2 shrink-0">
+                      {calendarRange(event) ? <div className="flex flex-col gap-2 shrink-0">
                         <a href={googleCalendarLink(event)} target="_blank" rel="noopener noreferrer"
                           className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
                           <ExternalLink className="w-4 h-4" /> <EditableText tag="span" contentKey="comm_event_google_btn" defaultValue="Google Agenda" />
@@ -439,7 +437,11 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
                           className="flex items-center gap-2 px-4 py-2 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white rounded-lg text-sm font-bold transition-colors whitespace-nowrap">
                           <Download className="w-4 h-4" /> <EditableText tag="span" contentKey="comm_event_ics_btn" defaultValue="Télécharger .ics" />
                         </button>
-                      </div>
+                      </div> : (
+                        <span className="self-start px-3 py-1.5 rounded-full border border-white/10 text-xs font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">
+                          <EditableText tag="span" contentKey="comm_event_tbc" defaultValue="Date à confirmer" />
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))
