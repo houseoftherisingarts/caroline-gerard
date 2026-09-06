@@ -120,6 +120,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
 
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           <NavLink to="/admin" icon={<LayoutDashboard />} label="Tableau de bord" onClick={closeSidebar} />
+          <NavLink to="/admin/demande-changement" icon={<Send />} label="Demander un changement" onClick={closeSidebar} />
           <NavLink to="/admin/commandes" icon={<ShoppingCart />} label="Commandes" onClick={closeSidebar} />
           <NavLink to="/admin/factures" icon={<FileText />} label="Factures & Devis" onClick={closeSidebar} />
           <NavLink to="/admin/echelle" icon={<Layers />} label="Échelle Produits" onClick={closeSidebar} />
