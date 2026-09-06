@@ -26,6 +26,7 @@ import {
   Download,
   Store,
   BadgeDollarSign,
+  Send,
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
