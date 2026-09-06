@@ -469,6 +469,7 @@ const App = () => {
               <AdminLayout>
                 <Routes>
                   <Route index element={<AdminDashboard showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
+                  <Route path="demande-changement" element={<AdminDemandeVexel />} />
                   <Route path="commandes" element={<AdminOrders />} />
                   <Route path="factures" element={<AdminInvoices />} />
                   <Route path="echelle" element={<AdminProductLadder offers={offers} />} />
