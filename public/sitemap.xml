@@ -56,6 +56,14 @@
   </url>
 
   <url>
+    <loc>https://carolinegerard.ca/actualites</loc>
+    <lastmod>2026-09-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="fr-CA" href="https://carolinegerard.ca/actualites" />
+  </url>
+
+  <url>
     <loc>https://carolinegerard.ca/blog</loc>
     <lastmod>2026-05-06</lastmod>
     <changefreq>weekly</changefreq>
