@@ -140,6 +140,7 @@ const AdminVisibilite = ({ vis, onSetVis, sphereImageScale, onSetSphereImageScal
         <ToggleRow label="Interviews & Médias" description="Masque la page /interviews et son lien dans le menu." checked={vis.hidePageInterviews} onChange={t('hidePageInterviews')} />
         <ToggleRow label="Conférences" description="Masque la page /conferences et son lien dans le menu." checked={vis.hideConferences} onChange={t('hideConferences')} />
         <ToggleRow label="Blog" description="Masque la page /blog et son lien dans le menu." checked={vis.hidePageBlog} onChange={t('hidePageBlog')} />
+        <ToggleRow label="Actualités" description="Masque la page /actualites et son lien dans le menu." checked={vis.hidePageActualites} onChange={t('hidePageActualites')} />
         <ToggleRow label="Contact" description="Masque la page /contact et son lien dans le menu." checked={vis.hidePageContact} onChange={t('hidePageContact')} />
         <ToggleRow label="Espace client / Communauté" description="Masque la page /communaute et le bouton « Espace client » dans le menu." checked={vis.hideEspaceClient} onChange={t('hideEspaceClient')} />
       </Group>
@@ -148,6 +149,7 @@ const AdminVisibilite = ({ vis, onSetVis, sphereImageScale, onSetSphereImageScal
       <Group title="Sections — Page Accueil">
         <ToggleRow label="Section héros" description="Masque le grand bandeau d'introduction avec la photo et les boutons." checked={vis.hideHomeHero} onChange={t('hideHomeHero')} />
         <ToggleRow label="Bouton « Lire le blog »" description="Masque le bouton « Lire le blog » dans la section héros de l'Accueil." checked={vis.hideHomeLireLeBlog} onChange={t('hideHomeLireLeBlog')} />
+        <ToggleRow label="Dernières nouvelles" description="Masque le bloc des trois dernières actualités sur la page Accueil." checked={vis.hideHomeActualites} onChange={t('hideHomeActualites')} />
         <ToggleRow label="Section mission" description="Masque le bloc « Une mission de cœur » avec les cartes Inspiration / Imaginaire." checked={vis.hideHomeMission} onChange={t('hideHomeMission')} />
         <ToggleRow label="Galerie photos" description="Masque la galerie de 6 photos sur la page Accueil. Chaque photo est modifiable individuellement via « Modifier le site »." checked={vis.hideHomeGallery} onChange={t('hideHomeGallery')} />
         <ToggleRow label="Section infolettre" description="Masque le formulaire d'abonnement à l'infolettre en bas de la page Accueil." checked={vis.hideHomeNewsletter} onChange={t('hideHomeNewsletter')} />

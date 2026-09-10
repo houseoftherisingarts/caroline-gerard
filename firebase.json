@@ -21,6 +21,13 @@
     ],
     "rewrites": [
       {
+        "source": "/actualites/**",
+        "function": {
+          "functionId": "ogActualite",
+          "region": "northamerica-northeast1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

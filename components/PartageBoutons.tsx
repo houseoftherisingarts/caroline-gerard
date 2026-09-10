@@ -14,24 +14,26 @@ type Props = {
   title: string;
   text?: string;
   className?: string;
+  /** Rangée compacte, icônes seules : pour les petites cartes où trois libellés déborderaient. */
+  compact?: boolean;
 };
 
 const canNativeShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
-const Btn = ({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) => (
+const Btn = ({ onClick, title, compact, children }: { onClick: () => void; title: string; compact?: boolean; children: React.ReactNode }) => (
   <button
     type="button"
     onClick={onClick}
     title={title}
     aria-label={title}
-    className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-slate-300 text-xs font-bold
-               hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all"
+    className={`flex items-center gap-2 rounded-xl border border-white/10 text-slate-300 text-xs font-bold
+               hover:text-gold hover:border-gold/50 hover:bg-gold/10 transition-all ${compact ? 'px-2.5 py-2' : 'px-3 py-2'}`}
   >
     {children}
   </button>
 );
 
-const PartageBoutons = ({ url, title, text = '', className = '' }: Props) => {
+const PartageBoutons = ({ url, title, text = '', className = '', compact = false }: Props) => {
   const [copie, setCopie] = useState<'lien' | 'texte' | null>(null);
 
   const flash = (quoi: 'lien' | 'texte') => {
@@ -63,34 +65,38 @@ const PartageBoutons = ({ url, title, text = '', className = '' }: Props) => {
         <button
           type="button"
           onClick={partagePhone}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gold text-midnight text-xs font-bold
-                     hover:bg-white transition-colors"
+          className={`flex items-center gap-2 rounded-xl bg-gold text-midnight text-xs font-bold
+                     hover:bg-white transition-colors ${compact ? 'px-2.5 py-2' : 'px-3 py-2'}`}
+          title="Partager"
+          aria-label="Partager"
         >
-          <Share2 size={14} /> Partager
+          <Share2 size={14} /> {!compact && 'Partager'}
         </button>
       )}
 
       <Btn
+        compact={compact}
         title="Partager sur Facebook"
         onClick={() => window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
           '_blank', 'noopener,noreferrer,width=640,height=640',
         )}
       >
-        <Facebook size={14} /> Facebook
+        <Facebook size={14} /> {!compact && 'Facebook'}
       </Btn>
 
-      <Btn title="Copier le lien de la nouvelle" onClick={() => copier(url, 'lien')}>
+      <Btn compact={compact} title="Copier le lien de la nouvelle" onClick={() => copier(url, 'lien')}>
         {copie === 'lien' ? <Check size={14} className="text-green-400" /> : <LinkIcon size={14} />}
-        {copie === 'lien' ? 'Lien copié' : 'Copier le lien'}
+        {!compact && (copie === 'lien' ? 'Lien copié' : 'Copier le lien')}
       </Btn>
 
       <Btn
+        compact={compact}
         title="Copier le texte et le lien, prêts à coller"
         onClick={() => copier([title, text, url].filter(Boolean).join('\n\n'), 'texte')}
       >
         {copie === 'texte' ? <Check size={14} className="text-green-400" /> : <ClipboardCopy size={14} />}
-        {copie === 'texte' ? 'Texte copié' : 'Copier le texte'}
+        {!compact && (copie === 'texte' ? 'Texte copié' : 'Copier le texte')}
       </Btn>
     </div>
   );

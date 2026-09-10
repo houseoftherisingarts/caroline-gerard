@@ -2,10 +2,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Star, Feather, BookOpen, Camera } from 'lucide-react';
+import { Star, Feather, BookOpen, Camera, Calendar, ArrowRight } from 'lucide-react';
 import EditableText from '../components/EditableText';
 import NewsletterForm from '../components/NewsletterForm';
 import SphereGallery, { SphereImage } from '../components/SphereGallery';
+import PartageBoutons from '../components/PartageBoutons';
+import { publishedNews, resume } from './ActualitesPage';
+import { formatLong } from '../lib/eventDate';
+import { NewsItem } from '../types';
 import { VisibilitySettings, DEFAULT_VIS } from '../lib/firestore';
 import { thumb } from '../lib/img';
 
@@ -18,7 +22,8 @@ const HOME_GALLERY_IMAGES: SphereImage[] = [
   { id: '6', url: 'https://storage.googleapis.com/salondesinconnus/Caroline/gifr%20png.png', alt: 'Caroline Gérard — Galerie photo 6' },
 ];
 
-const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGalleryImages }: { profileImage: string; vis?: VisibilitySettings; sphereImageScale?: number; sphereGalleryImages?: SphereImage[] }) => {
+const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGalleryImages, news = [] }: { profileImage: string; vis?: VisibilitySettings; sphereImageScale?: number; sphereGalleryImages?: SphereImage[]; news?: NewsItem[] }) => {
+  const dernieresNouvelles = publishedNews(news).slice(0, 3);
   const canonicalUrl = 'https://carolinegerard.ca/';
   const personJsonLd = {
     '@context': 'https://schema.org',
@@ -146,6 +151,52 @@ const HomePage = ({ profileImage, vis = DEFAULT_VIS, sphereImageScale, sphereGal
               alt="Caroline et William"
               className="relative z-10 rounded-[60px] border-4 border-white/10 shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-700 w-[75%] object-cover object-top aspect-square"
             />
+          </div>
+        </section>
+      )}
+
+      {/* Dernières nouvelles — fil alimenté depuis l'Espace Auteure (onglet Actualités) */}
+      {!vis.hideHomeActualites && dernieresNouvelles.length > 0 && (
+        <section className="w-full py-16 md:py-24 px-5 md:px-16 lg:px-24 relative">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-wrap items-end justify-between gap-4 mb-10 md:mb-14">
+              <div>
+                <EditableText tag="span" contentKey="home_news_label" defaultValue="Ce qui se passe" className="text-gold uppercase tracking-widest text-sm font-bold" />
+                <EditableText tag="h2" contentKey="home_news_title" defaultValue="Dernières nouvelles" className="font-serif text-3xl md:text-5xl text-white mt-3" />
+              </div>
+              <Link to="/actualites" className="inline-flex items-center gap-2 text-gold font-bold uppercase tracking-wider text-xs hover:text-white transition-colors">
+                Toutes les actualités <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {dernieresNouvelles.map(item => (
+                <article key={item.id} className="bg-midnight/60 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-gold/30 transition-all group flex flex-col">
+                  <Link to={`/actualites/${item.slug}`} className="h-48 overflow-hidden relative bg-slate-800 block">
+                    {item.image && (
+                      <img src={thumb(item.image, 800)} alt={item.title} className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-midnight/80 to-transparent" />
+                    <span className="absolute bottom-4 left-4 flex items-center gap-2 text-xs font-bold text-white/80">
+                      <Calendar className="w-3 h-3 text-gold" /> {formatLong({ date: item.date }, false)}
+                    </span>
+                  </Link>
+                  <div className="p-6 flex-1 flex flex-col">
+                    <h3 className="text-xl font-serif text-white mb-3 leading-snug">
+                      <Link to={`/actualites/${item.slug}`} className="hover:text-gold transition-colors">{item.title}</Link>
+                    </h3>
+                    <p className="text-slate-300 text-sm leading-relaxed mb-6 flex-1">{resume(item.body, 150)}</p>
+                    <PartageBoutons
+                      url={`https://carolinegerard.ca/actualites/${item.slug}`}
+                      title={item.title}
+                      text={resume(item.body)}
+                      className="mt-auto"
+                      compact
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
       )}

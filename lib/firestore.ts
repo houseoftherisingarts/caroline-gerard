@@ -286,6 +286,7 @@ export type VisibilitySettings = {
   hideHomeGallery: boolean;
   hideHomeNewsletter: boolean;
   hideHomeLireLeBlog: boolean;
+  hideHomeActualites: boolean;
   // Sections — Contact
   hideContactForm: boolean;
   // Sections — À Propos
@@ -312,6 +313,7 @@ export const DEFAULT_VIS: VisibilitySettings = {
   hideHomeGallery: false,
   hideHomeNewsletter: false,
   hideHomeLireLeBlog: false,
+  hideHomeActualites: false,
   hideContactForm: false,
   hideAProposCaroline: false,
   hideAProposWilliam: false,

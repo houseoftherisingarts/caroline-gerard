@@ -6,6 +6,7 @@ import HomePage from '../HomePage';
 import AProposPage from '../AProposPage';
 import ContactPage from '../ContactPage';
 import BlogPage from '../BlogPage';
+import ActualitesPage from '../ActualitesPage';
 import EventsPage from '../EventsPage';
 import ConferencesPage from '../ConferencesPage';
 import InterviewsPage from '../InterviewsPage';
@@ -13,13 +14,14 @@ import CommunautePage from '../CommunautePage';
 import ShopPage from '../ShopPage';
 import EditableText from '../../components/EditableText';
 import TermsPage from '../TermsPage';
-import { BlogPost, AppEvent, Conference, Interview, Book } from '../../types';
+import { BlogPost, NewsItem, AppEvent, Conference, Interview, Book } from '../../types';
 
 const PAGES = [
   { id: 'home',        label: 'Accueil' },
   { id: 'a-propos',   label: 'À Propos' },
   { id: 'boutique',    label: 'Boutique' },
   { id: 'blog',        label: 'Blog' },
+  { id: 'actualites',  label: 'Actualités' },
   { id: 'evenements',  label: 'Événements' },
   { id: 'conferences', label: 'Conférences' },
   { id: 'communaute',  label: 'Communauté' },
@@ -32,6 +34,7 @@ const PAGES = [
 interface AdminSiteEditorProps {
   profileImage: string;
   posts: BlogPost[];
+  news: NewsItem[];
   events: AppEvent[];
   conferences: Conference[];
   interviews: Interview[];
@@ -42,7 +45,7 @@ interface AdminSiteEditorProps {
 }
 
 const AdminSiteEditor = ({
-  profileImage, posts, events, conferences, interviews, books, addToCart, visitorCount, showVisitorCount,
+  profileImage, posts, news, events, conferences, interviews, books, addToCart, visitorCount, showVisitorCount,
 }: AdminSiteEditorProps) => {
   const { enterEditMode, exitEditMode, saveChanges, pendingChanges } = useSiteContent();
   const [selectedPage, setSelectedPage] = useState('home');
@@ -70,6 +73,7 @@ const AdminSiteEditor = ({
       case 'a-propos':   return <AProposPage />;
       case 'boutique':    return <ShopPage books={books} addToCart={addToCart} />;
       case 'blog':        return <BlogPage posts={posts} />;
+      case 'actualites':  return <ActualitesPage news={news} />;
       case 'evenements':  return <EventsPage events={events} />;
       case 'conferences': return <ConferencesPage conferences={conferences} />;
       case 'communaute':  return <CommunautePage posts={posts} events={events} conferences={conferences} />;

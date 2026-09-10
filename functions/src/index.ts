@@ -1,4 +1,4 @@
-import { onCall, HttpsError, CallableRequest } from 'firebase-functions/v2/https';
+import { onCall, onRequest, HttpsError, CallableRequest } from 'firebase-functions/v2/https';
 import { onDocumentWritten, onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { defineSecret, defineString } from 'firebase-functions/params';
 import { initializeApp } from 'firebase-admin/app';
@@ -910,3 +910,128 @@ function buildEmailHtml(order: OrderRecord, items: CartItemPayload[]): string {
 </body>
 </html>`;
 }
+
+// ── Aperçu social des actualités ─────────────────────────────────────────────
+// Facebook, LinkedIn et compagnie ne lisent pas le JavaScript : sans cette
+// fonction, un lien vers /actualites/<slug> partagé sur un réseau afficherait
+// la vignette générique du site au lieu de la photo et du titre de la nouvelle.
+// Hosting redirige donc /actualites/** ici, la fonction reprend la page bâtie
+// par Vite et remplace les balises d'aperçu avant de la renvoyer. Le visiteur
+// humain reçoit le site normal, le robot reçoit les bonnes balises.
+
+const SITE_PUBLIC = 'https://carolinegerard.ca';
+const IMAGE_PAR_DEFAUT = 'https://storage.googleapis.com/salondesinconnus/Caroline/Gemini_Generated_Image_8wrovw8wrovw8wro.png';
+
+let coquille: { html: string; at: number } | null = null;
+
+async function pageDeBase(): Promise<string | null> {
+  if (coquille && Date.now() - coquille.at < 10 * 60 * 1000) return coquille.html;
+  try {
+    // /index.html est un vrai fichier servi par Hosting : aucune réécriture, aucune boucle.
+    const reponse = await fetch(`${SITE_PUBLIC}/index.html`);
+    if (!reponse.ok) return null;
+    const html = await reponse.text();
+    coquille = { html, at: Date.now() };
+    return html;
+  } catch {
+    return null;
+  }
+}
+
+const echapper = (v: string): string =>
+  v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const resumeTexte = (corps: string, max = 200): string => {
+  const plat = (corps || '').replace(/\s+/g, ' ').trim();
+  return plat.length <= max ? plat : `${plat.slice(0, max - 1).trimEnd()}…`;
+};
+
+function balises(titre: string, description: string, image: string, url: string): string {
+  const t = echapper(titre);
+  const d = echapper(description);
+  const i = echapper(image);
+  const u = echapper(url);
+  return [
+    `<title>${t} | Caroline Gérard</title>`,
+    `<meta name="description" content="${d}" />`,
+    `<link rel="canonical" href="${u}" />`,
+    '<meta property="og:type" content="article" />',
+    `<meta property="og:title" content="${t}" />`,
+    `<meta property="og:description" content="${d}" />`,
+    `<meta property="og:image" content="${i}" />`,
+    `<meta property="og:url" content="${u}" />`,
+    '<meta name="twitter:card" content="summary_large_image" />',
+    `<meta name="twitter:title" content="${t}" />`,
+    `<meta name="twitter:description" content="${d}" />`,
+    `<meta name="twitter:image" content="${i}" />`,
+  ].join('\n    ');
+}
+
+function injecter(html: string, blocDeBalises: string): string {
+  const nettoye = html
+    .replace(/<title>[\s\S]*?<\/title>/i, '')
+    .replace(/<meta\s+name="description"[^>]*>/i, '')
+    .replace(/<link\s+rel="canonical"[^>]*>/i, '')
+    .replace(/<meta\s+property="og:(title|description|image|url|type)"[^>]*>/gi, '')
+    .replace(/<meta\s+name="twitter:(card|title|description|image)"[^>]*>/gi, '');
+  return nettoye.replace(/<head([^>]*)>/i, `<head$1>\n    ${blocDeBalises}`);
+}
+
+export const ogActualite = onRequest(
+  { region: 'northamerica-northeast1', memory: '256MiB', maxInstances: 3, cors: false },
+  async (req, res) => {
+    const slug = decodeURIComponent((req.path || '').replace(/^\/actualites\/?/, '').split('/')[0] || '');
+
+    let titre = 'Actualités';
+    let description = "Les nouvelles de Caroline Gérard : salons, dédicaces, parutions et coulisses.";
+    let image = IMAGE_PAR_DEFAUT;
+
+    if (slug) {
+      try {
+        const snap = await db.collection('news').where('slug', '==', slug).limit(1).get();
+        const nouvelle = snap.empty ? null : snap.docs[0].data();
+        if (nouvelle && nouvelle.isPublished) {
+          titre = String(nouvelle.title || titre);
+          description = resumeTexte(String(nouvelle.body || '')) || description;
+          if (nouvelle.image) image = String(nouvelle.image);
+        }
+      } catch {
+        // Firestore muet : on sert quand même la page avec les balises du site.
+      }
+    }
+
+    const url = slug ? `${SITE_PUBLIC}/actualites/${slug}` : `${SITE_PUBLIC}/actualites`;
+    const blocDeBalises = balises(titre, description, image, url);
+    const base = await pageDeBase();
+
+    res.set('Content-Type', 'text/html; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+
+    if (base) {
+      res.status(200).send(injecter(base, blocDeBalises));
+      return;
+    }
+
+    // Repli rarissime : la page bâtie n'a pas pu être lue. On sert une page
+    // complète avec les bonnes balises et le texte de la nouvelle.
+    res.status(200).send(`<!doctype html>
+<html lang="fr-CA">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    ${blocDeBalises}
+    <style>body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;padding:3rem 1.5rem;line-height:1.6}
+    main{max-width:44rem;margin:0 auto}h1{font-size:2rem;color:#fff}img{width:100%;border-radius:1rem;margin-bottom:1.5rem}
+    a{color:#d4af37}</style>
+  </head>
+  <body>
+    <main>
+      <img src="${echapper(image)}" alt="" />
+      <h1>${echapper(titre)}</h1>
+      <p>${echapper(description)}</p>
+      <p><a href="${SITE_PUBLIC}/actualites">Toutes les actualités de Caroline Gérard</a></p>
+    </main>
+  </body>
+</html>`);
+  },
+);

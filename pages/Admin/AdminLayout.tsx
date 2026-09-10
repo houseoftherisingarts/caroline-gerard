@@ -27,6 +27,7 @@ import {
   Store,
   BadgeDollarSign,
   Send,
+  Newspaper,
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
@@ -125,6 +126,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/factures" icon={<FileText />} label="Factures & Devis" onClick={closeSidebar} />
           <NavLink to="/admin/echelle" icon={<Layers />} label="Échelle Produits" onClick={closeSidebar} />
           <NavLink to="/admin/studio" icon={<Camera />} label="Studio Social" onClick={closeSidebar} />
+          <NavLink to="/admin/actualites" icon={<Newspaper />} label="Actualités" onClick={closeSidebar} />
           <NavLink to="/admin/contenu" icon={<Edit3 />} label="Articles de Blog" onClick={closeSidebar} />
           <NavLink to="/admin/evenements" icon={<Calendar />} label="Événements" onClick={closeSidebar} />
           <NavLink to="/admin/conferences" icon={<Briefcase />} label="Conférences" onClick={closeSidebar} />

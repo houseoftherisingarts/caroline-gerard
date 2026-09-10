@@ -76,26 +76,30 @@ const NouvelleSeule = ({ item }: { item: NewsItem }) => {
             <ArrowLeft size={14} /> Toutes les actualités
           </Link>
 
-          {item.image && (
-            <div className="w-full h-[32vh] md:h-[52vh] rounded-2xl overflow-hidden mb-8 bg-slate-800">
-              <img src={thumb(item.image, 1600)} alt={item.title} className="w-full h-full object-cover" />
+          <article className="bg-midnight/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            {item.image && (
+              <div className="w-full h-[32vh] md:h-[52vh] bg-slate-800">
+                <img src={thumb(item.image, 1600)} alt={item.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+
+            <div className="p-6 md:p-12">
+              <div className="flex items-center gap-2 text-sm text-gold mb-4">
+                <Calendar size={14} /> {dateLabel(item)}
+              </div>
+
+              <h1 className="font-serif text-3xl md:text-5xl text-white mb-8 leading-tight">{item.title}</h1>
+
+              <p className="text-slate-200 text-base md:text-lg leading-relaxed whitespace-pre-line mb-8">{item.body}</p>
+
+              <LienNouvelle item={item} />
+
+              <div className="border-t border-white/10 mt-10 pt-6 flex flex-wrap items-center gap-4">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Partager</span>
+                <PartageBoutons url={url} title={item.title} text={description} />
+              </div>
             </div>
-          )}
-
-          <div className="flex items-center gap-2 text-sm text-gold mb-4">
-            <Calendar size={14} /> {dateLabel(item)}
-          </div>
-
-          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight">{item.title}</h1>
-
-          <p className="text-slate-300 text-base md:text-lg leading-relaxed whitespace-pre-line mb-8">{item.body}</p>
-
-          <LienNouvelle item={item} />
-
-          <div className="border-t border-white/10 mt-10 pt-6 flex flex-wrap items-center gap-4">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Partager</span>
-            <PartageBoutons url={url} title={item.title} text={description} />
-          </div>
+          </article>
         </div>
       </div>
     </>
@@ -104,7 +108,7 @@ const NouvelleSeule = ({ item }: { item: NewsItem }) => {
 
 // ── Le fil ──────────────────────────────────────────────────────────────────
 const CarteLarge = ({ item }: { item: NewsItem }) => (
-  <article className="grid md:grid-cols-12 gap-6 md:gap-10 items-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-gold/30 transition-all overflow-hidden group">
+  <article className="grid md:grid-cols-12 gap-6 md:gap-10 items-center bg-midnight/60 backdrop-blur-md rounded-2xl border border-white/10 hover:border-gold/30 transition-all overflow-hidden group">
     <Link to={`/actualites/${item.slug}`} className="md:col-span-7 block h-56 md:h-[26rem] overflow-hidden bg-slate-800">
       {item.image && (
         <img src={thumb(item.image, 1200)} alt={item.title}
@@ -118,7 +122,7 @@ const CarteLarge = ({ item }: { item: NewsItem }) => (
       <h2 className="font-serif text-2xl md:text-4xl text-white mb-4 leading-tight">
         <Link to={`/actualites/${item.slug}`} className="hover:text-gold transition-colors">{item.title}</Link>
       </h2>
-      <p className="text-slate-400 leading-relaxed mb-6">{resume(item.body, 260)}</p>
+      <p className="text-slate-300 leading-relaxed mb-6">{resume(item.body, 260)}</p>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <Link to={`/actualites/${item.slug}`} className="text-gold font-bold uppercase tracking-wider text-xs hover:text-white transition-colors">
           Lire la suite
@@ -129,8 +133,8 @@ const CarteLarge = ({ item }: { item: NewsItem }) => (
   </article>
 );
 
-const Carte = ({ item }: { item: NewsItem }) => (
-  <article className="bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-gold/30 transition-all group flex flex-col">
+const Carte: React.FC<{ item: NewsItem }> = ({ item }) => (
+  <article className="bg-midnight/60 backdrop-blur-md rounded-2xl overflow-hidden border border-white/10 hover:border-gold/30 transition-all group flex flex-col">
     <Link to={`/actualites/${item.slug}`} className="h-52 overflow-hidden relative bg-slate-800 block">
       {item.image && (
         <img src={thumb(item.image, 800)} alt={item.title}
@@ -145,8 +149,8 @@ const Carte = ({ item }: { item: NewsItem }) => (
       <h2 className="text-xl font-serif text-white mb-3 leading-snug">
         <Link to={`/actualites/${item.slug}`} className="hover:text-gold transition-colors">{item.title}</Link>
       </h2>
-      <p className="text-slate-400 text-sm leading-relaxed mb-6 flex-1">{resume(item.body)}</p>
-      <PartageBoutons url={`${SITE}/actualites/${item.slug}`} title={item.title} text={resume(item.body)} className="mt-auto" />
+      <p className="text-slate-300 text-sm leading-relaxed mb-6 flex-1">{resume(item.body)}</p>
+      <PartageBoutons url={`${SITE}/actualites/${item.slug}`} title={item.title} text={resume(item.body)} className="mt-auto" compact />
     </div>
   </article>
 );
@@ -199,7 +203,7 @@ const ActualitesPage = ({ news }: { news: NewsItem[] }) => {
         ) : (
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center px-6">
             <Newspaper className="w-16 h-16 text-white/10 mb-6" />
-            <EditableText tag="h2" contentKey="news_empty_title" defaultValue="Les premières nouvelles arrivent bientôt" className="text-3xl font-serif text-white mb-4" />
+            <EditableText tag="h2" contentKey="news_empty_title" defaultValue="Les nouvelles arrivent bientôt" className="text-3xl font-serif text-white mb-4" />
             <EditableText tag="p" contentKey="news_empty_text" defaultValue="En attendant, suivez les prochains rendez-vous sur la page Événements." className="text-slate-400 max-w-md" />
             <Link to="/evenements" className="mt-8 text-gold font-bold uppercase tracking-wider text-xs hover:text-white transition-colors">
               Voir les événements

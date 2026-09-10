@@ -20,6 +20,7 @@ import CartDrawer from './components/CartDrawer';
 import EditableText from './components/EditableText';
 import CheckoutPage from './components/CheckoutPage';
 import HomePage from './pages/HomePage';
+import ActualitesPage from './pages/ActualitesPage';
 import ShopPage from './pages/ShopPage';
 import BlogPage from './pages/BlogPage';
 import ContactPage from './pages/ContactPage';
@@ -49,6 +50,7 @@ import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
 import AdminTestimonials from './pages/Admin/AdminTestimonials';
 import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
 import AdminDemandeVexel from './pages/Admin/AdminDemandeVexel';
+import AdminActualites from './pages/Admin/AdminActualites';
 import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
@@ -56,11 +58,13 @@ import IntroScreen from './components/IntroScreen';
 import NewsletterForm from './components/NewsletterForm';
 import CookieBanner from './components/CookieBanner';
 import { SiteContentProvider } from './contexts/SiteContentContext';
+import CrayonSite from './components/CrayonSite';
 
 import { blogPosts, books } from './data';
-import { Book, Order, ProductOffer, CartItem, BlogPost, Conference, Lead, AppEvent, Interview } from './types';
+import { Book, Order, ProductOffer, CartItem, BlogPost, Conference, Lead, AppEvent, Interview, NewsItem } from './types';
 import {
   subscribeToPosts, savePost, deletePost,
+  subscribeToNews,
   subscribeToEvents, saveEvent, deleteEvent,
   subscribeToConferences, saveConference, deleteConference,
   subscribeToInterviews, saveInterview, deleteInterview,
@@ -108,10 +112,11 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-8 xl:gap-10">
+        <div className="hidden lg:flex items-center gap-5 xl:gap-8">
           <Link to="/" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
           {!vis.hidePageAPropos && <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>}
           {!vis.hidePageBoutique && <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>}
+          {!vis.hidePageActualites && <Link to="/actualites" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Actualités</Link>}
           {!vis.hidePageEvenements && <Link to="/evenements" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>}
           {!vis.hidePageInterviews && <Link to="/interviews" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>}
           {!vis.hideConferences && <Link to="/conferences" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>}
@@ -160,6 +165,7 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
                 { to: '/', label: 'Accueil', hidden: false },
                 { to: '/a-propos', label: 'À Propos', hidden: vis.hidePageAPropos },
                 { to: '/boutique', label: 'Boutique', hidden: vis.hidePageBoutique },
+                { to: '/actualites', label: 'Actualités', hidden: vis.hidePageActualites },
                 { to: '/evenements', label: 'Événements', hidden: vis.hidePageEvenements },
                 { to: '/interviews', label: 'Médias', hidden: vis.hidePageInterviews },
                 { to: '/conferences', label: 'Conférence', hidden: vis.hideConferences },
@@ -250,6 +256,7 @@ const App = () => {
   ]);
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   const [mediaLibrary, setMediaLibrary] = useState<string[]>([]);
   const [visitorCount, setVisitorCount] = useState(0); // IP-unique tally from Firestore
   const [showVisitorCount, setShowVisitorCount] = useState(true);
@@ -312,6 +319,7 @@ const App = () => {
   useEffect(() => {
     const unsubs = [
       subscribeToPosts(setPosts),
+      subscribeToNews(setNews),
       subscribeToEvents(setEvents),
       subscribeToConferences(setConferences),
       subscribeToInterviews(setInterviews),
@@ -474,6 +482,7 @@ const App = () => {
                   <Route path="factures" element={<AdminInvoices />} />
                   <Route path="echelle" element={<AdminProductLadder offers={offers} />} />
                   <Route path="studio" element={<AdminSocialStudio mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} />} />
+                  <Route path="actualites" element={<AdminActualites news={news} mediaLibrary={mediaLibrary} />} />
                   <Route path="contenu" element={<AdminBlog posts={posts} setPosts={handleSetPosts} mediaLibrary={mediaLibrary} />} />
                   <Route path="evenements" element={<AdminEvents events={events} setEvents={handleSetEvents} mediaLibrary={mediaLibrary} />} />
                   <Route path="medias" element={<AdminMedia profileImage={profileImage} setProfileImage={handleSetProfileImage} mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} sphereGalleryImages={sphereGalleryImages} onSetSphereGalleryImages={handleSetSphereGalleryImages} />} />
@@ -488,7 +497,7 @@ const App = () => {
                   <Route path="kanban" element={<AdminKanban />} />
                   <Route path="communaute" element={<AdminCommunaute />} />
                   <Route path="visibilite" element={<AdminVisibilite vis={vis} onSetVis={handleSetVis} sphereImageScale={sphereImageScale} onSetSphereImageScale={handleSetSphereImageScale} />} />
-                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} events={events} conferences={conferences} interviews={interviews} books={firestoreBooks} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
+                  <Route path="editeur" element={<AdminSiteEditor profileImage={profileImage} posts={posts} news={news} events={events} conferences={conferences} interviews={interviews} books={firestoreBooks} addToCart={addToCart} visitorCount={visitorCount} showVisitorCount={showVisitorCount} />} />
                   <Route path="*" element={<div className="text-center p-12 text-slate-500">Section en développement...</div>} />
                 </Routes>
               </AdminLayout>
@@ -509,7 +518,7 @@ const App = () => {
                 onRemoveItem={removeItem}
               />
               <Routes>
-                <Route path="/" element={<HomePage profileImage={profileImage} vis={vis} sphereImageScale={sphereImageScale} sphereGalleryImages={sphereGalleryImages.length > 0 ? sphereGalleryImages : undefined} />} />
+                <Route path="/" element={<HomePage profileImage={profileImage} vis={vis} sphereImageScale={sphereImageScale} sphereGalleryImages={sphereGalleryImages.length > 0 ? sphereGalleryImages : undefined} news={news} />} />
                 <Route path="/a-propos" element={
                   vis.hidePageAPropos ? <Navigate to="/" replace /> : <AProposPage vis={vis} />
                 } />
@@ -527,6 +536,12 @@ const App = () => {
                 } />
                 <Route path="/blog" element={
                   vis.hidePageBlog ? <Navigate to="/" replace /> : <BlogPage posts={posts} />
+                } />
+                <Route path="/actualites" element={
+                  vis.hidePageActualites ? <Navigate to="/" replace /> : <ActualitesPage news={news} />
+                } />
+                <Route path="/actualites/:slug" element={
+                  vis.hidePageActualites ? <Navigate to="/" replace /> : <ActualitesPage news={news} />
                 } />
                 <Route path="/evenements" element={
                   vis.hidePageEvenements ? <Navigate to="/" replace /> : <EventsPage events={events} />
@@ -550,6 +565,7 @@ const App = () => {
               </Routes>
               <Footer visitorCount={visitorCount} showVisitorCount={showVisitorCount} vis={vis} />
               <CookieBanner />
+              <CrayonSite visible={isAdmin} />
             </div>
           } />
         </Routes>
