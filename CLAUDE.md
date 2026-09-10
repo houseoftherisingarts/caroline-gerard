@@ -104,3 +104,26 @@ npm run build && npm test
 ## Project Notes
 
 Artist portfolio site.
+
+## 🚨 Journal des changements — à tenir à CHAQUE journée de travail
+
+Caroline lit dans son Espace Auteure, à `/admin/journal`, le récit de tout ce qui a été bâti sur
+son site, une journée à la fois. Le contenu vit dans `lib/changelog.ts`.
+
+**Toute session qui touche ce dépôt ajoute son entrée en tête de `JOURNAL`, le jour même, AVANT
+de déclarer la livraison finie.** Une session sans entrée est une session inachevée, au même titre
+qu'un déploiement oublié.
+
+Comment l'écrire :
+
+- Une seule entrée par journée. Si la journée en a déjà une, ses étapes s'y ajoutent au lieu d'en
+  créer une deuxième.
+- Le texte s'adresse à Caroline, au « tu », et décrit ce qui a changé POUR ELLE. Jamais de nom de
+  fichier, de composant, de collection Firestore ni de vocabulaire de programmeur.
+- Chaque étape est une phrase entière avec un verbe. Jamais trois phrases courtes de suite
+  (RÈGLE -6, `voix-alex`), jamais de tiret cadratin.
+- Les corrections de défauts comptent autant que les nouveautés, et les travaux de sécurité se
+  nomment en clair, sans faire peur.
+- Vérifier avant de livrer :
+  `python3 ~/.claude/skills/voix-alex/scripts/verifier.py` sur les textes extraits du fichier.
+- Une journée déjà inscrite ne se récrit pas.

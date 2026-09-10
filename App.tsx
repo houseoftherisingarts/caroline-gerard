@@ -51,6 +51,7 @@ import AdminTestimonials from './pages/Admin/AdminTestimonials';
 import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
 import AdminDemandeVexel from './pages/Admin/AdminDemandeVexel';
 import AdminActualites from './pages/Admin/AdminActualites';
+import AdminChangeLog from './pages/Admin/AdminChangeLog';
 import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
@@ -478,6 +479,7 @@ const App = () => {
                 <Routes>
                   <Route index element={<AdminDashboard showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
                   <Route path="demande-changement" element={<AdminDemandeVexel />} />
+                  <Route path="journal" element={<AdminChangeLog />} />
                   <Route path="commandes" element={<AdminOrders />} />
                   <Route path="factures" element={<AdminInvoices />} />
                   <Route path="echelle" element={<AdminProductLadder offers={offers} />} />

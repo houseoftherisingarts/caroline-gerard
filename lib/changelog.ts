@@ -125,9 +125,8 @@ export const JOURNAL: EntreeJournal[] = [
     etapes: [
       "La page À propos a été créée.",
       "L’éditeur de texte est devenu riche : gras, italique, tailles et vrais paragraphes se posent directement dans la page.",
-      "Le téléversement de photos dans la médiathèque a été refait au complet.",
-      "Le deuxième livre a pris sa place dans la boutique.",
-      "L’infolettre est née, avec son formulaire, sa fenêtre d’envoi et la page Communauté.",
+      "Le téléversement de photos dans la médiathèque a été refait au complet, et le deuxième livre a pris sa place dans la boutique du même coup.",
+      "L’infolettre est née, avec son formulaire d’abonnement, la fenêtre qui te sert à composer l’envoi, et la page Communauté où tes abonnés atterrissent.",
       "Le bandeau des témoins est apparu, le reçu de commande a été bâti et la caisse a gagné en solidité.",
       "Tout le site a été repassé page par page pour le téléphone, ton Espace Auteure et son menu compris.",
     ],
