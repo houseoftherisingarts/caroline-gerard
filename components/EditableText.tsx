@@ -38,6 +38,9 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
 
   const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Un texte éditable vit parfois dans un lien : sans ceci, le clic ouvrirait la
+    // fenêtre de modification et changerait de page en même temps.
+    e.preventDefault();
     setIsEditing(true);
   };
 

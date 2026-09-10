@@ -45,14 +45,14 @@ const EditableImage = ({ contentKey, defaultValue, alt, className = '' }: Editab
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-[inherit]">
           <button
             type="button"
-            onClick={() => setIsPickerOpen(true)}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsPickerOpen(true); }}
             className="bg-gold text-midnight px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-white transition-colors"
           >
             <Camera size={16} /> Changer l&apos;image
           </button>
           <button
             type="button"
-            onClick={() => setIsFocalOpen(true)}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsFocalOpen(true); }}
             className="bg-white/90 text-midnight px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-white transition-colors"
           >
             <Crop size={16} /> Recadrer
