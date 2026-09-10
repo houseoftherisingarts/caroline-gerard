@@ -24,6 +24,7 @@ service cloud.firestore {
     // ── Contenu public du site : lecture libre, écriture admin ──
     match /books/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /posts/{id}       { allow read: if true; allow write: if isAdmin(); }
+    match /news/{id}        { allow read: if true; allow write: if isAdmin(); }
     match /events/{id}      { allow read: if true; allow write: if isAdmin(); }
     match /conferences/{id} { allow read: if true; allow write: if isAdmin(); }
     match /interviews/{id}  { allow read: if true; allow write: if isAdmin(); }

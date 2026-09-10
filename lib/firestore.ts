@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
-import { BlogPost, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement, StockMovement } from '../types';
+import { BlogPost, NewsItem, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement, StockMovement } from '../types';
 
 // --- Generic helper ---
 
@@ -63,6 +63,34 @@ export const savePost = (post: BlogPost) =>
 
 export const deletePost = (id: string) =>
   deleteDoc(doc(db, 'posts', id));
+
+// --- Actualités ---
+
+export const subscribeToNews = (cb: (items: NewsItem[]) => void) =>
+  subscribeToCollection<NewsItem>('news', cb);
+
+export const saveNewsItem = (item: NewsItem) =>
+  setDoc(doc(db, 'news', item.id), item);
+
+export const deleteNewsItem = (id: string) =>
+  deleteDoc(doc(db, 'news', id));
+
+/**
+ * Fabrique l'adresse publique d'une nouvelle à partir de son titre, puis se
+ * garde d'écraser une adresse déjà prise en lui ajoutant un chiffre.
+ */
+export const slugifyNews = (title: string, existing: string[] = []): string => {
+  const base = title
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'nouvelle';
+  if (!existing.includes(base)) return base;
+  let n = 2;
+  while (existing.includes(`${base}-${n}`)) n++;
+  return `${base}-${n}`;
+};
 
 // --- Events ---
 
@@ -250,6 +278,7 @@ export type VisibilitySettings = {
   hidePageEvenements: boolean;
   hidePageInterviews: boolean;
   hidePageBlog: boolean;
+  hidePageActualites: boolean;
   hidePageContact: boolean;
   // Sections — Accueil
   hideHomeHero: boolean;
@@ -276,6 +305,7 @@ export const DEFAULT_VIS: VisibilitySettings = {
   hidePageEvenements: false,
   hidePageInterviews: false,
   hidePageBlog: false,
+  hidePageActualites: false,
   hidePageContact: false,
   hideHomeHero: false,
   hideHomeMission: false,

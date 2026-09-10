@@ -248,3 +248,20 @@ export type CommunityMessage = {
   createdAt: string;
   read: boolean;
 };
+/** Une nouvelle du fil d'actualités : un texte court, une photo, parfois un lien. */
+export type NewsItem = {
+  id: string;
+  /** Adresse publique de la nouvelle : /actualites/<slug>. Ne change plus une fois publiée. */
+  slug: string;
+  title: string;
+  /** Texte simple, sauts de ligne conservés. Pas de HTML. */
+  body: string;
+  image: string;
+  /** Date affichée, au format AAAA-MM-JJ. */
+  date: string;
+  /** Lien optionnel vers une page du site ou vers l'extérieur. */
+  link?: string;
+  linkLabel?: string;
+  isPublished: boolean;
+  createdAt: string;
+};
