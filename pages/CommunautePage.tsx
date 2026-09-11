@@ -454,6 +454,9 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
           </div>
         )}
 
+        {/* ── Rendez-vous ── */}
+        {tab === 'rendezvous' && <RendezVousCommunaute user={user} />}
+
         {/* ── Messages ── */}
         {tab === 'messages' && (
           <div className="bg-midnight/60 border border-white/10 rounded-2xl overflow-hidden flex flex-col" style={{ height: '65vh' }}>
