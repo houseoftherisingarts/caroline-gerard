@@ -426,6 +426,32 @@ export const saveStockMovement = (mov: StockMovement) =>
 export const deleteStockMovement = (id: string) =>
   deleteDoc(doc(db, 'stockMovements', id));
 
+// --- Agenda de rendez-vous (lib/rendezvous.ts) ---
+
+export const subscribeToRendezVous = (cb: (items: RendezVous[]) => void) =>
+  subscribeToCollection<RendezVous>('rendezvous', cb);
+
+export const subscribeToOccupations = (cb: (items: Occupation[]) => void) =>
+  subscribeToCollection<Occupation>('occupations', cb);
+
+export const updateRendezVousStatut = (id: string, statut: StatutRendezVous, noteAdmin?: string) =>
+  updateDoc(doc(db, 'rendezvous', id), {
+    statut,
+    updatedAt: new Date().toISOString(),
+    ...(noteAdmin !== undefined ? { noteAdmin } : {}),
+  });
+
+export const deleteOccupation = (id: string) =>
+  deleteDoc(doc(db, 'occupations', id));
+
+/** Bloque une journée entière (9 h à 17 h, heure locale) sur l'agenda, pour une demande de conférence. */
+export const bloquerJournee = (jour: string) => {
+  const debut = new Date(`${jour}T09:00:00`);
+  const fin = new Date(`${jour}T17:00:00`);
+  const id = `bloc-${jour}`;
+  return setDoc(doc(db, 'occupations', id), { debut, fin });
+};
+
 // --- Testimonials ---
 
 export const subscribeToTestimonials = (cb: (items: Testimonial[]) => void) =>
