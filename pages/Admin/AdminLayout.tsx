@@ -60,6 +60,9 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
   const location = useLocation();
   const isEditor = location.pathname === '/admin/editeur';
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [demandesAgenda, setDemandesAgenda] = useState(0);
+
+  useEffect(() => subscribeToRendezVous((items) => setDemandesAgenda(items.filter((r) => r.statut === 'demande').length)), []);
 
   if (isEditor) return <>{children}</>;
 
