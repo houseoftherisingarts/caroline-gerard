@@ -481,6 +481,7 @@ const App = () => {
                 <Routes>
                   <Route index element={<AdminDashboard showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
                   <Route path="demande-changement" element={<AdminDemandeVexel />} />
+                  <Route path="partenaire-vexel" element={<AdminDevenirPartenaire />} />
                   <Route path="journal" element={<AdminChangeLog />} />
                   <Route path="commandes" element={<AdminOrders />} />
                   <Route path="factures" element={<AdminInvoices />} />
