@@ -590,6 +590,121 @@ export const onConferencePublished = onDocumentWritten(
   }
 );
 
+// ── onRendezVousConfirme — courriel de confirmation d'un rendez-vous ────────
+// Quand Caroline confirme une demande (rendezvous/{id}.statut passe à 'confirme'),
+// la personne reçoit un courriel avec la date, l'heure, le lien vers la salle vidéo
+// dans le site et le fichier .ics en pièce jointe.
+
+const deuxChiffres = (n: number): string => String(n).padStart(2, '0');
+const icsDate = (d: Date): string =>
+  `${d.getUTCFullYear()}${deuxChiffres(d.getUTCMonth() + 1)}${deuxChiffres(d.getUTCDate())}T${deuxChiffres(d.getUTCHours())}${deuxChiffres(d.getUTCMinutes())}00Z`;
+
+function icsRendezVousConfirme(id: string, debut: Date, fin: Date, salle: string): string {
+  const salleUrl = `https://meet.jit.si/${salle}`;
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Caroline Gérard//Rendez-vous//FR',
+    'BEGIN:VEVENT',
+    `UID:${id}@carolinegerard.ca`,
+    `DTSTAMP:${icsDate(new Date())}`,
+    `DTSTART:${icsDate(debut)}`,
+    `DTEND:${icsDate(fin)}`,
+    'SUMMARY:Rencontre avec Caroline Gérard',
+    `DESCRIPTION:Rencontre vidéo : ${salleUrl}`,
+    `URL:${salleUrl}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+}
+
+export const onRendezVousConfirme = onDocumentWritten(
+  {
+    document: 'rendezvous/{rdvId}',
+    region: 'northamerica-northeast1',
+    secrets: [emailUser, emailPass],
+  },
+  async (event) => {
+    const before = event.data?.before?.data() as { statut?: string } | undefined;
+    const after = event.data?.after?.data() as {
+      statut?: string;
+      nom?: string;
+      courriel?: string;
+      debut?: FirebaseFirestore.Timestamp;
+      fin?: FirebaseFirestore.Timestamp;
+      salle?: string;
+    } | undefined;
+
+    if (!after?.statut || after.statut !== 'confirme' || before?.statut === 'confirme') return;
+    if (!after.courriel || !after.debut || !after.fin || !after.salle) return;
+
+    const user = emailUser.value();
+    const pass = emailPass.value();
+    if (!user || !pass) {
+      console.error('Email secrets not configured — cannot send appointment confirmation.');
+      return;
+    }
+
+    const debut = after.debut.toDate();
+    const fin = after.fin.toDate();
+    const dateStr = debut.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const heureStr = debut.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+    const lienRencontre = `${SITE_PUBLIC}/communaute?onglet=rendezvous`;
+
+    const html = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Ton rendez-vous est confirmé</title></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+    <div style="background:#0f0f23;padding:36px 32px;text-align:center;">
+      <h1 style="color:#C8A96E;font-size:28px;margin:0;font-family:Georgia,serif;">Caroline Gérard</h1>
+      <p style="color:#888;margin:8px 0 0;letter-spacing:2px;font-size:12px;text-transform:uppercase;">Rendez-vous confirmé</p>
+    </div>
+    <div style="padding:32px;">
+      <h2 style="color:#0f0f23;font-size:22px;margin:0 0 16px;font-family:Georgia,serif;">Ton rendez-vous est confirmé</h2>
+      <p style="color:#555;font-size:15px;line-height:1.7;">
+        Ta rencontre avec Caroline Gérard aura lieu le <strong>${dateStr}</strong>, à <strong>${heureStr}</strong>.
+      </p>
+      <p style="color:#555;font-size:15px;line-height:1.7;">
+        La rencontre se tient en visioconférence, directement dans le site : ouvre le lien ci-dessous
+        à l'heure prévue, dans l'onglet Rendez-vous de ton espace membre.
+      </p>
+      <div style="text-align:center;margin-top:24px;">
+        <a href="${lienRencontre}" style="background:#C8A96E;color:#0f0f23;padding:14px 32px;border-radius:8px;font-weight:bold;text-decoration:none;font-size:15px;">Rejoindre la rencontre</a>
+      </div>
+      <p style="color:#999;font-size:13px;margin-top:24px;">Le fichier joint ajoute ce rendez-vous à ton calendrier.</p>
+    </div>
+    <div style="background:#f0f0f0;padding:16px;text-align:center;font-size:11px;color:#aaa;">
+      © 2026 Caroline Gérard
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const subject = `Ton rendez-vous avec Caroline Gérard — ${dateStr}`;
+    const transporter = makeTransporter();
+    try {
+      await transporter.sendMail({
+        from: `"Caroline Gérard" <${user}>`,
+        to: after.courriel,
+        subject,
+        html,
+        attachments: [
+          {
+            filename: 'rendez-vous.ics',
+            content: icsRendezVousConfirme(event.params.rdvId, debut, fin, after.salle),
+            contentType: 'text/calendar; charset=utf-8; method=PUBLISH',
+          },
+        ],
+      });
+      await logEmail({ type: 'rendezvous_confirme', to: after.courriel, subject, html, success: true, meta: { rdvId: event.params.rdvId } });
+    } catch (err) {
+      await logEmail({ type: 'rendezvous_confirme', to: after.courriel, subject, html, success: false, errorMessage: (err as Error).message, meta: { rdvId: event.params.rdvId } });
+      console.error('Failed to send appointment confirmation email:', err);
+    }
+  }
+);
+
 // ── sendContactForm callable — public contact-form forwarding ────────────────
 // Forwards a public site visitor's contact-form message to the configured
 // destination email. Server-side validates input and rate-limits silently.
