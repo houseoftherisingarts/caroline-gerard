@@ -141,6 +141,8 @@ export type Lead = {
   date: string;
   isRead?: boolean;
   archived?: boolean;
+  /** Date souhaitée pour une intervention, AAAA-MM-JJ (fenêtre « Réserver » de ConferencesPage). */
+  dateSouhaitee?: string;
 };
 
 export type EmailLog = {
