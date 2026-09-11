@@ -76,12 +76,51 @@ service cloud.firestore {
     }
 
     match /leads/{id} {
-      allow create: if keysOnly(['id', 'source', 'name', 'email', 'message', 'date', 'isRead', 'archived'])
+      allow create: if keysOnly(['id', 'source', 'name', 'email', 'message', 'date', 'isRead', 'archived', 'dateSouhaitee'])
         && request.resource.data.name is string && request.resource.data.name.size() <= 300
         && request.resource.data.email is string && request.resource.data.email.size() <= 320
         && request.resource.data.message is string && request.resource.data.message.size() <= 10000
-        && request.resource.data.isRead == false;
+        && request.resource.data.isRead == false
+        && (!('dateSouhaitee' in request.resource.data)
+            || (request.resource.data.dateSouhaitee is string && request.resource.data.dateSouhaitee.size() <= 10));
       allow read, update, delete: if isAdmin();
+    }
+
+    // ── Agenda de rendez-vous (lib/rendezvous.ts) ──
+    // settings/agenda (disponibilités de Caroline) est déjà couvert par settings/{id} ci-dessus.
+    match /rendezvous/{rdvId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow create: if isAdmin()
+                    || (isOwner(request.resource.data.uid)
+                        && request.resource.data.statut == 'demande'
+                        && request.resource.data.creePar == 'client'
+                        && request.resource.data.debut > request.time
+                        && rdvValide(request.resource.data)
+                        && request.resource.data.keys().hasOnly(['uid', 'nom', 'courriel', 'debut', 'fin', 'duree', 'statut', 'salle', 'note', 'creePar', 'createdAt', 'updatedAt']));
+      // La personne ne peut qu'annuler le sien; le reste appartient à Caroline.
+      allow update: if isAdmin()
+                    || (isOwner(resource.data.uid)
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['statut', 'updatedAt'])
+                        && request.resource.data.statut == 'annule');
+      allow delete: if isAdmin();
+    }
+    // Miroir sans donnée personnelle : les personnes connectées voient les créneaux déjà pris.
+    match /occupations/{rdvId} {
+      allow read: if request.auth != null;
+      // Le miroir n'existe que pour un rendez-vous réel écrit dans le même lot, au nom de la
+      // personne, aux mêmes heures : impossible de bloquer l'agenda avec une occupation fantôme.
+      allow create: if isAdmin()
+                    || (request.auth != null
+                        && request.resource.data.debut is timestamp
+                        && request.resource.data.fin is timestamp
+                        && request.resource.data.fin > request.resource.data.debut
+                        && request.resource.data.keys().hasOnly(['debut', 'fin'])
+                        && getAfter(/databases/$(database)/documents/rendezvous/$(rdvId)).data.uid == request.auth.uid
+                        && getAfter(/databases/$(database)/documents/rendezvous/$(rdvId)).data.debut == request.resource.data.debut
+                        && getAfter(/databases/$(database)/documents/rendezvous/$(rdvId)).data.fin == request.resource.data.fin);
+      allow delete: if isAdmin()
+                    || (request.auth != null && get(/databases/$(database)/documents/rendezvous/$(rdvId)).data.uid == request.auth.uid);
+      allow update: if isAdmin();
     }
 
     match /abandonedCheckouts/{id} {
