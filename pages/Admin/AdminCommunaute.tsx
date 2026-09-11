@@ -211,6 +211,7 @@ const AdminCommunaute = () => {
     conference_announcement: 'Annonce de conférence',
     direct_message: 'Message groupé',
     contact_form: 'Formulaire de contact',
+    rendezvous_confirme: 'Confirmation de rendez-vous',
   }[t]);
 
   // conversation panel JSX is inlined below to avoid the component-within-component remount bug
