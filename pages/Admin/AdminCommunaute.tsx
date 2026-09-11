@@ -643,6 +643,7 @@ const AdminCommunaute = () => {
               <option value="conference_announcement">Annonces de conférence</option>
               <option value="direct_message">Messages groupés</option>
               <option value="contact_form">Formulaires de contact</option>
+              <option value="rendezvous_confirme">Confirmations de rendez-vous</option>
             </select>
           </div>
 
