@@ -77,8 +77,10 @@ def html(entrees) -> str:
   .couverture .sous {{ font-size: 11pt; color: #cbd5e1; max-width: 128mm; margin-top: 6mm; }}
   .couverture .pied {{ margin-top: auto; font-size: 9pt; color: #94a3b8; letter-spacing: .08em; }}
 
-  .journee {{ page-break-inside: avoid; margin-bottom: 11mm; padding-bottom: 9mm;
+  .journee {{ margin-bottom: 10mm; padding-bottom: 8mm;
               border-bottom: 1px solid rgba(176,138,62,.28); }}
+  .date, h2 {{ break-after: avoid-page; }}
+  li, .intro {{ orphans: 2; widows: 2; }}
   .journee:last-of-type {{ border-bottom: 0; }}
   .date {{ font-size: 8.5pt; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
            color: #9a7429; margin: 0 0 2mm; }}
@@ -93,14 +95,14 @@ def html(entrees) -> str:
 </style></head><body>
   <section class="couverture">
     <p class="marque">Caroline Gérard</p>
-    <h1>Le journal des changements de votre site</h1>
+    <h1>Le journal de ton site</h1>
     <p class="chiffre">{len(entrees)}</p>
     <p class="sous">journées de travail et {total} changements livrés depuis le {escape(premiere)},
        racontés du plus récent au plus ancien.</p>
     <p class="pied">carolinegerard.ca · Espace Auteure · Journal des changements</p>
   </section>
   {journees}
-  <p class="fin">Ce journal vit aussi dans votre Espace Auteure, sous « Journal des changements »,
+  <p class="fin">Ce journal vit aussi dans ton Espace Auteure, sous « Journal des changements »,
      et une nouvelle journée s'y ajoute chaque fois que le site bouge.</p>
 </body></html>"""
 
@@ -128,8 +130,10 @@ def main():
     for i, page in enumerate(doc):
         page.wrap_contents()
         page.draw_rect(page.rect, fill=NUIT if i == 0 else CREME, overlay=False)
-    doc.save(str(SORTIE), incremental=False, deflate=True)
+    final = SORTIE.with_name(SORTIE.stem + "-fond.pdf")
+    doc.save(str(final), deflate=True)
     doc.close()
+    final.replace(SORTIE)
     tmp_html.unlink(missing_ok=True)
 
     taille = SORTIE.stat().st_size / 1024
