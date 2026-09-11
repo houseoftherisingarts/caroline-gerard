@@ -50,6 +50,7 @@ import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
 import AdminTestimonials from './pages/Admin/AdminTestimonials';
 import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
 import AdminDemandeVexel from './pages/Admin/AdminDemandeVexel';
+import AdminDevenirPartenaire from './pages/Admin/AdminDevenirPartenaire';
 import AdminActualites from './pages/Admin/AdminActualites';
 import AdminChangeLog from './pages/Admin/AdminChangeLog';
 import AdminAgenda from './pages/Admin/AdminAgenda';
