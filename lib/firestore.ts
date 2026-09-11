@@ -438,7 +438,7 @@ export const subscribeToOccupations = (cb: (items: Occupation[]) => void) =>
 export const updateRendezVousStatut = (id: string, statut: StatutRendezVous, noteAdmin?: string) =>
   updateDoc(doc(db, 'rendezvous', id), {
     statut,
-    updatedAt: new Date().toISOString(),
+    updatedAt: serverTimestamp(),
     ...(noteAdmin !== undefined ? { noteAdmin } : {}),
   });
 
