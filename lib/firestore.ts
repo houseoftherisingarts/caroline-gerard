@@ -428,12 +428,19 @@ export const deleteStockMovement = (id: string) =>
   deleteDoc(doc(db, 'stockMovements', id));
 
 // --- Agenda de rendez-vous (lib/rendezvous.ts) ---
+// rendezvous/{id} et occupations/{id} ne portent PAS leur id dans leurs propres champs
+// (firestore.rules les borne à hasOnly([...]) sans 'id', pour rester minimal) : contrairement
+// aux autres collections de ce fichier, l'id vient donc de l'id du document, pas de .data().
 
 export const subscribeToRendezVous = (cb: (items: RendezVous[]) => void) =>
-  subscribeToCollection<RendezVous>('rendezvous', cb);
+  onSnapshot(collection(db, 'rendezvous'), (snap) => {
+    cb(snap.docs.map((d) => ({ ...(d.data() as Omit<RendezVous, 'id'>), id: d.id })));
+  });
 
 export const subscribeToOccupations = (cb: (items: Occupation[]) => void) =>
-  subscribeToCollection<Occupation>('occupations', cb);
+  onSnapshot(collection(db, 'occupations'), (snap) => {
+    cb(snap.docs.map((d) => ({ ...(d.data() as Omit<Occupation, 'id'>), id: d.id })));
+  });
 
 export const updateRendezVousStatut = (id: string, statut: StatutRendezVous, noteAdmin?: string) =>
   updateDoc(doc(db, 'rendezvous', id), {
