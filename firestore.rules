@@ -21,6 +21,22 @@ service cloud.firestore {
       return request.resource.data.keys().hasOnly(allowed);
     }
 
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Bornes d'un rendez-vous : mêmes règles que l'agenda de Xena Horizon.
+    function rdvValide(data) {
+      return data.nom is string && data.nom.size() < 120
+             && data.courriel is string && data.courriel.size() < 200
+             && data.debut is timestamp && data.fin is timestamp
+             && data.fin > data.debut
+             && data.duree is number && data.duree >= 15 && data.duree <= 240
+             && data.fin.toMillis() - data.debut.toMillis() == data.duree * 60000
+             && data.salle is string && data.salle.size() < 80
+             && (!('note' in data) || (data.note is string && data.note.size() <= 1000));
+    }
+
     // ── Contenu public du site : lecture libre, écriture admin ──
     match /books/{id}       { allow read: if true; allow write: if isAdmin(); }
     match /posts/{id}       { allow read: if true; allow write: if isAdmin(); }
