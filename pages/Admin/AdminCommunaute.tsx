@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../firebase';
 import { Users, Mail, Send, Trash2, UserCheck, MessageSquare, ArrowLeft, Inbox, FileSearch, Archive, Eye, EyeOff, AlertTriangle, Check } from 'lucide-react';
