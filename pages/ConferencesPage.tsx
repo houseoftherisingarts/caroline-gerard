@@ -122,7 +122,73 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
                 <span className="text-gold">{selectedBookingConference.title}</span>
               </h2>
               <EditableText tag="p" contentKey="conferences_form_intro" defaultValue="Remplis le formulaire ci-dessous pour engager Caroline." className="text-slate-400 pb-4" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">...</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="block">
+                  <span className="sr-only">Ton nom</span>
+                  <input
+                    type="text" required value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Ton nom"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors"
+                  />
+                </label>
+                <label className="block">
+                  <span className="sr-only">Ton courriel</span>
+                  <input
+                    type="email" required value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="Ton courriel"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors"
+                  />
+                </label>
+              </div>
+              <label className="block">
+                <span className="sr-only">Organisation</span>
+                <input
+                  type="text" value={formData.company}
+                  onChange={e => setFormData({ ...formData, company: e.target.value })}
+                  placeholder="Organisation (école, entreprise, événement)"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors"
+                />
+              </label>
+              <label className="block">
+                <span className="sr-only">Date et lieu envisagés</span>
+                <input
+                  type="text" value={formData.eventInfo}
+                  onChange={e => setFormData({ ...formData, eventInfo: e.target.value })}
+                  placeholder="Date et lieu envisagés"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors"
+                />
+              </label>
+              <label className="block">
+                <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date souhaitée (facultatif)</span>
+                <input
+                  type="date" value={formData.dateSouhaitee}
+                  onChange={e => setFormData({ ...formData, dateSouhaitee: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold/50 transition-colors [color-scheme:dark]"
+                />
+              </label>
+              <label className="block">
+                <span className="sr-only">Détails</span>
+                <textarea
+                  rows={4} value={formData.details}
+                  onChange={e => setFormData({ ...formData, details: e.target.value })}
+                  placeholder="Quelques détails sur le public et le contexte de l'intervention"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+                />
+              </label>
+              <button
+                type="submit"
+                className="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-midnight font-bold rounded-xl hover:bg-white transition-colors"
+              >
+                <EditableText tag="span" contentKey="conferences_form_submit_btn" defaultValue="Envoyer la demande" />
+              </button>
+              <p className="text-slate-400 text-sm text-center pt-2">
+                <EditableText tag="span" contentKey="conferences_form_rdv_intro" defaultValue="Tu préfères d'abord en parler de vive voix ? " />
+                <Link to="/communaute?onglet=rendezvous" className="text-gold hover:underline">
+                  <EditableText tag="span" contentKey="conferences_form_rdv_link" defaultValue="Prends rendez-vous avec Caroline." />
+                </Link>
+              </p>
             </form>
           )}
         </Modal>
