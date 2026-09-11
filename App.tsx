@@ -529,7 +529,6 @@ const App = () => {
               />
               <Routes>
                 <Route path="/" element={<HomePage profileImage={profileImage} vis={vis} sphereImageScale={sphereImageScale} sphereGalleryImages={sphereGalleryImages.length > 0 ? sphereGalleryImages : undefined} news={news} />} />
-                <Route path="/qa-partenaire-vexel" element={<AdminDevenirPartenaire />} />
                 <Route path="/a-propos" element={
                   vis.hidePageAPropos ? <Navigate to="/" replace /> : <AProposPage vis={vis} />
                 } />
