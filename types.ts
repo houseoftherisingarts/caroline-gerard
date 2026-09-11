@@ -147,7 +147,7 @@ export type Lead = {
 
 export type EmailLog = {
   id: string;
-  type: 'order_receipt' | 'order_admin_notification' | 'subscriber_welcome' | 'newsletter' | 'conference_announcement' | 'direct_message' | 'contact_form';
+  type: 'order_receipt' | 'order_admin_notification' | 'subscriber_welcome' | 'newsletter' | 'conference_announcement' | 'direct_message' | 'contact_form' | 'rendezvous_confirme';
   to: string | string[];
   subject: string;
   preview: string;
