@@ -52,7 +52,8 @@ type EmailType =
   | 'newsletter'
   | 'conference_announcement'
   | 'direct_message'
-  | 'contact_form';
+  | 'contact_form'
+  | 'rendezvous_confirme';
 
 const stripHtml = (html: string): string =>
   html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
