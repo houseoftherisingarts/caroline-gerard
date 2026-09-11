@@ -76,7 +76,7 @@ const AdminCommunaute = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [allMessages, setAllMessages] = useState<CommunityMessage[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(leadDepuisAgenda);
   const [showArchivedLeads, setShowArchivedLeads] = useState(false);
   const [emailLog, setEmailLog] = useState<EmailLog[]>([]);
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
