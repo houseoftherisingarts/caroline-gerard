@@ -22,6 +22,19 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-09-11',
+    titre: 'Un agenda de rendez-vous, pour parler à quelqu\'un sans sortir du site',
+    intro: "Le même outil que celui bâti pour Laurie Belhumeur vient d'arriver chez toi : les gens qui veulent te parler peuvent maintenant réserver un moment eux-mêmes, et la rencontre se tient directement dans ton site.",
+    etapes: [
+      "Un onglet Agenda est apparu dans ton Espace Auteure, juste après Événements : tu y poses tes disponibilités de la semaine, tu vois les demandes en attente d'un coup d'œil et tu les confirmes ou les refuses d'un clic.",
+      "Chaque personne qui a un compte dans ta communauté trouve un onglet Rendez-vous où elle choisit un jour et une heure parmi ceux que tu as ouverts, écrit ce qu'elle veut aborder, puis reçoit ta confirmation.",
+      "Quand l'heure arrive, ni toi ni elle n'avez besoin d'installer un logiciel ni de chercher un lien perdu dans un courriel : la rencontre vidéo s'ouvre directement dans la page, avec caméra et micro, dès dix minutes avant le rendez-vous.",
+      "La page Contact porte maintenant un bouton Prendre rendez-vous, et la fenêtre de réservation des conférences demande en plus une date souhaitée, pour que les demandes de conférence viennent aussi s'inscrire sur ton agenda plutôt que de rester perdues dans un message texte.",
+      "Ces demandes de conférence avec une date apparaissent d'ailleurs dans l'onglet Agenda sous leur propre section, avec un bouton pour bloquer la journée pendant que tu négocies les détails avec la personne.",
+      "Un courriel de confirmation part tout seul dès que tu confirmes un rendez-vous, avec la date, l'heure, le lien vers la rencontre et un fichier à ajouter à son propre calendrier.",
+    ],
+  },
+  {
     date: '2026-09-10',
     titre: 'Ton fil d’actualités, et le crayon qui te suit sur le site',
     intro: "Tu voulais publier depuis ton site plutôt que de toujours partir de Facebook, et tu voulais un endroit pour tes nouvelles. Les deux sont en ligne.",
