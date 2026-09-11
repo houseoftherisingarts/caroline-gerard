@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
+import { subscribeToRendezVous } from '../../lib/firestore';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -32,7 +33,7 @@ import {
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
-const NavLink = ({ to, icon, label, onClick }: { to: string; icon: React.ReactNode; label: string; onClick?: () => void }) => {
+const NavLink = ({ to, icon, label, onClick, badge }: { to: string; icon: React.ReactNode; label: string; onClick?: () => void; badge?: number }) => {
   const location = useLocation();
   const isActive = location.pathname === to || (to !== '/admin' && location.pathname.startsWith(to));
 
@@ -47,7 +48,10 @@ const NavLink = ({ to, icon, label, onClick }: { to: string; icon: React.ReactNo
       }`}
     >
       {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 18 })}
-      <span className="text-sm lg:text-base">{label}</span>
+      <span className="text-sm lg:text-base flex-1">{label}</span>
+      {!!badge && (
+        <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{badge}</span>
+      )}
     </Link>
   );
 };
