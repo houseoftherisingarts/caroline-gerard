@@ -10,8 +10,7 @@ service cloud.firestore {
       return request.auth != null && (
         request.auth.uid in [
           'qieZGM8Vnie92DblUtpvi710q3F3',   // Caroline — Espace Auteure
-          'lcfLrSZjcUTxwAgMe8tkCivdXQj1',   // Alex — Vexel
-          'lWvybMEMJXPhHIing5Lf2RhKo092'    // TÉMOIN boucle G — à retirer avant le déploiement final (RÈGLE -5)
+          'lcfLrSZjcUTxwAgMe8tkCivdXQj1'    // Alex — Vexel
         ]
         || (request.auth.token.email in ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com']
             && request.auth.token.email_verified == true)
