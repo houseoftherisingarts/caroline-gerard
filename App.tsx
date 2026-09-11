@@ -52,6 +52,7 @@ import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
 import AdminDemandeVexel from './pages/Admin/AdminDemandeVexel';
 import AdminActualites from './pages/Admin/AdminActualites';
 import AdminChangeLog from './pages/Admin/AdminChangeLog';
+import AdminAgenda from './pages/Admin/AdminAgenda';
 import AProposPage from './pages/AProposPage';
 import CommunautePage from './pages/CommunautePage';
 import TermsPage from './pages/TermsPage';
