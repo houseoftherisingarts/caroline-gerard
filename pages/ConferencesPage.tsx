@@ -22,13 +22,13 @@ const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () =
 const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
   const [bookingModalOpen, setBookingModalOpen] = useState<string | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState<Conference | null>(null);
-  const [formData, setFormData] = useState({ name: '', company: '', email: '', eventInfo: '', details: '' });
+  const [formData, setFormData] = useState({ name: '', company: '', email: '', eventInfo: '', details: '', dateSouhaitee: '' });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const openBookingModal = (conferenceId: string) => {
     setBookingModalOpen(conferenceId);
     setIsSubmitted(false);
-    setFormData({ name: '', company: '', email: '', eventInfo: '', details: '' });
+    setFormData({ name: '', company: '', email: '', eventInfo: '', details: '', dateSouhaitee: '' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,6 +44,7 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
       date: new Date().toISOString(),
       isRead: false,
       archived: false,
+      ...(formData.dateSouhaitee ? { dateSouhaitee: formData.dateSouhaitee } : {}),
     };
     saveLead(newLead);
     trackConferenceBooking(conference.title);
