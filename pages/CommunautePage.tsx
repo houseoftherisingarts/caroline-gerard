@@ -17,6 +17,7 @@ import { sortEvents, formatLong, calendarRange } from '../lib/eventDate';
 import { thumb } from '../lib/img';
 import EditableText from '../components/EditableText';
 import { useEditableString } from '../components/EditableField';
+import RendezVousCommunaute from '../components/RendezVousCommunaute';
 import {
   Star,
   LogOut,
