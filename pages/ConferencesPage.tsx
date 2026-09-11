@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Conference, Lead } from '../types';
-import { X, Info } from 'lucide-react';
+import { X, Info, Calendar } from 'lucide-react';
 import BlockRenderer from '../components/BlockRenderer';
 import { saveLead } from '../lib/firestore';
 import { trackConferenceBooking } from '../lib/analytics';
