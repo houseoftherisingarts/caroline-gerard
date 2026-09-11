@@ -138,6 +138,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/actualites" icon={<Newspaper />} label="Actualités" onClick={closeSidebar} />
           <NavLink to="/admin/contenu" icon={<Edit3 />} label="Articles de Blog" onClick={closeSidebar} />
           <NavLink to="/admin/evenements" icon={<Calendar />} label="Événements" onClick={closeSidebar} />
+          <NavLink to="/admin/agenda" icon={<Calendar />} label="Agenda" onClick={closeSidebar} badge={demandesAgenda} />
           <NavLink to="/admin/conferences" icon={<Briefcase />} label="Conférences" onClick={closeSidebar} />
           <NavLink to="/admin/interviews" icon={<Mic />} label="Interviews & Médias" onClick={closeSidebar} />
           <NavLink to="/admin/medias" icon={<ImageIcon />} label="Médiathèque" onClick={closeSidebar} />
