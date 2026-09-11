@@ -308,7 +308,7 @@ const App = () => {
       // Miroir de isAdmin() dans firestore.rules : UID d'abord, courriels
       // Vexel vérifiés en repli. Le suffixe @admin.local seul ne suffit plus
       // (n'importe qui peut créer un compte membre avec ce suffixe).
-      const ADMIN_UIDS = ['qieZGM8Vnie92DblUtpvi710q3F3', 'lcfLrSZjcUTxwAgMe8tkCivdXQj1', 'lWvybMEMJXPhHIing5Lf2RhKo092' /* TÉMOIN boucle G — à retirer avant le déploiement final */];
+      const ADMIN_UIDS = ['qieZGM8Vnie92DblUtpvi710q3F3', 'lcfLrSZjcUTxwAgMe8tkCivdXQj1'];
       const ADMIN_EMAILS = ['alex@lesalondesinconnus.com', 'krystine@inspiratanature.com'];
       setIsAdmin(!!user && (
         ADMIN_UIDS.includes(user.uid)
