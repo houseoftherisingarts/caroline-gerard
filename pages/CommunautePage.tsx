@@ -79,7 +79,7 @@ async function ensureMemberSaved(user: User) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-type Tab = 'actualites' | 'commandes' | 'evenements' | 'messages';
+type Tab = 'actualites' | 'commandes' | 'evenements' | 'rendezvous' | 'messages';
 
 const TabButton = ({ id, label, active, badge, onClick }: { id: Tab; label: React.ReactNode; active: boolean; badge?: number; onClick: (t: Tab) => void }) => (
   <button
