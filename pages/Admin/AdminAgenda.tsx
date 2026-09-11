@@ -154,7 +154,7 @@ const AdminAgenda: React.FC = () => {
   // Journées demandées : les leads de conférence qui portent une date souhaitée, distincts des
   // rendez-vous vidéo. Une journée déjà bloquée sur l'agenda le montre.
   const journeesDemandees = useMemo(
-    () => leads.filter((l) => l.source.startsWith('Intervention') && l.dateSouhaitee && !l.archived),
+    () => leads.filter((l) => (l.source ?? '').startsWith('Intervention') && l.dateSouhaitee && !l.archived),
     [leads]
   );
   const journeesBloquees = useMemo(() => new Set(occupations.filter((o) => o.id.startsWith('bloc-')).map((o) => o.id)), [occupations]);
