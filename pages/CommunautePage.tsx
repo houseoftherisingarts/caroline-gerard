@@ -124,9 +124,11 @@ interface CommunautePageProps {
 }
 
 const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => {
+  const [searchParams] = useSearchParams();
+  const ongletDemande = searchParams.get('onglet');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>('actualites');
+  const [tab, setTab] = useState<Tab>(ongletDemande === 'rendezvous' ? 'rendezvous' : 'actualites');
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [messages, setMessages] = useState<CommunityMessage[]>([]);
