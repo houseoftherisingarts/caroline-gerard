@@ -148,6 +148,27 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
           />
         </div>
 
+        {/* Carte Rendez-vous */}
+        <div className="bg-white/5 backdrop-blur-md p-10 rounded-2xl border border-white/10 text-center flex flex-col items-center hover:border-gold/30 transition-all w-full">
+          <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mb-6 text-gold">
+            <Calendar size={32} aria-hidden="true" />
+          </div>
+          <EditableText tag="h2" contentKey="contact_rdv_card_title" defaultValue="Prendre rendez-vous" className="text-2xl font-serif text-white mb-2" />
+          <EditableText
+            tag="p"
+            contentKey="contact_rdv_card_text"
+            defaultValue="Choisis un moment qui te convient pour en parler avec Caroline en visioconférence."
+            className="text-slate-400 text-sm mb-6"
+          />
+          <Link
+            to="/communaute?onglet=rendezvous"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-midnight font-bold rounded-xl hover:bg-white transition-colors"
+          >
+            <Calendar className="w-4 h-4" aria-hidden="true" />
+            <EditableText tag="span" contentKey="contact_rdv_card_btn" defaultValue="Prendre rendez-vous" />
+          </Link>
+        </div>
+
         {/* Carte Formulaire de contact */}
         {!vis.hideContactForm && (
           <div className="bg-white/5 backdrop-blur-md p-8 md:p-10 rounded-2xl border border-white/10 hover:border-gold/30 transition-all w-full">
