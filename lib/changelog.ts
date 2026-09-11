@@ -24,7 +24,7 @@ export const JOURNAL: EntreeJournal[] = [
   {
     date: '2026-09-11',
     titre: 'Un agenda de rendez-vous, pour parler à quelqu\'un sans sortir du site',
-    intro: "Le même outil que celui bâti pour Laurie Belhumeur vient d'arriver chez toi : les gens qui veulent te parler peuvent maintenant réserver un moment eux-mêmes, et la rencontre se tient directement dans ton site.",
+    intro: "Un outil déjà éprouvé ailleurs vient d'arriver chez toi : les gens qui veulent te parler peuvent maintenant réserver un moment eux-mêmes, et la rencontre se tient directement dans ton site.",
     etapes: [
       "Un onglet Agenda est apparu dans ton Espace Auteure, juste après Événements : tu y poses tes disponibilités de la semaine, tu vois les demandes en attente d'un coup d'œil et tu les confirmes ou les refuses d'un clic.",
       "Chaque personne qui a un compte dans ta communauté trouve un onglet Rendez-vous où elle choisit un jour et une heure parmi ceux que tu as ouverts, écrit ce qu'elle veut aborder, puis reçoit ta confirmation.",
