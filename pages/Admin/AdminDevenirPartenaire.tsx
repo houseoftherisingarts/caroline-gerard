@@ -13,7 +13,6 @@ const AdminDevenirPartenaire = () => (
     </div>
     <div
       style={{
-        // @ts-expect-error — variables CSS du canon de ce site, lues par le panneau partagé
         '--couleur-surface': '#0f172a',
         '--couleur-texte': '#f8fafc',
         '--couleur-muted': '#94a3b8',
@@ -22,7 +21,7 @@ const AdminDevenirPartenaire = () => (
         '--rayon-carte': '30px',
         '--police-corps': "'Lato', sans-serif",
         '--police-titre': "'Playfair Display', serif",
-      }}
+      } as React.CSSProperties}
     >
       <PartenaireVexelPanneau
         slug="caroline-gerard"
