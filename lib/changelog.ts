@@ -32,6 +32,7 @@ export const JOURNAL: EntreeJournal[] = [
       "La page Contact porte maintenant un bouton Prendre rendez-vous, et la fenêtre de réservation des conférences demande en plus une date souhaitée, pour que les demandes de conférence viennent aussi s'inscrire sur ton agenda plutôt que de rester perdues dans un message texte.",
       "Ces demandes de conférence avec une date apparaissent d'ailleurs dans l'onglet Agenda sous leur propre section, avec un bouton pour bloquer la journée pendant que tu négocies les détails avec la personne.",
       "Un courriel de confirmation part tout seul dès que tu confirmes un rendez-vous, avec la date, l'heure, le lien vers la rencontre et un fichier à ajouter à son propre calendrier.",
+      "Ton Espace Auteure porte aussi un nouvel onglet Devenir partenaire Vexel, où tu peux signer l'entente qui te fait toucher une part de chaque nouveau client que tu recommandes au studio, et dès que ton code est actif, un badge discret apparaît au pied de ton site pour le montrer.",
     ],
   },
   {
