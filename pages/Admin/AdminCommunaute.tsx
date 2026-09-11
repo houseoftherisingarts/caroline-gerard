@@ -69,7 +69,9 @@ const Bubble = ({ msg, onDelete }: { msg: CommunityMessage; onDelete: (id: strin
 // ─── Admin Communauté ─────────────────────────────────────────────────────────
 
 const AdminCommunaute = () => {
-  const [tab, setTab] = useState<Tab>('messages');
+  const [searchParams] = useSearchParams();
+  const leadDepuisAgenda = searchParams.get('lead');
+  const [tab, setTab] = useState<Tab>(leadDepuisAgenda ? 'demandes' : 'messages');
   const [members, setMembers] = useState<Member[]>([]);
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [allMessages, setAllMessages] = useState<CommunityMessage[]>([]);
