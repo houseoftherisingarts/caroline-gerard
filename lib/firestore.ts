@@ -15,7 +15,7 @@ import {
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
-import { BlogPost, NewsItem, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement, StockMovement } from '../types';
+import { BlogPost, NewsItem, AppEvent, Conference, Interview, Lead, Subscriber, Member, CommunityMessage, Book, PromoCode, EmailLog, Testimonial, ConsignmentLocation, ConsignmentMovement, StockMovement, RendezVous, Occupation, StatutRendezVous } from '../types';
 
 // --- Generic helper ---
 
