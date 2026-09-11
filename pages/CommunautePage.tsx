@@ -342,6 +342,7 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
           <TabButton id="actualites" label={<EditableText tag="span" contentKey="comm_tab_actualites" defaultValue="Actualités" />} active={tab === 'actualites'} onClick={setTab} />
           <TabButton id="commandes" label={<EditableText tag="span" contentKey="comm_tab_commandes" defaultValue="Mes commandes" />} active={tab === 'commandes'} onClick={setTab} />
           <TabButton id="evenements" label={<EditableText tag="span" contentKey="comm_tab_evenements" defaultValue="Événements" />} active={tab === 'evenements'} onClick={setTab} />
+          <TabButton id="rendezvous" label={<EditableText tag="span" contentKey="comm_tab_rendezvous" defaultValue="Rendez-vous" />} active={tab === 'rendezvous'} onClick={setTab} />
           <TabButton id="messages" label={<EditableText tag="span" contentKey="comm_tab_messages" defaultValue="Messages" />} active={tab === 'messages'} badge={unreadFromCaroline} onClick={setTab} />
         </div>
 
