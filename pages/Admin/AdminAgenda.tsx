@@ -46,7 +46,7 @@ const LigneRendezVous: React.FC<{ rdv: RendezVous; maintenant: Date; onRejoindre
 
   const enregistrerNote = () => {
     if (note === (rdv.noteAdmin ?? '')) return;
-    updateRendezVousStatut(rdv.statut, rdv.statut, note).catch(() => null);
+    updateRendezVousStatut(rdv.id, rdv.statut, note).catch(() => null);
   };
 
   const rejoignable = rencontreOuverte(rdv, maintenant);
