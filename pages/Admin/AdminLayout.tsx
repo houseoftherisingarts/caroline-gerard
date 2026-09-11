@@ -27,6 +27,7 @@ import {
   Download,
   Store,
   BadgeDollarSign,
+  Handshake,
   Send,
   Newspaper,
   History,
