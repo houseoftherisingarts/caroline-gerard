@@ -248,6 +248,53 @@ export type CommunityMessage = {
   createdAt: string;
   read: boolean;
 };
+// --- Agenda de rendez-vous (lib/rendezvous.ts) ---
+
+export type PlageHoraire = { de: string; a: string };
+
+export type AgendaConfig = {
+  /** Durée d'une rencontre, en minutes. */
+  duree: number;
+  /** Tampon entre deux rencontres, en minutes. */
+  tampon: number;
+  /** Délai minimal avant un rendez-vous, en heures. */
+  delaiMinHeures: number;
+  /** Horizon de réservation, en jours. */
+  horizonJours: number;
+  fuseau: string;
+  /** Plages hebdomadaires, indexées par jour de semaine ('0' = dimanche ... '6' = samedi). */
+  jours: Record<'0' | '1' | '2' | '3' | '4' | '5' | '6', PlageHoraire[]>;
+  /** Exceptions par date AAAA-MM-JJ : liste de plages, vide = journée fermée. */
+  exceptions: Record<string, PlageHoraire[]>;
+};
+
+export type StatutRendezVous = 'demande' | 'confirme' | 'annule' | 'complete';
+
+export type RendezVous = {
+  id: string;
+  uid: string;
+  nom: string;
+  courriel: string;
+  debut: any;
+  fin: any;
+  duree: number;
+  statut: StatutRendezVous;
+  /** Nom de la salle vidéo Jitsi Meet, ex. « caroline-<id> ». */
+  salle: string;
+  note?: string;
+  noteAdmin?: string;
+  creePar: 'client' | 'admin';
+  createdAt: any;
+  updatedAt: any;
+};
+
+/** Miroir sans donnée personnelle de rendezvous/{id} : lisible par toute personne connectée. */
+export type Occupation = {
+  id: string;
+  debut: any;
+  fin: any;
+};
+
 /** Une nouvelle du fil d'actualités : un texte court, une photo, parfois un lien. */
 export type NewsItem = {
   id: string;
