@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import QuillIcon from '../components/QuillIcon';
 
-// 404 sur mesure — l'univers étoilé de William (StarField tourne déjà en
+// 404 sur mesure, dans l'univers étoilé de William (StarField tourne déjà en
 // fond, monté globalement par App.tsx) plutôt qu'une page blanche générique.
 const NotFoundPage: React.FC = () => {
   return (
