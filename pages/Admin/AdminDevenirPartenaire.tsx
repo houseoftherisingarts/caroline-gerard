@@ -29,7 +29,7 @@ const AdminDevenirPartenaire = () => (
         onSucces={(resultat) => {
           setDoc(
             doc(db, 'settings', 'vexel'),
-            { partenaire: { code: resultat.code, lien: resultat.lien, page: resultat.page, signeLe: new Date().toISOString() } },
+            { partenaire: { code: resultat.code, signeLe: new Date().toISOString() } },
             { merge: true },
           );
         }}
