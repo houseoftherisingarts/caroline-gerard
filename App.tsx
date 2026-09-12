@@ -27,6 +27,7 @@ import BlogPage from './pages/BlogPage';
 import ContactPage from './pages/ContactPage';
 import ConferencesPage from './pages/ConferencesPage';
 import EventsPage from './pages/EventsPage';
+import NotFoundPage from './pages/NotFoundPage';
 import InterviewsPage from './pages/InterviewsPage';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminLayout from './pages/Admin/AdminLayout';
