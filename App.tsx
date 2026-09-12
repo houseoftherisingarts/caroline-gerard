@@ -571,8 +571,8 @@ const App = () => {
                   <CommunautePage posts={posts} events={events} conferences={conferences} />
                 } />
                 <Route path="/conditions" element={<TermsPage />} />
-                {/* Fallback to Home if unknown route in public section */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* Adresse inconnue : page 404 sur mesure, jamais un repli muet vers l'accueil */}
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
               <Footer visitorCount={visitorCount} showVisitorCount={showVisitorCount} vis={vis} />
               <CookieBanner />
