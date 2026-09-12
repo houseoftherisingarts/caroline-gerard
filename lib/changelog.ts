@@ -22,6 +22,16 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-09-12',
+    titre: "Une page d'accueil pour les adresses perdues",
+    intro: "Quand quelqu'un tapait une mauvaise adresse ou cliquait un vieux lien vers ton site, il atterrissait tout droit sur ta page d'accueil, sans un mot d'explication. Il tombe maintenant sur une vraie page, dans ton univers.",
+    etapes: [
+      "Toute adresse qui ne correspond à rien sur ton site affiche maintenant une page 404 habillée à ta couleur, avec le ciel étoilé et la plume que tes visiteurs reconnaissent déjà, plutôt que d'être renvoyée sans un mot vers ta page d'accueil.",
+      "Le texte de cette page parle de William et de ses univers invisibles, avec une phrase qui rassure la personne perdue et un seul bouton pour revenir chez toi d'un clic.",
+      "Cette page a été vérifiée en ligne, sur ordinateur et sur téléphone, pour qu'elle reste lisible et que son bouton reste accessible même quand le message sur les témoins de connexion s'affiche en bas de l'écran.",
+    ],
+  },
+  {
     date: '2026-09-11',
     titre: 'Un agenda de rendez-vous, pour parler à quelqu\'un sans sortir du site',
     intro: "Un outil déjà éprouvé ailleurs vient d'arriver chez toi : les gens qui veulent te parler peuvent maintenant réserver un moment eux-mêmes, et la rencontre se tient directement dans ton site.",
