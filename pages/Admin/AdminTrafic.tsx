@@ -30,7 +30,8 @@ const libelleCourt = (jour: string) => {
 
 const libelleLong = (jour: string) => {
   const [a, m, j] = jour.split('-').map(Number);
-  return new Date(a, m - 1, j).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+  const t = new Date(a, m - 1, j).toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long' });
+  return t.charAt(0).toUpperCase() + t.slice(1);
 };
 
 type Repere = { type: 'evenement' | 'nouvelle'; titre: string };
@@ -59,9 +60,9 @@ const InfoBulle = ({ active, payload }: { active?: boolean; payload?: Array<{ pa
   const p = payload[0].payload;
   return (
     <div className="bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-sm shadow-xl max-w-xs">
-      <p className="text-white font-bold capitalize">{libelleLong(p.jour)}</p>
+      <p className="text-white font-bold">{libelleLong(p.jour)}</p>
       <p className="text-slate-300 mt-1">{p.vues.toLocaleString('fr-CA')} vues · {p.visiteurs.toLocaleString('fr-CA')} visiteurs</p>
-      {p.partiel && <p className="text-slate-500 text-xs mt-1">Journée d'avant le compteur : nouveaux visiteurs seulement.</p>}
+      {p.partiel && <p className="text-slate-400 text-xs mt-1">Journée d'avant le compteur : nouveaux visiteurs seulement.</p>}
       {p.reperes.map((r, i) => (
         <p key={i} className="text-gold text-xs mt-1 flex items-center gap-1">
           {r.type === 'evenement' ? <CalendarDays size={12} /> : <Newspaper size={12} />} {r.titre}
@@ -121,7 +122,7 @@ const AdminTrafic = ({ events, news }: { events: AppEvent[]; news: NewsItem[] })
     const depuis = jourMoins(29);
     const total = new Map<string, number>();
     jours.filter(j => j.jour >= depuis && j.pages).forEach(j => {
-      Object.entries(j.pages!).forEach(([k, v]) => total.set(k, (total.get(k) ?? 0) + v));
+      (Object.entries(j.pages!) as [string, number][]).forEach(([k, v]) => total.set(k, (total.get(k) ?? 0) + v));
     });
     return [...total.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
   }, [jours]);
@@ -171,12 +172,12 @@ const AdminTrafic = ({ events, news }: { events: AppEvent[]; news: NewsItem[] })
 
         <div className="h-56 md:h-80 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={serie} barCategoryGap="20%" barGap={2}>
+            <BarChart data={serie} barCategoryGap="12%" barGap={2}>
               <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
               <XAxis dataKey="libelle" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={fenetre === 30 ? 2 : 9} />
               <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} width={32} />
               <Tooltip content={<InfoBulle />} cursor={{ fill: '#ffffff08' }} />
-              <Legend wrapperStyle={{ fontSize: 12, color: '#94a3b8' }} iconType="circle" iconSize={8} />
+              <Legend wrapperStyle={{ fontSize: 12 }} iconType="circle" iconSize={8} formatter={(v: string) => <span className="text-slate-400">{v}</span>} />
               <Bar dataKey="vues" name="Pages vues" fill={COULEUR_VUES} radius={[4, 4, 0, 0]} maxBarSize={22} />
               <Bar dataKey="visiteurs" name="Visiteurs" fill={COULEUR_VISITEURS} radius={[4, 4, 0, 0]} maxBarSize={22} />
             </BarChart>
@@ -206,8 +207,8 @@ const AdminTrafic = ({ events, news }: { events: AppEvent[]; news: NewsItem[] })
                 <tbody>
                   {journeesRecentes.map(p => (
                     <tr key={p.jour} className="border-b border-white/5 last:border-0">
-                      <td className="py-2.5 pr-4 text-white whitespace-nowrap capitalize">{libelleLong(p.jour)}</td>
-                      <td className="py-2.5 pr-4 text-right text-white font-bold">{p.partiel ? <span className="text-slate-600">·</span> : p.vues.toLocaleString('fr-CA')}</td>
+                      <td className="py-2.5 pr-4 text-white whitespace-nowrap">{libelleLong(p.jour)}</td>
+                      <td className="py-2.5 pr-4 text-right text-white font-bold">{p.partiel ? <span className="text-slate-400 font-normal">·</span> : p.vues.toLocaleString('fr-CA')}</td>
                       <td className="py-2.5 pr-4 text-right text-white font-bold">{p.visiteurs.toLocaleString('fr-CA')}</td>
                       <td className="py-2.5 text-slate-300">
                         {p.reperes.map((r, i) => (
@@ -216,7 +217,7 @@ const AdminTrafic = ({ events, news }: { events: AppEvent[]; news: NewsItem[] })
                             {r.titre}
                           </span>
                         ))}
-                        {p.partiel && p.reperes.length === 0 && <span className="text-slate-600 text-xs">nouveaux visiteurs seulement</span>}
+                        {p.partiel && p.reperes.length === 0 && <span className="text-slate-400 text-xs">nouveaux visiteurs seulement</span>}
                       </td>
                     </tr>
                   ))}

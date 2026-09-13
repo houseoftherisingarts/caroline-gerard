@@ -676,12 +676,27 @@ exports.sendDirectMessage = (0, https_1.onCall)({
     }
     return { success: true, sent: recipients.length };
 });
-// ── recordVisit callable — IP-unique visitor counter ─────────────────────────
+// ── recordVisit callable — IP-unique visitor counter + trafic par jour ───────
 // Counts each distinct visitor IP only once, so multiple sessions/tabs/refreshes
 // from the same computer no longer inflate the count (closer to Google Analytics'
 // "users"). The raw IP is never stored — only a salted SHA-256 hash — to stay
 // aligned with Loi 25. Returns { counted: true } the first time an IP is seen.
+//
+// Depuis le 13 septembre 2026, le site appelle cette fonction à CHAQUE page vue
+// (hors Espace Auteure) et elle tient aussi trafic/{AAAA-MM-JJ} : vues du jour,
+// visiteurs distincts du jour (une adresse hachée compte une fois par jour) et
+// vues par page. C'est ce que Caroline lit dans Espace Auteure › Trafic du site.
 const VISITOR_SALT = 'cg-visitor-v1';
+// Journée au fuseau du Québec, format AAAA-MM-JJ (fr-CA donne exactement ce format).
+const jourQuebec = (d = new Date()) => new Intl.DateTimeFormat('fr-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+// Clé de page sûre pour un champ Firestore : "/" -> "accueil", "/actualites/salon" -> "actualites__salon".
+const clePage = (page) => {
+    const p = typeof page === 'string' ? page.trim().slice(0, 200) : '';
+    const propre = p.replace(/[?#].*$/, '').replace(/^\/+|\/+$/g, '');
+    if (!propre)
+        return 'accueil';
+    return propre.replace(/\//g, '__').replace(/[^A-Za-z0-9_-]+/g, '_') || 'accueil';
+};
 exports.recordVisit = (0, https_1.onCall)({
     region: 'northamerica-northeast1',
     invoker: 'public',
@@ -695,13 +710,23 @@ exports.recordVisit = (0, https_1.onCall)({
     const visitorRef = db.collection('uniqueVisitors').doc(ipHash);
     const analyticsRef = db.collection('settings').doc('analytics');
     const nowIso = new Date().toISOString();
+    const jour = jourQuebec();
+    const traficRef = db.collection('trafic').doc(jour);
+    const page = clePage(request.data?.page);
     const counted = await db.runTransaction(async (tx) => {
         const snap = await tx.get(visitorRef);
+        const dejaVuCeJour = snap.exists && snap.get('dernierJour') === jour;
+        tx.set(traficRef, {
+            jour,
+            vues: firestore_2.FieldValue.increment(1),
+            visiteurs: firestore_2.FieldValue.increment(dejaVuCeJour ? 0 : 1),
+            pages: { [page]: firestore_2.FieldValue.increment(1) },
+        }, { merge: true });
         if (snap.exists) {
-            tx.update(visitorRef, { lastSeen: nowIso, hits: firestore_2.FieldValue.increment(1) });
+            tx.update(visitorRef, { lastSeen: nowIso, dernierJour: jour, hits: firestore_2.FieldValue.increment(1) });
             return false;
         }
-        tx.set(visitorRef, { firstSeen: nowIso, lastSeen: nowIso, hits: 1 });
+        tx.set(visitorRef, { firstSeen: nowIso, lastSeen: nowIso, dernierJour: jour, hits: 1 });
         tx.set(analyticsRef, { uniqueVisitors: firestore_2.FieldValue.increment(1) }, { merge: true });
         return true;
     });

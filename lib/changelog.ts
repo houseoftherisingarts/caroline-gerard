@@ -22,6 +22,18 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-09-13',
+    titre: 'Le trafic de ton site jour par jour, et un interrupteur pour ranger l’agenda',
+    intro: "Tu as déposé deux demandes dans ton Espace Auteure cette semaine, et c’est la première fois que le circuit fonctionne de bout en bout : elles ont été lues là où tu les as écrites, puis appliquées le même jour. Les deux sont en ligne.",
+    etapes: [
+      "Un nouvel onglet Trafic du site est apparu en haut de ton Espace Auteure, juste sous le tableau de bord : il montre combien de pages ont été vues et combien de personnes différentes sont passées, jour après jour, sur les trente ou les quatre-vingt-dix derniers jours.",
+      "Tes événements et tes nouvelles sont posés sur les mêmes journées, dans la bulle du graphique comme dans le tableau du dessous, pour que tu voies d’un coup d’œil si une publication ou une sortie a fait bouger la courbe, ce qui était le sens de ta question.",
+      "Le même onglet liste les pages les plus consultées du dernier mois, ce qui te dit où les gens vont vraiment quand ils arrivent chez toi.",
+      "Le compte jour par jour a démarré aujourd’hui, parce que le site ne gardait jusqu’ici qu’un total de visiteurs depuis le lancement; les journées d’avant montrent seulement les nouveaux visiteurs, reconstitués depuis ce total, et elles sont marquées comme telles. Tes propres passages dans l’Espace Auteure ne sont jamais comptés.",
+      "Dans Masquer / Afficher, un interrupteur Agenda / Rendez-vous s’est ajouté sous Espace client : il range la carte Prendre rendez-vous de la page Contact, l’onglet Rendez-vous de l’Espace client et la date souhaitée du formulaire de conférences, sans toucher à ton propre onglet Agenda. Comme tu l’as demandé, il est déjà en position masquée; tu le rallumeras le jour où tu voudras offrir cette option.",
+    ],
+  },
+  {
     date: '2026-09-12',
     titre: "Une page d'accueil pour les adresses perdues",
     intro: "Quand quelqu'un tapait une mauvaise adresse ou cliquait un vieux lien vers ton site, il atterrissait tout droit sur ta page d'accueil, sans un mot d'explication. Il tombe maintenant sur une vraie page, dans ton univers.",
