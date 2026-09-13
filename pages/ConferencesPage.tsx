@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { Conference, Lead } from '../types';
 import { X, Info, Calendar } from 'lucide-react';
 import BlockRenderer from '../components/BlockRenderer';
-import { saveLead } from '../lib/firestore';
+import { saveLead, VisibilitySettings, DEFAULT_VIS } from '../lib/firestore';
 import { trackConferenceBooking } from '../lib/analytics';
 import EditableText from '../components/EditableText';
 import { thumb } from '../lib/img';
@@ -19,7 +19,7 @@ const Modal = ({ children, onClose }: { children: React.ReactNode, onClose: () =
   </div>
 );
 
-const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
+const ConferencesPage = ({ conferences, vis = DEFAULT_VIS }: { conferences: Conference[]; vis?: VisibilitySettings }) => {
   const [bookingModalOpen, setBookingModalOpen] = useState<string | null>(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState<Conference | null>(null);
   const [formData, setFormData] = useState({ name: '', company: '', email: '', eventInfo: '', details: '', dateSouhaitee: '' });
@@ -160,6 +160,7 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-gold/50 transition-colors"
                 />
               </label>
+              {!vis.hideAgenda && (
               <label className="block">
                 <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date souhaitée (facultatif)</span>
                 <input
@@ -168,6 +169,7 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-gold/50 transition-colors [color-scheme:dark]"
                 />
               </label>
+              )}
               <label className="block">
                 <span className="sr-only">Détails</span>
                 <textarea
@@ -183,12 +185,14 @@ const ConferencesPage = ({ conferences }: { conferences: Conference[] }) => {
               >
                 <EditableText tag="span" contentKey="conferences_form_submit_btn" defaultValue="Envoyer la demande" />
               </button>
+              {!vis.hideAgenda && (
               <p className="text-slate-400 text-sm text-center pt-2">
                 <EditableText tag="span" contentKey="conferences_form_rdv_intro" defaultValue="Tu préfères d'abord en parler de vive voix ? " />
                 <Link to="/communaute?onglet=rendezvous" className="text-gold hover:underline">
                   <EditableText tag="span" contentKey="conferences_form_rdv_link" defaultValue="Prends rendez-vous avec Caroline." />
                 </Link>
               </p>
+              )}
             </form>
           )}
         </Modal>

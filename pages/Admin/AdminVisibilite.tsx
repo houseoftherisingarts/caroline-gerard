@@ -143,6 +143,7 @@ const AdminVisibilite = ({ vis, onSetVis, sphereImageScale, onSetSphereImageScal
         <ToggleRow label="Actualités" description="Masque la page /actualites et son lien dans le menu." checked={vis.hidePageActualites} onChange={t('hidePageActualites')} />
         <ToggleRow label="Contact" description="Masque la page /contact et son lien dans le menu." checked={vis.hidePageContact} onChange={t('hidePageContact')} />
         <ToggleRow label="Espace client / Communauté" description="Masque la page /communaute et le bouton « Espace client » dans le menu." checked={vis.hideEspaceClient} onChange={t('hideEspaceClient')} />
+        <ToggleRow label="Agenda / Rendez-vous" description="Masque la carte « Prendre rendez-vous » de la page Contact, l'onglet Rendez-vous de l'Espace client et la date souhaitée du formulaire de conférences. Ton onglet Agenda reste dans l'Espace Auteure." checked={vis.hideAgenda} onChange={t('hideAgenda')} />
       </Group>
 
       {/* ── Sections — Accueil ── */}

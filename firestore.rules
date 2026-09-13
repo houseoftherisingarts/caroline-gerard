@@ -159,6 +159,9 @@ service cloud.firestore {
     match /consignmentMovements/{id} { allow read, write: if isAdmin(); }
     match /stockMovements/{id}       { allow read, write: if isAdmin(); }
 
+    // trafic/{AAAA-MM-JJ} : écrit par recordVisit (SDK admin), lu par l'Espace Auteure seulement.
+    match /trafic/{jour}             { allow read: if isAdmin(); allow write: if false; }
+
     // uniqueVisitors : réservé au SDK admin (recordVisit).
     // Toute collection absente de cette liste est refusée par défaut.
   }

@@ -193,6 +193,9 @@ const AdminDashboard = ({
             <label className="text-xs text-slate-400 font-bold">Afficher au public</label>
             <ToggleSwitch checked={showVisitorCount} onChange={setShowVisitorCount} />
           </div>
+          <Link to="/admin/trafic" className="inline-flex items-center gap-1 text-xs font-bold text-gold hover:text-white transition-colors mt-4">
+            Voir les vues par jour <ChevronRight size={14} />
+          </Link>
         </div>
       </div>
 

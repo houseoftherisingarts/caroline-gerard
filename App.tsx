@@ -48,6 +48,7 @@ import AdminInterviews from './pages/Admin/AdminInterviews';
 import AdminSiteEditor from './pages/Admin/AdminSiteEditor';
 import AdminCommunaute from './pages/Admin/AdminCommunaute';
 import AdminVisibilite from './pages/Admin/AdminVisibilite';
+import AdminTrafic from './pages/Admin/AdminTrafic';
 import AdminPromoCodes from './pages/Admin/AdminPromoCodes';
 import AdminTestimonials from './pages/Admin/AdminTestimonials';
 import AdminLeadMagnet from './pages/Admin/AdminLeadMagnet';
@@ -92,6 +93,8 @@ const ScrollToTop = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     trackPageView(pathname);
+    // Compteur maison, jour par jour (Espace Auteure › Trafic). L'Espace Auteure ne compte pas.
+    if (!pathname.startsWith('/admin')) recordVisit(pathname);
   }, [pathname]);
 
   return null;
@@ -361,15 +364,6 @@ const App = () => {
     return subscribeToLeads(setLeads);
   }, [isAdmin]);
 
-  // Record the visit once per browser session; the server dedupes by hashed IP
-  // so multiple sessions from the same computer are only counted once.
-  useEffect(() => {
-    if (!sessionStorage.getItem('_cg_visited')) {
-      sessionStorage.setItem('_cg_visited', '1');
-      recordVisit();
-    }
-  }, []);
-
   // --- Firestore-persisted setters ---
   // Each setter diffs old vs new, deletes removed items, saves new/changed ones.
 
@@ -485,6 +479,7 @@ const App = () => {
               <AdminLayout>
                 <Routes>
                   <Route index element={<AdminDashboard showVisitorCount={showVisitorCount} setShowVisitorCount={handleSetShowVisitorCount} leads={leads} />} />
+                  <Route path="trafic" element={<AdminTrafic events={events} news={news} />} />
                   <Route path="demande-changement" element={<AdminDemandeVexel />} />
                   <Route path="partenaire-vexel" element={<AdminDevenirPartenaire />} />
                   <Route path="journal" element={<AdminChangeLog />} />
@@ -558,7 +553,7 @@ const App = () => {
                   vis.hidePageEvenements ? <Navigate to="/" replace /> : <EventsPage events={events} />
                 } />
                 <Route path="/conferences" element={
-                  vis.hideConferences ? <Navigate to="/" replace /> : <ConferencesPage conferences={conferences} />
+                  vis.hideConferences ? <Navigate to="/" replace /> : <ConferencesPage conferences={conferences} vis={vis} />
                 } />
                 <Route path="/interviews" element={
                   vis.hidePageInterviews ? <Navigate to="/" replace /> : <InterviewsPage interviews={interviews} />
@@ -568,7 +563,7 @@ const App = () => {
                 } />
                 <Route path="/communaute" element={
                   vis.hideEspaceClient ? <Navigate to="/" replace /> :
-                  <CommunautePage posts={posts} events={events} conferences={conferences} />
+                  <CommunautePage posts={posts} events={events} conferences={conferences} vis={vis} />
                 } />
                 <Route path="/conditions" element={<TermsPage />} />
                 {/* Adresse inconnue : page 404 sur mesure, jamais un repli muet vers l'accueil */}

@@ -11,7 +11,7 @@ import {
 } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
-import { saveMember, subscribeToMemberMessages, sendCommunityMessage, markMessageRead } from '../lib/firestore';
+import { saveMember, subscribeToMemberMessages, sendCommunityMessage, markMessageRead, VisibilitySettings, DEFAULT_VIS } from '../lib/firestore';
 import { BlogPost, AppEvent, Conference, Member, Order, CommunityMessage } from '../types';
 import { sortEvents, formatLong, calendarRange } from '../lib/eventDate';
 import { thumb } from '../lib/img';
@@ -121,14 +121,15 @@ interface CommunautePageProps {
   posts: BlogPost[];
   events: AppEvent[];
   conferences: Conference[];
+  vis?: VisibilitySettings;
 }
 
-const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => {
+const CommunautePage = ({ posts, events, conferences, vis = DEFAULT_VIS }: CommunautePageProps) => {
   const [searchParams] = useSearchParams();
   const ongletDemande = searchParams.get('onglet');
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>(ongletDemande === 'rendezvous' ? 'rendezvous' : 'actualites');
+  const [tab, setTab] = useState<Tab>(ongletDemande === 'rendezvous' && !vis.hideAgenda ? 'rendezvous' : 'actualites');
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [messages, setMessages] = useState<CommunityMessage[]>([]);
@@ -342,7 +343,7 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
           <TabButton id="actualites" label={<EditableText tag="span" contentKey="comm_tab_actualites" defaultValue="Actualités" />} active={tab === 'actualites'} onClick={setTab} />
           <TabButton id="commandes" label={<EditableText tag="span" contentKey="comm_tab_commandes" defaultValue="Mes commandes" />} active={tab === 'commandes'} onClick={setTab} />
           <TabButton id="evenements" label={<EditableText tag="span" contentKey="comm_tab_evenements" defaultValue="Événements" />} active={tab === 'evenements'} onClick={setTab} />
-          <TabButton id="rendezvous" label={<EditableText tag="span" contentKey="comm_tab_rendezvous" defaultValue="Rendez-vous" />} active={tab === 'rendezvous'} onClick={setTab} />
+          {!vis.hideAgenda && <TabButton id="rendezvous" label={<EditableText tag="span" contentKey="comm_tab_rendezvous" defaultValue="Rendez-vous" />} active={tab === 'rendezvous'} onClick={setTab} />}
           <TabButton id="messages" label={<EditableText tag="span" contentKey="comm_tab_messages" defaultValue="Messages" />} active={tab === 'messages'} badge={unreadFromCaroline} onClick={setTab} />
         </div>
 
@@ -455,7 +456,7 @@ const CommunautePage = ({ posts, events, conferences }: CommunautePageProps) => 
         )}
 
         {/* ── Rendez-vous ── */}
-        {tab === 'rendezvous' && <RendezVousCommunaute user={user} />}
+        {tab === 'rendezvous' && !vis.hideAgenda && <RendezVousCommunaute user={user} />}
 
         {/* ── Messages ── */}
         {tab === 'messages' && (

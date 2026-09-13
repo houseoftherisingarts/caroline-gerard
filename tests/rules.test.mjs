@@ -64,6 +64,12 @@ async function main() {
     assertSucceeds(setDoc(doc(dbAdmin, 'settings', 'agenda'), { duree: 45 }, { merge: true }))
   );
 
+  // ── trafic : lecture réservée à Caroline, aucune écriture depuis le site ──
+  await verifie('un anonyme lit trafic (refus attendu)', assertFails(getDoc(doc(dbAnon, 'trafic', '2026-09-13'))));
+  await verifie('un client connecté lit trafic (refus attendu)', assertFails(getDoc(doc(dbA, 'trafic', '2026-09-13'))));
+  await verifie('Caroline lit trafic (ok)', assertSucceeds(getDoc(doc(dbAdmin, 'trafic', '2026-09-13'))));
+  await verifie('Caroline écrit trafic depuis le site (refus attendu)', assertFails(setDoc(doc(dbAdmin, 'trafic', '2026-09-13'), { vues: 1 })));
+
   // ── rendezvous : la personne demande un créneau à son nom, ne peut confirmer elle-même, peut annuler ──
   const dans3Jours = new Date(Date.now() + 3 * 86400000);
   const fin3Jours = new Date(dans3Jours.getTime() + 45 * 60000);

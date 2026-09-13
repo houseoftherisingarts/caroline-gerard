@@ -148,7 +148,8 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
           />
         </div>
 
-        {/* Carte Rendez-vous */}
+        {/* Carte Rendez-vous (masquable dans Masquer / Afficher) */}
+        {!vis.hideAgenda && (
         <div className="bg-white/5 backdrop-blur-md p-10 rounded-2xl border border-white/10 text-center flex flex-col items-center hover:border-gold/30 transition-all w-full">
           <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mb-6 text-gold">
             <Calendar size={32} aria-hidden="true" />
@@ -168,6 +169,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
             <EditableText tag="span" contentKey="contact_rdv_card_btn" defaultValue="Prendre rendez-vous" />
           </Link>
         </div>
+        )}
 
         {/* Carte Formulaire de contact */}
         {!vis.hideContactForm && (

@@ -13,6 +13,7 @@ import {
   orderBy,
   updateDoc,
   serverTimestamp,
+  documentId,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
@@ -231,8 +232,25 @@ const recordVisitFn = httpsCallable(functions, 'recordVisit');
 // Pings the server once; the function dedupes by hashed IP so the same computer
 // is only ever counted once. Failures are swallowed — a visit counter must never
 // break the page.
-export const recordVisit = (): Promise<unknown> =>
-  recordVisitFn().catch(() => null);
+export const recordVisit = (page: string): Promise<unknown> =>
+  recordVisitFn({ page }).catch(() => null);
+
+// --- Trafic par jour (écrit par recordVisit côté serveur, lu par l'Espace Auteure) ---
+export type JourTrafic = {
+  jour: string;          // AAAA-MM-JJ, heure du Québec
+  vues: number;          // pages vues ce jour-là
+  visiteurs: number;     // visiteurs distincts ce jour-là (par adresse hachée)
+  pages?: Record<string, number>; // vues par page, clé encodée (voir decodePageKey)
+  partiel?: boolean;     // journée reconstituée avant le compteur quotidien : visiteurs seulement
+};
+
+export const decodePageKey = (key: string) => (key === 'accueil' ? '/' : '/' + key.replace(/__/g, '/'));
+
+export const subscribeToTrafic = (cb: (jours: JourTrafic[]) => void, nbJours = 90) => {
+  const depuis = new Date(Date.now() - nbJours * 86400000).toISOString().slice(0, 10);
+  const q = query(collection(db, 'trafic'), where(documentId(), '>=', depuis), orderBy(documentId()));
+  return onSnapshot(q, snap => cb(snap.docs.map(d => ({ ...(d.data() as Omit<JourTrafic, 'jour'>), jour: d.id }))));
+};
 
 export const subscribeToVisitorCount = (cb: (count: number) => void) =>
   onSnapshot(doc(db, 'settings', 'analytics'), snap => {
@@ -274,6 +292,7 @@ export type VisibilitySettings = {
   // Pages (hides nav link + redirects route when true)
   hideConferences: boolean;
   hideEspaceClient: boolean;
+  hideAgenda: boolean;
   hidePageAPropos: boolean;
   hidePageBoutique: boolean;
   hidePageEvenements: boolean;
@@ -302,6 +321,7 @@ export type VisibilitySettings = {
 export const DEFAULT_VIS: VisibilitySettings = {
   hideConferences: false,
   hideEspaceClient: false,
+  hideAgenda: false,
   hidePageAPropos: false,
   hidePageBoutique: false,
   hidePageEvenements: false,
