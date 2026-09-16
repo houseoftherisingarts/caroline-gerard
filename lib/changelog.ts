@@ -26,7 +26,7 @@ export const JOURNAL: EntreeJournal[] = [
     titre: 'La mention du studio, à côté de celle de tes partenaires',
     intro: "Une petite plaque a rejoint le bas de ton site : elle nomme le studio qui l'a bâti, juste à côté de la carte réservée à tes partenaires.",
     etapes: [
-      "Une plaque discrète en bas de ton site dit qui l'a construit et s'ouvre sur une courte carte de présentation quand on clique dessus.",
+      "Une plaque discrète en bas de ton site dit qui l'a construit, et un clic dessus ouvre une courte carte de présentation.",
     ],
   },
   {
