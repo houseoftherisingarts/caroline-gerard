@@ -239,8 +239,9 @@ const Footer = ({ visitorCount, showVisitorCount, vis }: { visitorCount: number,
             <Lock className="w-3 h-3" /> Admin
           </Link>
         </div>
-        <div style={{ '--couleur-surface': '#0f172a', '--couleur-accent': '#d4af37', '--rayon-carte': '30px' } as React.CSSProperties}>
+        <div style={{ '--couleur-surface': '#0f172a', '--couleur-accent': '#d4af37', '--rayon-carte': '30px' } as React.CSSProperties} className="flex items-center gap-3">
           <BadgeVexel db={db} />
+          <CollantVexel />
         </div>
       </div>
     </div>
