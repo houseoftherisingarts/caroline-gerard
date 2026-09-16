@@ -22,6 +22,14 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-09-16',
+    titre: 'La mention du studio, à côté de celle de tes partenaires',
+    intro: "Une petite plaque a rejoint le bas de ton site : elle nomme le studio qui l'a bâti, juste à côté de la carte réservée à tes partenaires.",
+    etapes: [
+      "Une plaque discrète en bas de ton site dit qui l'a construit et s'ouvre sur une courte carte de présentation quand on clique dessus.",
+    ],
+  },
+  {
     date: '2026-09-13',
     titre: 'Le trafic de ton site jour par jour, et un interrupteur pour ranger l’agenda',
     intro: "Tu as déposé deux demandes dans ton Espace Auteure cette semaine, et c’est la première fois que le circuit fonctionne de bout en bout : elles ont été lues là où tu les as écrites, puis appliquées le même jour. Les deux sont en ligne.",
