@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from './firebase';
 import { BadgeVexel } from './vexel/BadgeVexel';
+import { CollantVexel } from './vexel/CollantVexel';
 import { trackAddToCart, trackBeginCheckout, trackPageView } from './lib/analytics';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
