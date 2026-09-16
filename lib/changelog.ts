@@ -27,6 +27,7 @@ export const JOURNAL: EntreeJournal[] = [
     intro: "Une petite plaque a rejoint le bas de ton site : elle nomme le studio qui l'a bâti, juste à côté de la carte réservée à tes partenaires.",
     etapes: [
       "Une plaque discrète en bas de ton site dit qui l'a construit, et un clic dessus ouvre une courte carte de présentation.",
+      "Cette plaque porte maintenant le petit blason du studio et son nom dans une belle police à empattements, pour qu'elle se distingue mieux de la carte de tes partenaires juste à côté.",
     ],
   },
   {

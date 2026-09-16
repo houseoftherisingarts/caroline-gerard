@@ -1,8 +1,9 @@
 // CollantVexel — le collant foil du pied de page, présent sur tous les sites Vexel sauf
-// vexelwebstudio.com lui-même. Porté de xena-horizon-platform (3)/components/BadgeVexel.tsx :
-// même liseré découpé, même reflet holographique qui suit le pointeur, même clic qui ouvre
-// une carte avant de renvoyer vers vexelwebstudio.com. Autonome (styles inline, comme
-// BadgeVexel.tsx dans ce même dossier) pour ne dépendre d'aucun token Tailwind du site hôte.
+// vexelwebstudio.com lui-même. Aligné le 16 sept 2026 sur le modèle du Lynx
+// (le-lynx---observatoire/components/CollantVexel.tsx) : logo complet (cercle et sigil) à
+// gauche, « Site créé par » en surtitre et « Vexel Webstudio » en serif, liseré blanc découpé,
+// reflet irisé qui suit le pointeur et reste visible au repos, léger basculement 3D, posé droit.
+// Autonome (styles inline) pour ne dépendre d'aucun token Tailwind du site hôte.
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const TEXTES = {
@@ -33,6 +34,8 @@ const TEXTES = {
 const VEXEL_URL = 'https://vexelwebstudio.com';
 const SALON_URL = 'https://lesalondesinconnus.com/';
 const LOGO_SALON = '/salon-logo-or.png';
+const LOGO_VEXEL = '/vexel-logo.png';
+const SERIF = 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif';
 
 const style = `
 .cv-foil {
@@ -54,17 +57,25 @@ const style = `
   box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35), 0 10px 24px -10px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.25);
   transform: perspective(600px) rotateX(var(--rx)) rotateY(var(--ry));
   transition: transform 220ms ease, box-shadow 220ms ease;
+  will-change: transform;
 }
 .cv-foil:hover { box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35), 0 18px 34px -12px rgb(0 0 0 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.35); }
 .cv-sheen {
   position: absolute; inset: -40%; pointer-events: none; z-index: 0;
   background: repeating-conic-gradient(from 200deg at var(--mx) var(--my),
     #ff9ecb 0deg, #ffe08a 24deg, #9bffcf 48deg, #8ad4ff 72deg, #c9a4ff 96deg, #ff9ecb 120deg);
-  opacity: 0.16; mix-blend-mode: color-dodge; filter: saturate(1.2) blur(2px);
+  opacity: 0.18; mix-blend-mode: color-dodge; filter: saturate(1.2) blur(2px);
   transition: opacity 260ms ease;
 }
-.cv-foil:hover .cv-sheen { opacity: 0.32; }
-.cv-foil > *:not(.cv-sheen) { position: relative; z-index: 1; }
+.cv-foil:hover .cv-sheen { opacity: 0.34; }
+.cv-grain {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
+}
+.cv-foil > *:not(.cv-sheen):not(.cv-grain) { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .cv-foil { transform: none; transition: none; } }
 .cv-overlay {
   position: fixed; inset: 0; z-index: 900;
   display: flex; align-items: center; justify-content: center; padding: 1rem;
@@ -161,11 +172,13 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
         className={`cv-foil ${className}`}
       >
         <span aria-hidden className="cv-sheen" />
+        <span aria-hidden className="cv-grain" />
+        <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '2.5rem', width: 'auto', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
         <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
           <span style={{ fontSize: '0.625rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.7)' }}>
             {t.kicker}
           </span>
-          <span style={{ marginTop: '0.25rem', fontSize: '1.05rem' }}>{t.nom}</span>
+          <span style={{ marginTop: '0.25rem', fontFamily: SERIF, fontSize: '1.05rem' }}>{t.nom}</span>
         </span>
       </a>
 
@@ -181,8 +194,9 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
             <button type="button" className="cv-carte-fermer" aria-label={t.fermer} onClick={() => setOuverte(false)}>
               ✕
             </button>
+            <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '3.5rem', width: 'auto', margin: '0 auto 1rem' }} />
             <p style={{ fontSize: '0.75rem', color: '#9a9a9f', margin: 0 }}>{t.sousTitre}</p>
-            <h2 id="collant-vexel-titre" style={{ marginTop: '0.5rem', fontSize: '1.25rem' }}>{t.titre}</h2>
+            <h2 id="collant-vexel-titre" style={{ marginTop: '0.5rem', fontFamily: SERIF, fontSize: '1.25rem' }}>{t.titre}</h2>
             <p style={{ marginTop: '0.75rem', color: '#c7c7cc' }}>{t.corps}</p>
             <a
               ref={ouiRef}
