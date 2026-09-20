@@ -33,6 +33,10 @@ const AdminDevenirPartenaire = () => (
             { merge: true },
           );
         }}
+        formule="base"
+        onCollant={async (id) => {
+          await setDoc(doc(db, 'settings', 'vexel'), { collant: id }, { merge: true });
+        }}
       />
     </div>
   </div>
