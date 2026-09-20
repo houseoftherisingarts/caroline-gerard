@@ -58,7 +58,7 @@ service cloud.firestore {
     match /events/{id}      { allow read: if true; allow write: if isAdmin(); }
     match /conferences/{id} { allow read: if true; allow write: if isAdmin(); }
     match /interviews/{id}  { allow read: if true; allow write: if isAdmin(); }
-    match /settings/{id}    { allow read: if true; allow write: if isAdmin(); }
+    match /settings/{id}    { allow read: if true; allow write: if isAdmin() && (id != 'vexel' || collantOk('base')); }
 
     // Témoignages : le public peut en soumettre un (jamais publié d'office)
     match /testimonials/{id} {
