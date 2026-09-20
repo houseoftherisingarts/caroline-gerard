@@ -17,6 +17,20 @@ service cloud.firestore {
       );
     }
 
+    // La finition du collant Vexel, une par formule d'abonnement (voir
+    // _vexel-base/docs/COLLANT-REGLES.md). Caroline Gérard porte Base.
+    function finitionsDe(formule) {
+      return formule == 'signature'
+        ? ['noir', 'blanc', 'rouge', 'bleu', 'vert', 'violet', 'bronze', 'argent', 'or', 'saphir', 'irise', 'arc-en-ciel']
+        : formule == 'hybride'
+          ? ['noir', 'blanc', 'rouge', 'bleu', 'vert', 'violet', 'bronze', 'argent', 'or', 'saphir']
+          : ['noir', 'blanc', 'rouge', 'bleu', 'vert', 'violet', 'bronze'];
+    }
+    function collantOk(formule) {
+      return !('collant' in request.resource.data)
+        || request.resource.data.collant in finitionsDe(formule);
+    }
+
     function keysOnly(allowed) {
       return request.resource.data.keys().hasOnly(allowed);
     }
