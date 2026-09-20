@@ -21,6 +21,7 @@
 // `onSucces` l'écrit pour `settings/vexel.partenaire`. Sans `onCollant`, le
 // choix ne fait que se refléter dans l'aperçu, rien ne part nulle part.
 import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eraser, Check, Copy, ExternalLink, Loader2 } from 'lucide-react';
 import { ARTICLES, PREAMBULE, TITRE, TEXTE_INTEGRAL_CONTRAT, VERSION_CONTRAT } from './contrat-representant';
