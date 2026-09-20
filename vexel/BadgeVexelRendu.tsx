@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import type React from 'react';
 import { BadgeCheck } from 'lucide-react';
 import type { Fini } from './collants';
 
