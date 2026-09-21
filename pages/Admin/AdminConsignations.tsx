@@ -460,7 +460,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
 
       {/* Vue d'ensemble */}
       {locations.length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { label: 'Livres en consigne', value: String(totals.onHand) },
             { label: 'Livres vendus', value: String(totals.sold) },
@@ -468,7 +468,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
           ].map(({ label, value }) => (
             <div key={label} className="bg-midnight/60 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-4">
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{label}</p>
-              <p className="text-2xl font-serif font-bold text-gold mt-1">{value}</p>
+              <p className="text-2xl font-serif font-bold text-gold mt-1 whitespace-nowrap">{value}</p>
             </div>
           ))}
         </div>
