@@ -3,39 +3,62 @@
 // (le-lynx---observatoire/components/CollantVexel.tsx) : logo complet (cercle et sigil) à
 // gauche, « Site créé par » en surtitre et « Vexel Webstudio » en serif, liseré blanc découpé,
 // reflet irisé qui suit le pointeur et reste visible au repos, léger basculement 3D, posé droit.
+// Le foil de la base est l'irisé; un client peut recevoir la teinte de son canon (Krystine : or et cuivre). La carte qui s'ouvre au clic est
+// celle de Laurie (xena-horizon-platform/components/BadgeVexel.tsx, 20 sept 2026) : un volet foil
+// avec le grand logo, l'entente en clair (rabais de 10 % pour la personne, commission pour le
+// propriétaire du site, dont le code, le nom et le prénom se passent en props) et « Continuer vers Vexel » qui ouvre vexelwebstudio.com avec le code
+// partenaire déjà rempli (?parrain=CODE, lu par la page /compte).
 // Autonome (styles inline) pour ne dépendre d'aucun token Tailwind du site hôte.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type React from 'react';
 
 const TEXTES = {
   FR: {
     kicker: 'Site créé par',
     nom: 'Vexel Webstudio',
+    rang: 'Affilié Vexel',
     sousTitre: 'un projet créatif du Salon des Inconnus',
     salon: 'Le Salon des Inconnus',
-    libelle: "Site créé par Vexel Webstudio : en savoir plus",
-    titre: 'Un site comme celui-ci',
-    corps: "Ce site a été bâti par Vexel Webstudio, un studio web fondé au Salon des Inconnus.",
-    oui: 'Voir Vexel Webstudio',
+    libelle: "Site créé par Vexel Webstudio : en savoir plus sur l'entente",
+    titre: 'Un site comme celui-ci, avec un coup de pouce',
+    corps: (proprietaire: string, prenom: string) =>
+      `${proprietaire} est affiliée à Vexel Webstudio pour les sites Internet. Si vous ouvrez un dossier chez Vexel à partir d'ici, vous gagnez un rabais sur ce même forfait.`,
+    // Sans code partenaire, aucun rabais n'existe : la carte le tait au lieu de le promettre.
+    titreSansCode: 'Un site comme celui-ci',
+    corpsSansCode: 'Ce site a été bâti par Vexel Webstudio, un studio web fondé au Salon des Inconnus.',
+    question: '',
+    oui: 'Continuer vers Vexel',
+    non: 'Pas maintenant',
     fermer: 'Fermer',
   },
   EN: {
     kicker: 'Site by',
     nom: 'Vexel Webstudio',
+    rang: 'Vexel affiliate',
     sousTitre: 'a creative project of Le Salon des Inconnus',
     salon: 'Le Salon des Inconnus',
-    libelle: 'Site by Vexel Webstudio: learn more',
-    titre: 'A site like this one',
-    corps: 'This site was built by Vexel Webstudio, a web studio founded at Le Salon des Inconnus.',
-    oui: 'Visit Vexel Webstudio',
+    libelle: 'Site by Vexel Webstudio: learn about the partnership',
+    titre: 'A site like this one, with a helping hand',
+    corps: (proprietaire: string, prenom: string) =>
+      `${proprietaire} is affiliated with Vexel Webstudio for websites. If you open a file with Vexel from here, you earn a discount on that same plan.`,
+    titreSansCode: 'A site like this one',
+    corpsSansCode: 'This site was built by Vexel Webstudio, a web studio founded at Le Salon des Inconnus.',
+    question: '',
+    oui: 'Continue to Vexel',
+    non: 'Not now',
     fermer: 'Close',
   },
 };
 
-const VEXEL_URL = 'https://vexelwebstudio.com';
 const SALON_URL = 'https://lesalondesinconnus.com/';
 const LOGO_SALON = '/salon-logo-or.png';
 const LOGO_VEXEL = '/vexel-logo.png';
 const SERIF = 'ui-serif, Georgia, Cambria, "Times New Roman", Times, serif';
+
+/** L'adresse se reconstruit toujours ici; seul un code de la forme attendue passe. */
+const codeValide = (code: string) => /^[A-Z0-9-]{4,24}$/.test(code);
+export const lienVexel = (code: string) =>
+  codeValide(code) ? `https://vexelwebstudio.com/compte?parrain=${encodeURIComponent(code)}` : 'https://vexelwebstudio.com/compte';
 
 const style = `
 .cv-foil {
@@ -78,42 +101,79 @@ const style = `
 @media (prefers-reduced-motion: reduce) { .cv-foil { transform: none; transition: none; } }
 .cv-overlay {
   position: fixed; inset: 0; z-index: 900;
-  display: flex; align-items: center; justify-content: center; padding: 1rem;
-  background: rgba(10,10,12,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end; justify-content: center; padding: 1rem;
+  background: rgba(28,23,18,0.55); backdrop-filter: blur(4px);
 }
 .cv-carte {
   position: relative;
-  width: 100%; max-width: 480px;
+  width: 100%; max-width: 960px;
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
   border-radius: 15px;
-  background: #101012;
-  border: 1px solid rgba(255,255,255,0.14);
-  color: #f2f2f2;
-  padding: 2rem;
-  text-align: center;
+  background: #f4efe6;
+  border: 1px solid rgba(156,122,68,0.35);
+  color: #1c1712;
+  box-shadow: 0 30px 80px -30px rgba(20,16,12,0.6);
+  text-align: left;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
 }
+.cv-volet {
+  --mx: 30%; --my: 30%;
+  position: relative; isolation: isolate; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem;
+  min-height: 200px; padding: 1.5rem; text-align: center; color: #fff;
+  background:
+    radial-gradient(120% 120% at var(--mx) var(--my), rgb(255 255 255 / 0.18), transparent 55%),
+    linear-gradient(135deg, #1b1b22 0%, #050505 60%, #14141a 100%);
+}
+.cv-volet > *:not(.cv-sheen):not(.cv-grain) { position: relative; z-index: 1; }
+.cv-corps { position: relative; display: flex; flex-direction: column; justify-content: center; padding: 1.5rem; }
 .cv-carte-fermer {
   position: absolute; top: 0.75rem; right: 0.75rem;
-  width: 2.25rem; height: 2.25rem;
+  width: 2.5rem; height: 2.5rem;
   display: flex; align-items: center; justify-content: center;
-  border-radius: 999px; border: none; background: transparent; color: #9a9a9f; cursor: pointer;
+  border-radius: 999px; border: none; background: transparent; color: #7a6a58; cursor: pointer; font-size: 1rem;
 }
-.cv-carte-fermer:hover { color: #f2f2f2; }
+.cv-carte-fermer:hover { color: #1c1712; }
+.cv-rang { display: flex; align-items: center; gap: 0.5rem; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: #7d6330; }
+.cv-boutons { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-top: 1.5rem; padding-right: 5.5rem; }
 .cv-bouton {
   display: inline-flex; align-items: center; justify-content: center;
-  margin-top: 1.25rem; min-height: 44px; padding: 0 1.4rem;
-  border-radius: 999px; background: #d4af37; color: #101012; font-weight: 600;
-  text-decoration: none;
+  min-height: 44px; padding: 0 1.4rem;
+  border-radius: 999px; background: #1c1712; color: #f4efe6; font-weight: 600; font-size: 0.875rem;
+  text-decoration: none; border: 1px solid #1c1712;
 }
-.cv-salon { display: inline-block; margin-top: 1.5rem; }
+.cv-bouton:hover { background: #34241a; border-color: #34241a; }
+.cv-bouton-non {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 1.4rem; font-size: 0.875rem; cursor: pointer;
+  border-radius: 999px; background: transparent; color: #1c1712; border: 1px solid rgba(28,23,18,0.25);
+}
+.cv-bouton-non:hover { border-color: #1c1712; }
+.cv-salon { position: absolute; right: 1.25rem; bottom: 1.25rem; display: inline-block; }
+@media (min-width: 640px) {
+  .cv-overlay { align-items: center; }
+  .cv-carte { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); aspect-ratio: 16 / 9; }
+  .cv-volet { padding: 2rem; }
+  .cv-corps { padding: 2.5rem; }
+  .cv-salon { right: 1.75rem; bottom: 1.75rem; }
+}
 `;
 
 export interface CollantVexelProps {
   lang?: 'FR' | 'EN';
   className?: string;
+  /** Code partenaire du propriétaire du site, rempli d'avance chez Vexel au clic sur « Continuer ».
+   * Vide tant que le propriétaire n'a pas de code : la carte parle alors du studio, sans rabais. */
+  codeParrain?: string;
+  proprietaire?: string;
+  prenom?: string;
 }
 
-export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps) {
+export function CollantVexel({ lang = 'FR', className = '', codeParrain = '', proprietaire = '', prenom = '' }: CollantVexelProps) {
   const t = TEXTES[lang];
+  const lien = lienVexel(codeParrain);
+  const aCode = codeValide(codeParrain) && proprietaire !== '';
   const ref = useRef<HTMLAnchorElement>(null);
   const ouiRef = useRef<HTMLAnchorElement>(null);
   const [ouverte, setOuverte] = useState(false);
@@ -138,6 +198,7 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
     el.style.setProperty('--ry', '0deg');
   }, []);
 
+  // Le lien reste réel (lecteur d'écran, clic du milieu), mais le clic ordinaire explique d'abord.
   const ouvrir = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
@@ -162,7 +223,7 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
       <style>{style}</style>
       <a
         ref={ref}
-        href={VEXEL_URL}
+        href={lien}
         onClick={ouvrir}
         aria-haspopup="dialog"
         aria-expanded={ouverte}
@@ -173,7 +234,7 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
       >
         <span aria-hidden className="cv-sheen" />
         <span aria-hidden className="cv-grain" />
-        <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '2.5rem', width: 'auto', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
+        <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '1.75rem', width: 'auto', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }} />
         <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.15 }}>
           <span style={{ fontSize: '0.625rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.7)' }}>
             {t.kicker}
@@ -191,26 +252,43 @@ export function CollantVexel({ lang = 'FR', className = '' }: CollantVexelProps)
             className="cv-carte"
             onClick={(e) => e.stopPropagation()}
           >
-            <button type="button" className="cv-carte-fermer" aria-label={t.fermer} onClick={() => setOuverte(false)}>
-              ✕
-            </button>
-            <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '3.5rem', width: 'auto', margin: '0 auto 1rem' }} />
-            <p style={{ fontSize: '0.75rem', color: '#9a9a9f', margin: 0 }}>{t.sousTitre}</p>
-            <h2 id="collant-vexel-titre" style={{ marginTop: '0.5rem', fontFamily: SERIF, fontSize: '1.25rem' }}>{t.titre}</h2>
-            <p style={{ marginTop: '0.75rem', color: '#c7c7cc' }}>{t.corps}</p>
-            <a
-              ref={ouiRef}
-              href={VEXEL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOuverte(false)}
-              className="cv-bouton"
-            >
-              {t.oui}
-            </a>
-            <a href={SALON_URL} target="_blank" rel="noopener noreferrer" aria-label={t.salon} className="cv-salon">
-              <img src={LOGO_SALON} alt={t.salon} style={{ height: '2.5rem', width: 'auto' }} />
-            </a>
+            {/* Le volet de gauche reprend la surface foil du collant, avec le logo complet en grand. */}
+            <div className="cv-volet">
+              <span aria-hidden className="cv-sheen" />
+              <span aria-hidden className="cv-grain" />
+              <img src={LOGO_VEXEL} alt="" width={329} height={320} style={{ height: '7rem', width: 'auto', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.6))' }} />
+              <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                <span style={{ fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.7)' }}>{t.kicker}</span>
+                <span style={{ marginTop: '0.4rem', fontFamily: SERIF, fontSize: '1.375rem' }}>{t.nom}</span>
+              </span>
+            </div>
+
+            <div className="cv-corps">
+              <button type="button" className="cv-carte-fermer" aria-label={t.fermer} onClick={() => setOuverte(false)}>
+                ✕
+              </button>
+              {aCode ? (
+                <p className="cv-rang" style={{ margin: 0 }}>
+                  <span aria-hidden style={{ display: 'inline-block', width: '0.5rem', height: '0.5rem', borderRadius: '999px', background: '#bb9a5e' }} />
+                  {t.rang}
+                </p>
+              ) : null}
+              <p style={{ margin: '0.35rem 0 0', fontSize: '0.8125rem', color: '#7a6a58' }}>{t.sousTitre}</p>
+              <h2 id="collant-vexel-titre" style={{ margin: '1rem 0 0', fontFamily: SERIF, fontWeight: 400, fontSize: 'clamp(1.35rem, 2.4vw, 1.75rem)', lineHeight: 1.15 }}>{aCode ? t.titre : t.titreSansCode}</h2>
+              <p style={{ margin: '1rem 0 0', fontSize: '0.9375rem', lineHeight: 1.65 }}>{aCode ? t.corps(proprietaire, prenom) : t.corpsSansCode}</p>
+              {t.question ? <p style={{ margin: '0.75rem 0 0', fontSize: '0.9375rem', fontWeight: 600 }}>{t.question}</p> : null}
+              <div className="cv-boutons">
+                <a ref={ouiRef} href={lien} target="_blank" rel="noopener" onClick={() => setOuverte(false)} className="cv-bouton">
+                  {t.oui}
+                </a>
+                <button type="button" className="cv-bouton-non" onClick={() => setOuverte(false)}>
+                  {t.non}
+                </button>
+              </div>
+              <a href={SALON_URL} target="_blank" rel="noopener noreferrer" aria-label={t.salon} className="cv-salon">
+                <img src={LOGO_SALON} alt={t.salon} style={{ height: '3.5rem', width: 'auto', filter: 'drop-shadow(0 2px 6px rgba(197,160,89,0.35))' }} />
+              </a>
+            </div>
           </div>
         </div>
       )}
