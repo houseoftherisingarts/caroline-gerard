@@ -10,6 +10,7 @@
 // partenaire déjà rempli (?parrain=CODE, lu par la page /compte).
 // Autonome (styles inline) pour ne dépendre d'aucun token Tailwind du site hôte.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type React from 'react';
 
 const TEXTES = {
@@ -100,7 +101,7 @@ const style = `
 .cv-foil > *:not(.cv-sheen):not(.cv-grain) { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .cv-foil { transform: none; transition: none; } }
 .cv-overlay {
-  position: fixed; inset: 0; z-index: 900;
+  position: fixed; inset: 0; z-index: 10000;
   display: flex; align-items: flex-end; justify-content: center; padding: 1rem;
   background: rgba(28,23,18,0.55); backdrop-filter: blur(4px);
 }
@@ -245,7 +246,8 @@ export function CollantVexel({ lang = 'FR', className = '', codeParrain = '', pr
         </span>
       </a>
 
-      {ouverte && (
+      {/* Portée dans <body> : un pied de page flouté ou transformé enfermerait sinon la carte (position fixed). */}
+      {ouverte && createPortal(
         <div className="cv-overlay" role="presentation" onClick={() => setOuverte(false)}>
           <div
             role="dialog"
@@ -293,7 +295,7 @@ export function CollantVexel({ lang = 'FR', className = '', codeParrain = '', pr
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </>
   );
 }
