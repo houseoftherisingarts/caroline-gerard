@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Plus, X, Edit3, Trash2, Check, PackagePlus, BadgeDollarSign, SlidersHorizontal,
-  Store, Tent, PiggyBank, Wallet, CreditCard, Landmark, Globe, CircleDot, History,
+  Store, Tent, PiggyBank, Wallet, CreditCard, Landmark, Globe, CircleDot, History, Gift, Receipt,
 } from 'lucide-react';
 import {
   Book, ConsignmentLocation, ConsignmentMovement, StockMovement, StockMovementType, PaymentMethod,
@@ -10,6 +10,7 @@ import {
   subscribeToConsignmentLocations, subscribeToConsignmentMovements,
   subscribeToStockMovements, saveStockMovement, deleteStockMovement,
 } from '../../lib/firestore';
+import { TPS_PCT, TVQ_PCT, calculerTaxes, revenuLivres, montantEncaisse } from '../../lib/taxes';
 
 interface AdminVentesProps { books: Book[]; }
 
@@ -27,7 +28,8 @@ const fmtDate = (d: string) => new Date(d + 'T12:00:00').toLocaleDateString('fr-
 const TYPE_META: Record<StockMovementType, { label: string; hint: string; color: string; icon: React.ReactNode }> = {
   vente:      { label: 'Vente',            hint: 'Événement, en main propre, site web', color: 'text-green-400 bg-green-500/10 border-green-500/30', icon: <BadgeDollarSign size={13} /> },
   entree:     { label: 'Livres reçus',     hint: 'Inventaire de départ, commande reçue', color: 'text-sky-400 bg-sky-500/10 border-sky-500/30',       icon: <PackagePlus size={13} /> },
-  ajustement: { label: 'Correction',       hint: 'Recomptage, perte, don (+ ou −)',     color: 'text-amber-400 bg-amber-500/10 border-amber-500/30', icon: <SlidersHorizontal size={13} /> },
+  don:        { label: 'Livres donnés',    hint: 'Cadeau, exemplaire offert, don',       color: 'text-rose-400 bg-rose-500/10 border-rose-500/30',    icon: <Gift size={13} /> },
+  ajustement: { label: 'Correction',       hint: 'Recomptage, perte (+ ou −)',          color: 'text-amber-400 bg-amber-500/10 border-amber-500/30', icon: <SlidersHorizontal size={13} /> },
 };
 
 const PAYMENTS: { id: PaymentMethod; label: string; icon: React.ReactNode }[] = [
@@ -57,11 +59,24 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
   const [tip, setTip] = useState(existing?.tip ?? 0);
   const [eventName, setEventName] = useState(existing?.eventName ?? '');
   const [eventCost, setEventCost] = useState(existing?.eventCost ?? 0);
+  const [shipping, setShipping] = useState(existing?.shipping ?? 0);
+  const [taxesIncluses, setTaxesIncluses] = useState(existing?.taxesIncluses ?? false);
+  const [tpsPct, setTpsPct] = useState(existing?.tpsPct ?? TPS_PCT);
+  // Un montant saisi à la main prime sur le calcul; null = on suit le calcul. À l'ouverture, un montant
+  // enregistré qui diffère du calcul est traité comme une correction manuelle.
+  const calcInitial = calculerTaxes(existing ?? {});
+  const [tpsManuel, setTpsManuel] = useState<number | null>(existing?.tps != null && existing.tps !== calcInitial.tps ? existing.tps : null);
+  const [tvqManuel, setTvqManuel] = useState<number | null>(existing?.tvq != null && existing.tvq !== calcInitial.tvq ? existing.tvq : null);
   const [date, setDate] = useState(existing?.date ?? today());
   const [note, setNote] = useState(existing?.note ?? '');
   const [err, setErr] = useState('');
   const book = sellable.find(b => b.id === bookId);
   const isSale = type === 'vente';
+  const calc = calculerTaxes({ qty, unitPrice, shipping, taxesIncluses, tpsPct });
+  const tps = tpsManuel ?? calc.tps;
+  const tvq = tvqManuel ?? calc.tvq;
+  const manuel = tpsManuel !== null || tvqManuel !== null;
+  const vente = { qty, unitPrice, shipping, taxesIncluses, tpsPct, tps, tvq };
 
   const pickBook = (id: string) => {
     setBookId(id);
@@ -83,6 +98,9 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
           ...(tip > 0 ? { tip } : {}),
           ...(eventName.trim() ? { eventName: eventName.trim() } : {}),
           ...(eventCost > 0 ? { eventCost } : {}),
+          ...(shipping > 0 ? { shipping } : {}),
+          ...(taxesIncluses ? { taxesIncluses: true } : {}),
+          tpsPct, tps, tvq,
         } : {}),
       });
       onClose();
@@ -101,7 +119,7 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
         </div>
         <div className="p-6 space-y-4">
           <Field label="Type">
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {(Object.keys(TYPE_META) as StockMovementType[]).map(t => (
                 <button key={t} type="button" onClick={() => setType(t)} title={TYPE_META[t].hint}
                   className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-xs font-bold transition-all ${type === t ? TYPE_META[t].color : 'text-slate-400 bg-white/5 border-white/10 hover:bg-white/10'}`}>
@@ -119,7 +137,7 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
             </Field>
           )}
           <div className="grid grid-cols-2 gap-4">
-            <Field label={isSale ? 'Livres vendus' : type === 'entree' ? 'Livres reçus' : 'Correction (+ / −)'}>
+            <Field label={isSale ? 'Livres vendus' : type === 'entree' ? 'Livres reçus' : type === 'don' ? 'Livres donnés' : 'Correction (+ / −)'}>
               <input type="number" value={qty} onChange={e => setQty(parseInt(e.target.value) || 0)} className={inputCls} />
             </Field>
             {isSale && (
@@ -152,16 +170,51 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
               <Field label="Sous en plus pour William ($)">
                 <input type="number" min="0" step="0.01" value={tip} onChange={e => setTip(parseFloat(e.target.value) || 0)} className={inputCls} />
               </Field>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest inline-flex items-center gap-1.5"><Receipt size={13} className="text-gold" /> Taxes perçues</p>
+                  <label className="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                    <input type="checkbox" checked={taxesIncluses} onChange={e => setTaxesIncluses(e.target.checked)} className="accent-gold w-3.5 h-3.5" />
+                    Taxes incluses dans le prix
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="TPS sur les livres (%)">
+                    <input type="number" min="0" max="100" step="0.001" value={tpsPct} onChange={e => setTpsPct(parseFloat(e.target.value) || 0)} className={inputCls} />
+                  </Field>
+                  <Field label="Transport facturé ($)">
+                    <input type="number" min="0" step="0.01" value={shipping} onChange={e => setShipping(parseFloat(e.target.value) || 0)} className={inputCls} />
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="TPS perçue ($)">
+                    <input type="number" min="0" step="0.01" value={tps} onChange={e => setTpsManuel(parseFloat(e.target.value) || 0)} className={inputCls} />
+                  </Field>
+                  <Field label="TVQ perçue ($)">
+                    <input type="number" min="0" step="0.01" value={tvq} onChange={e => setTvqManuel(parseFloat(e.target.value) || 0)} className={inputCls} />
+                  </Field>
+                </div>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  {manuel ? (
+                    <>Montants corrigés à la main. <button type="button" onClick={() => { setTpsManuel(null); setTvqManuel(null); }} className="text-gold hover:underline font-bold">Revenir au calcul</button></>
+                  ) : (
+                    <>La TPS se calcule sur les livres, et le transport porte la TPS et la TVQ (9,975 %). Tu peux corriger les deux montants à la main.</>
+                  )}
+                </p>
+              </div>
               <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 space-y-1">
-                <div className="flex justify-between"><span className="text-slate-500">Ventes</span><span>{money(qty * unitPrice)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Livres, avant taxes</span><span>{money(revenuLivres(vente))}</span></div>
+                {shipping > 0 && <div className="flex justify-between"><span className="text-slate-500">Transport{taxesIncluses ? ', taxes comprises' : ''}</span><span>{money(taxesIncluses ? shipping / (1 + (TPS_PCT + TVQ_PCT) / 100) : shipping)}</span></div>}
+                {tps > 0 && <div className="flex justify-between"><span className="text-slate-500">TPS</span><span>{money(tps)}</span></div>}
+                {tvq > 0 && <div className="flex justify-between"><span className="text-slate-500">TVQ</span><span>{money(tvq)}</span></div>}
                 {tip > 0 && <div className="flex justify-between"><span className="text-slate-500">Petit cochon de William</span><span>{money(tip)}</span></div>}
-                <div className="flex justify-between font-bold text-gold border-t border-white/10 pt-1.5 mt-1.5"><span>Encaissé</span><span>{money(qty * unitPrice + tip)}</span></div>
+                <div className="flex justify-between font-bold text-gold border-t border-white/10 pt-1.5 mt-1.5"><span>Encaissé</span><span>{money(montantEncaisse(vente) + tip)}</span></div>
               </div>
             </>
           )}
           <div className="grid grid-cols-2 gap-4">
             <Field label="Date"><input type="date" value={date} onChange={e => setDate(e.target.value)} className={inputCls} /></Field>
-            <Field label="Note"><input value={note} onChange={e => setNote(e.target.value)} placeholder="Optionnel" className={inputCls} /></Field>
+            <Field label="Note"><input value={note} onChange={e => setNote(e.target.value)} placeholder={type === 'don' ? 'À qui, à quelle occasion' : 'Optionnel'} className={inputCls} /></Field>
           </div>
         </div>
         <div className="sticky bottom-0 bg-slate-900 border-t border-white/10 px-6 py-4 flex flex-col gap-3">
@@ -181,6 +234,7 @@ const StockModal = ({ books, existing, eventNames, onClose, onSave }: {
 type SaleRow = {
   id: string; date: string; where: string; channel: 'direct' | 'depositaire';
   bookTitle: string; qty: number; gross: number; net: number; payment: string; tip: number; eventCost: number;
+  tps: number; tvq: number; encaisse: number;   // gross et net sont avant taxes; encaisse est ce que la personne a payé
   stock?: StockMovement;
 };
 
@@ -205,10 +259,11 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
 
   // Stock chez Caroline, livre par livre : reçus + corrections − ventes directes − dépôts + retours.
   const stockByBook = useMemo(() => sellable.map(b => {
-    let home = 0, consigned = 0, soldDirect = 0, soldCons = 0;
+    let home = 0, consigned = 0, soldDirect = 0, soldCons = 0, given = 0;
     stock.filter(m => m.bookId === b.id).forEach(m => {
       if (m.type === 'entree' || m.type === 'ajustement') home += m.qty;
       if (m.type === 'vente') { home -= m.qty; soldDirect += m.qty; }
+      if (m.type === 'don') { home -= m.qty; given += m.qty; }
     });
     cons.filter(m => m.bookId === b.id).forEach(m => {
       const q = m.qty ?? 0;
@@ -216,7 +271,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
       if (m.type === 'retour') { home += q; consigned -= q; }
       if (m.type === 'vente') { consigned -= q; soldCons += q; }
     });
-    return { book: b, home, consigned, soldDirect, soldCons };
+    return { book: b, home, consigned, soldDirect, soldCons, given };
   }), [sellable, stock, cons]);
 
   const years = useMemo(() => {
@@ -230,26 +285,28 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
   const rows: SaleRow[] = useMemo(() => {
     const direct: SaleRow[] = stock.filter(m => m.type === 'vente' && m.date.startsWith(year)).map(m => ({
       id: m.id, date: m.date, where: m.eventName || (m.payment === 'web' ? 'Site web' : 'Vente directe'), channel: 'direct',
-      bookTitle: m.bookTitle, qty: m.qty, gross: m.qty * (m.unitPrice ?? 0), net: m.qty * (m.unitPrice ?? 0),
-      payment: payLabel(m.payment), tip: m.tip ?? 0, eventCost: m.eventCost ?? 0, stock: m,
+      bookTitle: m.bookTitle, qty: m.qty, gross: revenuLivres(m), net: revenuLivres(m),
+      payment: payLabel(m.payment), tip: m.tip ?? 0, eventCost: m.eventCost ?? 0,
+      tps: m.tps ?? 0, tvq: m.tvq ?? 0, encaisse: montantEncaisse(m), stock: m,
     }));
     const dep: SaleRow[] = cons.filter(m => m.type === 'vente' && m.date.startsWith(year)).map(m => {
-      const gross = (m.qty ?? 0) * (m.unitPrice ?? 0);
+      const gross = revenuLivres(m);
       return {
         id: m.id, date: m.date, where: locName(m.locationId) + (m.note ? ` · ${m.note}` : ''), channel: 'depositaire',
         bookTitle: m.bookTitle ?? 'Livre', qty: m.qty ?? 0, gross, net: gross * (1 - (m.commissionPct ?? 0) / 100),
         payment: `Dépositaire (${m.commissionPct ?? 0} %)`, tip: 0, eventCost: 0,
+        tps: m.tps ?? 0, tvq: m.tvq ?? 0, encaisse: montantEncaisse(m),
       };
     });
     return [...direct, ...dep].sort((a, b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
   }, [stock, cons, locations, year]);
 
   const totals = useMemo(() => {
-    const t = { qty: 0, net: 0, comptant: 0, square: 0, tips: 0, costs: 0 };
+    const t = { qty: 0, net: 0, comptant: 0, square: 0, tips: 0, costs: 0, tps: 0, tvq: 0 };
     rows.forEach(r => {
-      t.qty += r.qty; t.net += r.net; t.tips += r.tip; t.costs += r.eventCost;
-      if (r.stock?.payment === 'comptant') t.comptant += r.gross;
-      if (r.stock?.payment === 'square') t.square += r.gross;
+      t.qty += r.qty; t.net += r.net; t.tips += r.tip; t.costs += r.eventCost; t.tps += r.tps; t.tvq += r.tvq;
+      if (r.stock?.payment === 'comptant') t.comptant += r.encaisse;
+      if (r.stock?.payment === 'square') t.square += r.encaisse;
     });
     return t;
   }, [rows]);
@@ -281,7 +338,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
 
       {/* Stock par livre */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {stockByBook.map(({ book, home, consigned, soldDirect, soldCons }) => (
+        {stockByBook.map(({ book, home, consigned, soldDirect, soldCons, given }) => (
           <div key={book.id} className="bg-midnight/60 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
             <div className="p-5 flex items-center gap-4">
               <img src={book.image} alt="" className="w-12 h-16 object-cover rounded-lg border border-white/10" />
@@ -290,11 +347,12 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
                 {book.subtitle && <p className="text-slate-500 text-xs mt-0.5 truncate">{book.subtitle}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-3 border-t border-white/5 divide-x divide-white/5 text-center">
+            <div className="grid grid-cols-4 border-t border-white/5 divide-x divide-white/5 text-center">
               {[
                 { label: 'Chez toi', value: home, icon: <Tent size={12} /> },
                 { label: 'En consigne', value: consigned, icon: <Store size={12} /> },
-                { label: 'Vendus (total)', value: soldDirect + soldCons, icon: <BadgeDollarSign size={12} /> },
+                { label: 'Vendus', value: soldDirect + soldCons, icon: <BadgeDollarSign size={12} /> },
+                { label: 'Donnés', value: given, icon: <Gift size={12} /> },
               ].map(({ label, value, icon }) => (
                 <div key={label} className="py-3 px-1">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-center gap-1">{icon} {label}</p>
@@ -330,6 +388,26 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
           ))}
         </div>
         {totals.costs > 0 && <p className="text-xs text-slate-500">Kiosques payés cette année : {money(totals.costs)} · net après kiosques : <span className="text-slate-300">{money(totals.net - totals.costs)}</span></p>}
+      </div>
+
+      {/* Taxes perçues, à remettre */}
+      <div className="bg-midnight/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
+        <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2 text-white font-serif font-bold"><Receipt size={16} className="text-gold" /> Taxes perçues en {year}</div>
+        <div className="grid grid-cols-3 divide-x divide-white/5 text-center">
+          {[
+            { label: 'TPS', value: totals.tps },
+            { label: 'TVQ', value: totals.tvq },
+            { label: 'À remettre', value: totals.tps + totals.tvq, gold: true },
+          ].map(({ label, value, gold }) => (
+            <div key={label} className="py-4 px-2">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+              <p className={`font-serif font-bold text-xl mt-0.5 whitespace-nowrap ${gold ? 'text-gold' : 'text-white'}`}>{money(value)}</p>
+            </div>
+          ))}
+        </div>
+        <p className="px-5 py-3 text-xs text-slate-500 border-t border-white/5 leading-relaxed">
+          La somme des taxes inscrites sur chaque vente de {year}, en direct comme chez les dépositaires, pour ta déclaration. Les ventes inscrites avant le 21 septembre 2026 n'en portent pas encore : ouvre celles où tu avais perçu des taxes et enregistre-les.
+        </p>
       </div>
 
       {/* Par événement */}
@@ -371,7 +449,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
             <table className="w-full text-sm">
               <thead><tr className="text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-white/10">
                 <th className="px-5 py-3">Date</th><th className="px-5 py-3">Où</th><th className="px-5 py-3">Livre</th>
-                <th className="px-5 py-3 text-right">Qté</th><th className="px-5 py-3">Paiement</th><th className="px-5 py-3 text-right">Net</th><th className="px-5 py-3"></th>
+                <th className="px-5 py-3 text-right">Qté</th><th className="px-5 py-3">Paiement</th><th className="px-5 py-3 text-right">Net</th><th className="px-5 py-3 text-right">Taxes</th><th className="px-5 py-3"></th>
               </tr></thead>
               <tbody className="divide-y divide-white/5">
                 {rows.map(r => (
@@ -386,6 +464,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
                     <td className="px-5 py-3 text-right">{r.qty}</td>
                     <td className="px-5 py-3 text-slate-400 whitespace-nowrap">{r.payment}{r.tip > 0 && <span className="text-gold text-xs ml-1.5 inline-flex items-center gap-0.5"><PiggyBank size={11} /> +{money(r.tip)}</span>}</td>
                     <td className="px-5 py-3 text-right text-white font-bold whitespace-nowrap">{money(r.net)}</td>
+                    <td className="px-5 py-3 text-right text-slate-400 whitespace-nowrap" title={`TPS ${money(r.tps)} · TVQ ${money(r.tvq)}`}>{r.tps + r.tvq > 0 ? money(r.tps + r.tvq) : '—'}</td>
                     <td className="px-5 py-3 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
                       {r.stock && (deleteConfirm === r.id ? (
                         <span className="inline-flex gap-1">
@@ -410,7 +489,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
       {/* Livres reçus et corrections */}
       {historyRows.length > 0 && (
         <div className="bg-midnight/60 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2 text-white font-serif font-bold"><PackagePlus size={16} className="text-sky-400" /> Livres reçus et corrections</div>
+          <div className="px-5 py-3 border-b border-white/10 flex items-center gap-2 text-white font-serif font-bold"><PackagePlus size={16} className="text-sky-400" /> Livres reçus, donnés et corrections</div>
           <table className="w-full text-sm">
             <tbody className="divide-y divide-white/5">
               {historyRows.map(m => (
@@ -418,7 +497,7 @@ const AdminVentes = ({ books }: AdminVentesProps) => {
                   <td className="px-5 py-3 whitespace-nowrap">{fmtDate(m.date)}</td>
                   <td className="px-5 py-3"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold ${TYPE_META[m.type].color}`}>{TYPE_META[m.type].icon} {TYPE_META[m.type].label}</span>{m.note && <span className="block text-slate-600 text-xs mt-1">{m.note}</span>}</td>
                   <td className="px-5 py-3 text-slate-400">{m.bookTitle}</td>
-                  <td className="px-5 py-3 text-right font-bold text-white">{m.qty > 0 ? `+${m.qty}` : m.qty}</td>
+                  <td className="px-5 py-3 text-right font-bold text-white">{m.type === 'don' ? `−${m.qty}` : m.qty > 0 ? `+${m.qty}` : m.qty}</td>
                   <td className="px-5 py-3 text-right" onClick={e => e.stopPropagation()}>
                     {deleteConfirm === m.id ? (
                       <span className="inline-flex gap-1">

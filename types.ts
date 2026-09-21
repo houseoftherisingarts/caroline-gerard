@@ -202,6 +202,10 @@ export type ConsignmentMovement = {
   qty?: number;            // depot / vente / retour
   unitPrice?: number;      // vente : prix unitaire au moment de la vente
   commissionPct?: number;  // vente : % retenu, figé au moment de la saisie
+  taxesIncluses?: boolean; // vente : le prix comprend déjà la TPS (dépositaire qui vend « taxes incluses »)
+  tpsPct?: number;         // vente : % de TPS sur les livres, 5 par défaut, 0 si le dépositaire n'en charge pas
+  tps?: number;            // vente : TPS perçue en $, que Caroline devra remettre
+  tvq?: number;            // vente : TVQ perçue en $, normalement 0 sur un livre
   amount?: number;         // paiement : montant reçu du dépositaire
   date: string;            // jour de l'événement (ISO)
   note?: string;
@@ -211,7 +215,7 @@ export type ConsignmentMovement = {
 
 // --- Stock personnel et ventes directes (événements, en main propre, site) ---
 
-export type StockMovementType = 'entree' | 'vente' | 'ajustement';
+export type StockMovementType = 'entree' | 'vente' | 'ajustement' | 'don';
 export type PaymentMethod = 'comptant' | 'square' | 'virement' | 'web' | 'autre';
 
 export type StockMovement = {
@@ -219,12 +223,17 @@ export type StockMovement = {
   type: StockMovementType;
   bookId: string;
   bookTitle: string;       // dénormalisé pour l'historique
-  qty: number;             // entree : livres reçus · vente : livres vendus · ajustement : +/- (inventaire de départ, perte, don)
+  qty: number;             // entree : livres reçus · vente : livres vendus · don : livres donnés · ajustement : +/- (inventaire de départ, perte)
   unitPrice?: number;      // vente
   payment?: PaymentMethod; // vente
   tip?: number;            // vente : sous donnés en plus (le petit cochon de William)
   eventName?: string;      // vente : nom de l'événement / du marché
   eventCost?: number;      // vente : coût du kiosque, inscrit une fois par événement
+  shipping?: number;       // vente : transport facturé (la TPS et la TVQ s'y appliquent)
+  taxesIncluses?: boolean; // vente : le prix unitaire et le transport comprennent déjà les taxes
+  tpsPct?: number;         // vente : % de TPS sur les livres, 5 par défaut, 0 si rien n'a été chargé
+  tps?: number;            // vente : TPS perçue en $, calculée puis corrigible à la main
+  tvq?: number;            // vente : TVQ perçue en $, normalement sur le transport seulement
   date: string;            // ISO jour
   note?: string;
   createdAt: string;

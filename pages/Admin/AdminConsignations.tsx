@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Plus, Store, Edit3, Trash2, X, Check, PackagePlus, PackageMinus,
-  BadgeDollarSign, HandCoins, History, Sparkles, ArrowUp, ArrowDown,
+  BadgeDollarSign, HandCoins, History, Sparkles, ArrowUp, ArrowDown, Receipt,
 } from 'lucide-react';
 import { Book, ConsignmentLocation, ConsignmentMovement, ConsignmentMovementType } from '../../types';
 import {
   subscribeToConsignmentLocations, saveConsignmentLocation,
   subscribeToConsignmentMovements, saveConsignmentMovement, deleteConsignmentMovement,
 } from '../../lib/firestore';
+import { TPS_PCT, calculerTaxes, revenuLivres } from '../../lib/taxes';
 
 interface AdminConsignationsProps {
   books: Book[];
@@ -61,29 +62,31 @@ type LocationStats = {
   sold: number;
   returned: number;
   onHand: number;
-  gross: number;
+  gross: number;     // ventes avant taxes
   netOwed: number;   // ventes nettes de commission
+  taxes: number;     // TPS et TVQ perçues sur ces ventes, que le dépositaire remet à Caroline
   paid: number;      // paiements reçus
-  balance: number;   // netOwed - paid
+  balance: number;   // netOwed + taxes - paid
 };
 
 function computeStats(locId: string, movements: ConsignmentMovement[], fallbackPct: number): LocationStats {
-  const s: LocationStats = { deposited: 0, sold: 0, returned: 0, onHand: 0, gross: 0, netOwed: 0, paid: 0, balance: 0 };
+  const s: LocationStats = { deposited: 0, sold: 0, returned: 0, onHand: 0, gross: 0, netOwed: 0, taxes: 0, paid: 0, balance: 0 };
   movements.filter(m => m.locationId === locId).forEach(m => {
     const qty = m.qty ?? 0;
     if (m.type === 'depot') s.deposited += qty;
     if (m.type === 'retour') s.returned += qty;
     if (m.type === 'vente') {
       s.sold += qty;
-      const gross = qty * (m.unitPrice ?? 0);
+      const gross = revenuLivres(m);
       const pct = m.commissionPct ?? fallbackPct;
       s.gross += gross;
       s.netOwed += gross * (1 - pct / 100);
+      s.taxes += (m.tps ?? 0) + (m.tvq ?? 0);
     }
     if (m.type === 'paiement') s.paid += m.amount ?? 0;
   });
   s.onHand = s.deposited - s.sold - s.returned;
-  s.balance = s.netOwed - s.paid;
+  s.balance = s.netOwed + s.taxes - s.paid;
   return s;
 }
 
@@ -196,7 +199,19 @@ const MovementModal = ({ location, books, existing, onClose, onSave }: {
   const isMoney = type === 'paiement';
   const isSale = type === 'vente';
   const commissionPct = existing?.commissionPct ?? location.commissionPct;
-  const netPreview = isSale ? qty * unitPrice * (1 - commissionPct / 100) : 0;
+  const [taxesIncluses, setTaxesIncluses] = useState(existing?.taxesIncluses ?? false);
+  const [tpsPct, setTpsPct] = useState(existing?.tpsPct ?? TPS_PCT);
+  // Un montant saisi à la main prime sur le calcul; null = on suit le calcul. À l'ouverture, un montant
+  // enregistré qui diffère du calcul est traité comme une correction manuelle.
+  const calcInitial = calculerTaxes(existing ?? {});
+  const [tpsManuel, setTpsManuel] = useState<number | null>(existing?.tps != null && existing.tps !== calcInitial.tps ? existing.tps : null);
+  const [tvqManuel, setTvqManuel] = useState<number | null>(existing?.tvq != null && existing.tvq !== calcInitial.tvq ? existing.tvq : null);
+  const calc = calculerTaxes({ qty, unitPrice, taxesIncluses, tpsPct });
+  const tps = tpsManuel ?? calc.tps;
+  const tvq = tvqManuel ?? calc.tvq;
+  const manuel = tpsManuel !== null || tvqManuel !== null;
+  const basePreview = isSale ? revenuLivres({ qty, unitPrice, taxesIncluses, tpsPct }) : 0;
+  const netPreview = basePreview * (1 - commissionPct / 100);
 
   const pickBook = (id: string) => {
     setBookId(id);
@@ -222,7 +237,7 @@ const MovementModal = ({ location, books, existing, onClose, onSave }: {
           : {
               qty,
               ...(book ? { bookId: book.id, bookTitle: book.title } : {}),
-              ...(isSale ? { unitPrice, commissionPct } : {}),
+              ...(isSale ? { unitPrice, commissionPct, tpsPct, tps, tvq, ...(taxesIncluses ? { taxesIncluses: true } : {}) } : {}),
             }),
       };
       await onSave(mov);
@@ -281,11 +296,46 @@ const MovementModal = ({ location, books, existing, onClose, onSave }: {
                 )}
               </div>
               {isSale && (
-                <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 space-y-1">
-                  <div className="flex justify-between"><span className="text-slate-500">Montant brut</span><span>{money(qty * unitPrice)}</span></div>
-                  <div className="flex justify-between"><span className="text-slate-500">Commission ({commissionPct}%)</span><span>−{money(qty * unitPrice * commissionPct / 100)}</span></div>
-                  <div className="flex justify-between font-bold text-gold border-t border-white/10 pt-1.5 mt-1.5"><span>Qui te revient</span><span>{money(netPreview)}</span></div>
-                </div>
+                <>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest inline-flex items-center gap-1.5"><Receipt size={13} className="text-gold" /> Taxes perçues</p>
+                      <label className="inline-flex items-center gap-2 text-xs text-slate-300 cursor-pointer select-none">
+                        <input type="checkbox" checked={taxesIncluses} onChange={e => setTaxesIncluses(e.target.checked)} className="accent-gold w-3.5 h-3.5" />
+                        Taxes incluses dans le prix
+                      </label>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <Field label="TPS (%)">
+                        <input type="number" min="0" max="100" step="0.001" value={tpsPct} onChange={e => setTpsPct(parseFloat(e.target.value) || 0)} className={inputCls} />
+                      </Field>
+                      <Field label="TPS perçue ($)">
+                        <input type="number" min="0" step="0.01" value={tps} onChange={e => setTpsManuel(parseFloat(e.target.value) || 0)} className={inputCls} />
+                      </Field>
+                      <Field label="TVQ perçue ($)">
+                        <input type="number" min="0" step="0.01" value={tvq} onChange={e => setTvqManuel(parseFloat(e.target.value) || 0)} className={inputCls} />
+                      </Field>
+                    </div>
+                    <p className="text-slate-500 text-xs leading-relaxed">
+                      {manuel ? (
+                        <>Montants corrigés à la main. <button type="button" onClick={() => { setTpsManuel(null); setTvqManuel(null); }} className="text-gold hover:underline font-bold">Revenir au calcul</button></>
+                      ) : (
+                        <>Mets 0 % si ce commerce ne charge pas la taxe, ou coche « taxes incluses » s'il vend ton livre à un prix tout compris.</>
+                      )}
+                    </p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 space-y-1">
+                    <div className="flex justify-between"><span className="text-slate-500">Montant brut{taxesIncluses ? ', avant taxes' : ''}</span><span>{money(basePreview)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-500">Commission ({commissionPct}%)</span><span>−{money(basePreview * commissionPct / 100)}</span></div>
+                    <div className="flex justify-between font-bold text-gold border-t border-white/10 pt-1.5 mt-1.5"><span>Qui te revient</span><span>{money(netPreview)}</span></div>
+                    {tps + tvq > 0 && (
+                      <>
+                        <div className="flex justify-between"><span className="text-slate-500">Taxes perçues pour toi</span><span>{money(tps + tvq)}</span></div>
+                        <div className="flex justify-between text-white"><span className="text-slate-500">À recevoir du commerce</span><span>{money(netPreview + tps + tvq)}</span></div>
+                      </>
+                    )}
+                  </div>
+                </>
               )}
             </>
           )}
@@ -476,6 +526,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                 ))}
                 <div className="flex justify-between pt-1"><span>Déposés au total</span><span className="text-slate-300">{s.deposited}</span></div>
                 <div className="flex justify-between"><span>Ventes nettes de commission</span><span className="text-slate-300">{money(s.netOwed)}</span></div>
+                {s.taxes > 0 && <div className="flex justify-between"><span>Taxes perçues pour toi</span><span className="text-slate-300">{money(s.taxes)}</span></div>}
                 <div className="flex justify-between"><span>Paiements reçus</span><span className="text-slate-300">{money(s.paid)}</span></div>
               </div>
 
@@ -524,8 +575,9 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                     const canUp = i > 0 && filteredMovements[i - 1].date === m.date;
                     const canDown = i < filteredMovements.length - 1 && filteredMovements[i + 1].date === m.date;
                     const net = m.type === 'vente'
-                      ? (m.qty ?? 0) * (m.unitPrice ?? 0) * (1 - (m.commissionPct ?? 0) / 100)
+                      ? revenuLivres(m) * (1 - (m.commissionPct ?? 0) / 100)
                       : null;
+                    const taxes = (m.tps ?? 0) + (m.tvq ?? 0);
                     return (
                       <tr key={m.id} onClick={() => openEdit(m)} className="text-slate-300 hover:bg-white/[0.03] transition-colors cursor-pointer" title="Cliquer pour modifier">
                         <td className="px-5 py-3 whitespace-nowrap">{new Date(m.date + 'T12:00:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
@@ -543,7 +595,7 @@ const AdminConsignations = ({ books }: AdminConsignationsProps) => {
                           {m.type === 'vente' && (
                             <span>
                               <span className="text-white font-bold">{money(net ?? 0)}</span>
-                              <span className="block text-slate-600 text-xs">brut {money((m.qty ?? 0) * (m.unitPrice ?? 0))} · comm. {m.commissionPct ?? 0}%</span>
+                              <span className="block text-slate-600 text-xs">brut {money(revenuLivres(m))} · comm. {m.commissionPct ?? 0}%{taxes > 0 ? ` · taxes ${money(taxes)}` : ''}</span>
                             </span>
                           )}
                           {(m.type === 'depot' || m.type === 'retour') && '—'}
