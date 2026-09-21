@@ -22,6 +22,17 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-09-21',
+    titre: 'Les livres donnés et les taxes perçues, dans Ventes & stock',
+    intro: "Tu as déposé ta demande cet après-midi dans ton Espace Auteure, et elle est en ligne le jour même : tes livres donnés ont maintenant leur place, et chaque vente porte les taxes que tu as perçues, pour que tu saches ce que tu dois remettre au moment de ta déclaration.",
+    etapes: [
+      "Dans Ventes & stock, le formulaire offre un quatrième choix, Livres donnés, à côté de Vente, Livres reçus et Correction : tu inscris le nombre d'exemplaires et, dans la note, à qui ils sont allés, et ils sortent de ton stock sans compter comme une vente. La carte de ton livre affiche maintenant une colonne Donnés, et la liste du bas s'appelle Livres reçus, donnés et corrections.",
+      "Chaque vente porte maintenant un bloc Taxes perçues. La TPS se calcule à 5 % sur les livres, comme tu l'as demandé, et si tu inscris un transport facturé, la TPS et la TVQ (9,975 %) s'y ajoutent toutes seules. Tu peux changer le pourcentage, corriger les deux montants à la main quand ils ne collent pas à ce que tu as vraiment perçu, et revenir au calcul d'un clic.",
+      "Pour les dépositaires qui vendent ton livre à 25 $ tout compris, une case Taxes incluses dans le prix sort la TPS du montant au lieu de l'ajouter par-dessus, et pour ceux qui ne chargent rien, tu mets 0 % et le tour est joué. Le même bloc vit dans le formulaire de vente de la page Dépositaires, où les taxes perçues pour toi s'ajoutent à ce que le commerce te doit.",
+      "Sous les totaux de l'année, un panneau Taxes perçues en 2026 additionne la TPS, la TVQ et le total à remettre, toutes ventes confondues, en direct comme chez les dépositaires, et le détail des ventes montre les taxes de chaque ligne. Les ventes inscrites avant aujourd'hui n'en portent pas encore : ouvre celles où tu avais perçu des taxes et enregistre-les, le panneau se mettra à jour.",
+    ],
+  },
+  {
     date: '2026-09-20',
     titre: 'Le badge de représentante choisit sa couleur',
     intro: "Le petit badge « Partenaire officiel » que ton site montrera une fois ton dossier de représentante ouvert peut maintenant porter une couleur, plutôt qu'une seule finition fixe.",
