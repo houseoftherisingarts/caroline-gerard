@@ -89,6 +89,9 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Expéditeurs signalés comme pourriel (lus par sendContactForm via l'Admin SDK)
+    match /pourriel/{id} { allow read, write: if isAdmin(); }
+
     match /leads/{id} {
       allow create: if keysOnly(['id', 'source', 'name', 'email', 'message', 'date', 'isRead', 'archived', 'dateSouhaitee'])
         && request.resource.data.name is string && request.resource.data.name.size() <= 300

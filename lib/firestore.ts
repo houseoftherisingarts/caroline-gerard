@@ -14,6 +14,9 @@ import {
   updateDoc,
   serverTimestamp,
   documentId,
+  arrayUnion,
+  arrayRemove,
+  deleteField,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
@@ -143,6 +146,22 @@ export const archiveLead = (id: string, archived = true) =>
 
 export const deleteLead = (id: string) =>
   deleteDoc(doc(db, 'leads', id));
+
+// Pourriel : l'expéditeur signalé (adresse, et domaine s'il n'est pas un
+// fournisseur public) est retenu par sendContactForm aux prochains envois.
+const DOMAINES_PUBLICS = ['gmail.com', 'hotmail.com', 'hotmail.ca', 'outlook.com', 'live.com', 'live.ca', 'yahoo.com', 'yahoo.ca', 'icloud.com', 'me.com', 'videotron.ca', 'bell.net', 'sympatico.ca', 'cogeco.ca', 'protonmail.com', 'proton.me'];
+export const marquerPourriel = async (lead: Lead, spam: boolean) => {
+  const courriel = lead.email.trim().toLowerCase();
+  const domaine = courriel.split('@')[1] ?? '';
+  const op = spam ? arrayUnion : arrayRemove;
+  await setDoc(doc(db, 'pourriel', 'liste'), {
+    courriels: op(courriel),
+    ...(domaine && !DOMAINES_PUBLICS.includes(domaine) ? { domaines: op(domaine) } : {}),
+  }, { merge: true });
+  await updateDoc(doc(db, 'leads', lead.id), spam
+    ? { spam: 'signale', archived: true, isRead: true }
+    : { spam: deleteField(), archived: false });
+};
 
 // --- Email log (audit trail of all outbound mail from Cloud Functions) ---
 

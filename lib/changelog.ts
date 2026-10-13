@@ -22,6 +22,16 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-10-13',
+    titre: "L'avis de commande blindé et le pourriel retenu à la porte",
+    intro: "Tes deux demandes du 12 et du 13 octobre sont en ligne : l'avis qui t'arrive à chaque commande ne peut plus se perdre en route, et le formulaire de contact apprend maintenant à reconnaître les messages dont tu ne veux plus.",
+    etapes: [
+      "Chaque commande passée sur ton site t'envoyait déjà un courriel à caroline@carolinegerard.ca, mais il partait seulement après le reçu du client, si bien qu'un reçu bloqué en route aurait emporté ton avis avec lui. Les deux partent maintenant chacun de leur côté, et quand tu fais Répondre sur ton avis, ta réponse va droit au client plutôt qu'à toi-même.",
+      "Dans Communauté, onglet Demandes, un message ouvert porte maintenant un bouton Pourriel à côté d'Archiver : il range le message et retient tout ce que la même adresse t'écrira ensuite, et le domaine au complet quand il ne s'agit pas d'un service connu comme Gmail ou Hotmail. Les messages retenus ne t'arrivent plus dans ta boîte, ils restent rangés dans tes archives avec la mention Pourriel, et le bouton Pas un pourriel les remet en circulation si jamais tu t'es trompée.",
+      "Le formulaire porte aussi un piège invisible que seuls les robots remplissent, et il refuse en silence un envoi fait en moins de trois secondes, ce qu'aucune personne ne réussit en tapant un vrai message. Le message de Groupe agileDSS que tu nous as signalé est déjà marqué, et son domaine bloqué.",
+    ],
+  },
+  {
     date: '2026-09-21',
     titre: 'Les livres donnés et les taxes perçues, dans Ventes & stock',
     intro: "Tu as déposé ta demande cet après-midi dans ton Espace Auteure, et elle est en ligne le jour même : tes livres donnés ont maintenant leur place, et chaque vente porte les taxes que tu as perçues, pour que tu saches ce que tu dois remettre au moment de ta déclaration.",

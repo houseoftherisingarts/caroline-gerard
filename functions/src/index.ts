@@ -311,8 +311,8 @@ export const processCheckout = onCall(
           });
           await logEmail({ type: 'order_receipt', to: customer.email, subject: receiptSubject, html: receiptHtml, success: true, meta: { orderId, total: grandTotal } });
         } catch (err) {
+          // Pas de throw : un reçu qui échoue ne doit jamais empêcher l'avis à Caroline
           await logEmail({ type: 'order_receipt', to: customer.email, subject: receiptSubject, html: receiptHtml, success: false, errorMessage: (err as Error).message, meta: { orderId } });
-          throw err;
         }
 
         // Admin notification to Caroline
@@ -320,6 +320,7 @@ export const processCheckout = onCall(
           await transporter.sendMail({
             from: `"Boutique Caroline Gérard" <${user}>`,
             to: 'caroline@carolinegerard.ca',
+            replyTo: customer.email,
             subject: adminSubject,
             html: adminHtml,
           });
@@ -707,7 +708,7 @@ export const onRendezVousConfirme = onDocumentWritten(
 
 // ── sendContactForm callable — public contact-form forwarding ────────────────
 // Forwards a public site visitor's contact-form message to the configured
-// destination email. Server-side validates input and rate-limits silently.
+// destination email. Server-side validates input and holds back spam (see below).
 // Falls back to caroline@carolinegerard.ca when no destination is provided.
 
 export const sendContactForm = onCall(
@@ -717,11 +718,14 @@ export const sendContactForm = onCall(
     invoker: 'public',
   },
   async (request) => {
-    const { name, email, subject, message } = request.data as {
+    const { name, email, subject, message, leadId, piege, ms } = request.data as {
       name: string;
       email: string;
       subject?: string;
       message: string;
+      leadId?: string;
+      piege?: string; // champ invisible : seul un robot le remplit
+      ms?: number;    // temps passé sur la page avant l'envoi
     };
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
@@ -743,6 +747,26 @@ export const sendContactForm = onCall(
     const safeDest = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedDest)
       ? cleanedDest
       : 'caroline@carolinegerard.ca';
+
+    // Pourriel : champ piège rempli, envoi en moins de 3 s, ou expéditeur
+    // (adresse ou domaine) déjà signalé par Caroline dans l'Espace Auteure.
+    // On répond « succès » au robot et on range la demande sans courriel.
+    const courriel = email.trim().toLowerCase();
+    const domaine = courriel.split('@')[1] ?? '';
+    const liste = (await db.collection('pourriel').doc('liste').get()).data() ?? {};
+    const raison =
+      piege?.trim() ? 'piege'
+      : (typeof ms === 'number' && ms < 3000) ? 'trop-rapide'
+      : (liste.courriels ?? []).includes(courriel) ? 'courriel-signale'
+      : (liste.domaines ?? []).includes(domaine) ? 'domaine-signale'
+      : null;
+    if (raison) {
+      if (leadId && /^contact_[\w]+$/.test(leadId)) {
+        await db.collection('leads').doc(leadId).update({ spam: raison, archived: true, isRead: true }).catch(() => null);
+      }
+      console.log('Formulaire de contact : pourriel retenu', { raison, domaine });
+      return { success: true };
+    }
 
     const user = emailUser.value();
     const pass = emailPass.value();

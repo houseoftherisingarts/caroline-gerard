@@ -16,6 +16,7 @@ import {
   markLeadRead,
   archiveLead,
   deleteLead,
+  marquerPourriel,
   subscribeToEmailLog,
   deleteEmailLogEntry,
 } from '../../lib/firestore';
@@ -529,6 +530,9 @@ const AdminCommunaute = () => {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className={`text-sm truncate ${l.isRead ? 'text-slate-300' : 'font-bold text-white'}`}>{l.name}</p>
+                      {l.spam && (
+                        <span className="bg-slate-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">Pourriel</span>
+                      )}
                       {!l.isRead && !l.archived && (
                         <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">Nouveau</span>
                       )}
@@ -585,6 +589,13 @@ const AdminCommunaute = () => {
                       className="flex items-center gap-2 px-3 py-2 bg-white/5 text-slate-300 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors"
                     >
                       <Archive size={14} /> {selectedLead.archived ? 'Désarchiver' : 'Archiver'}
+                    </button>
+                    <button
+                      onClick={() => marquerPourriel(selectedLead, !selectedLead.spam)}
+                      className="flex items-center gap-2 px-3 py-2 bg-white/5 text-slate-300 hover:bg-white/10 rounded-lg text-xs font-bold transition-colors"
+                      title={selectedLead.spam ? 'Laisser passer les prochains messages de cet expéditeur' : 'Bloquer les prochains messages de cet expéditeur'}
+                    >
+                      <AlertTriangle size={14} /> {selectedLead.spam ? 'Pas un pourriel' : 'Pourriel'}
                     </button>
                     <button
                       onClick={() => {

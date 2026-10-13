@@ -143,6 +143,8 @@ export type Lead = {
   archived?: boolean;
   /** Date souhaitée pour une intervention, AAAA-MM-JJ (fenêtre « Réserver » de ConferencesPage). */
   dateSouhaitee?: string;
+  /** Pourriel : 'signale' par Caroline, ou la raison du filtre (piege, trop-rapide, courriel-signale, domaine-signale). */
+  spam?: string;
 };
 
 export type EmailLog = {

@@ -1,5 +1,5 @@
 // AEO updated 2026-05-06
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Mail, Send, CheckCircle, MessageSquare, Calendar } from 'lucide-react';
@@ -26,6 +26,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  // Anti-pourriel : champ invisible (seul un robot le remplit) et heure d'arrivée sur la page
+  const [piege, setPiege] = useState('');
+  const arrivee = useRef(Date.now());
 
   // Editable form strings (placeholders, errors, aria labels)
   const namePh = useEditableString('contact_form_name_placeholder', 'Ton nom');
@@ -98,6 +101,9 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
           email: lead.email,
           subject: subject || '(sans sujet)',
           message: message.trim(),
+          leadId: lead.id,
+          piege,
+          ms: Date.now() - arrivee.current,
         });
       } catch {
         // Non-blocking: lead is saved in Firestore even if email forwarding fails
@@ -205,6 +211,16 @@ const ContactPage: React.FC<ContactPageProps> = ({ vis = DEFAULT_VIS }) => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4" aria-label={ariaFormLabel}>
+                <input
+                  type="text"
+                  name="site_web"
+                  value={piege}
+                  onChange={e => setPiege(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] w-px h-px opacity-0"
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="block">
                     <span className="sr-only">{ariaNameLabel}</span>
