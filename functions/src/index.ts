@@ -761,8 +761,15 @@ export const sendContactForm = onCall(
       : (liste.domaines ?? []).includes(domaine) ? 'domaine-signale'
       : null;
     if (raison) {
+      // Le leadId vient du client : on ne touche qu'à la demande créée à l'instant
+      // par ce même envoi (même courriel, moins de 10 min), jamais à une autre.
       if (leadId && /^contact_[\w]+$/.test(leadId)) {
-        await db.collection('leads').doc(leadId).update({ spam: raison, archived: true, isRead: true }).catch(() => null);
+        const ref = db.collection('leads').doc(leadId);
+        const lead = (await ref.get()).data();
+        const recente = lead && Date.now() - new Date(lead.date).getTime() < 10 * 60 * 1000;
+        if (lead && recente && lead.email === courriel && !lead.isRead) {
+          await ref.update({ spam: raison, archived: true, isRead: true }).catch(() => null);
+        }
       }
       console.log('Formulaire de contact : pourriel retenu', { raison, domaine });
       return { success: true };
