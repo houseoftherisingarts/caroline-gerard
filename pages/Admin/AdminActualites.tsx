@@ -1,7 +1,7 @@
 // L'atelier des actualités. Caroline écrit une nouvelle, met une photo, publie, et partage
 // depuis la même page. Les nouvelles vivent dans la collection Firestore « news » et remontent
 // toutes seules sur /actualites et sur l'accueil.
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Edit3, Library, Newspaper, Save, Trash2, UploadCloud, X } from 'lucide-react';
 import { NewsItem } from '../../types';
 import { deleteNewsItem, saveNewsItem, slugifyNews } from '../../lib/firestore';
@@ -83,6 +83,15 @@ const ChoixPhoto = ({ value, onChange, mediaLibrary }: { value: string; onChange
   );
 };
 
+const SECOURS = 'caroline-actualite-en-cours';
+// Une nouvelle jamais enregistrée (sans id) qui attend dans le navigateur
+const secours = (): Partial<NewsItem> | null => {
+  try {
+    const n = JSON.parse(localStorage.getItem(SECOURS) || 'null');
+    return n && !n.id ? n : null;
+  } catch { return null; }
+};
+
 const vide = (): Partial<NewsItem> => ({
   title: '', body: '', image: '', link: '', linkLabel: '',
   isPublished: false, date: new Date().toLocaleDateString('fr-CA'),
@@ -91,8 +100,17 @@ const vide = (): Partial<NewsItem> => ({
 const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrary: string[] }) => {
   const [courante, setCourante] = useState<Partial<NewsItem> | null>(null);
   const [aSupprimer, setASupprimer] = useState<string | null>(null);
+  const [erreur, setErreur] = useState('');
 
-  const handleSave = () => {
+  // Copie de secours dans le navigateur : une nouvelle en cours d'écriture
+  // survit à une page fermée ou à un enregistrement raté.
+  useEffect(() => {
+    try {
+      if (courante) localStorage.setItem(SECOURS, JSON.stringify(courante));
+    } catch { /* navigateur privé : pas de secours, rien d'autre ne change */ }
+  }, [courante]);
+
+  const handleSave = async () => {
     if (!courante) return;
     const titre = (courante.title || '').trim();
     if (!titre) return;
@@ -110,8 +128,15 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
       isPublished: !!courante.isPublished,
       createdAt: courante.createdAt || new Date().toISOString(),
     };
-    saveNewsItem(item);
-    setCourante(null);
+    try {
+      await saveNewsItem(item);
+      try { localStorage.removeItem(SECOURS); } catch { /* rien */ }
+      setErreur('');
+      setCourante(null);
+    } catch (e) {
+      console.error('Actualité non enregistrée', e);
+      setErreur("La nouvelle n'a pas pu être enregistrée. Ton texte est toujours là : réessaie dans un instant.");
+    }
   };
 
   if (courante) {
@@ -119,7 +144,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
     return (
       <div className="animate-fade-in-up space-y-6">
         <div className="flex flex-wrap justify-between items-center gap-4">
-          <button onClick={() => setCourante(null)} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+          <button onClick={() => { try { localStorage.removeItem(SECOURS); } catch { /* rien */ } setErreur(''); setCourante(null); }} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
             <ArrowLeft size={18} /> Retour
           </button>
           <div className="flex items-center gap-4">
@@ -138,6 +163,10 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
             </button>
           </div>
         </div>
+
+        {erreur && (
+          <p role="alert" className="bg-red-500/15 border border-red-400/40 text-red-200 rounded-xl px-4 py-3 text-sm">{erreur}</p>
+        )}
 
         <div className="bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 p-6 md:p-8 space-y-6">
           <ChoixPhoto value={courante.image || ''} onChange={url => setCourante({ ...courante, image: url })} mediaLibrary={mediaLibrary} />
@@ -219,7 +248,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
           </p>
         </div>
         <button
-          onClick={() => setCourante(vide())}
+          onClick={() => setCourante(secours() ?? vide())}
           className="bg-gold text-midnight px-4 py-2 rounded-lg font-bold hover:bg-white transition-colors flex items-center gap-2"
         >
           <Newspaper size={16} /> Écrire une nouvelle

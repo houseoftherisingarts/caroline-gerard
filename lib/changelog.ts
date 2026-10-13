@@ -23,12 +23,13 @@ export type EntreeJournal = {
 export const JOURNAL: EntreeJournal[] = [
   {
     date: '2026-10-13',
-    titre: "L'avis de commande blindé et le pourriel retenu à la porte",
+    titre: "L'avis de commande, le pourriel et le bouton Enregistrer des Actualités",
     intro: "Tes deux demandes du 12 et du 13 octobre sont en ligne : l'avis qui t'arrive à chaque commande ne peut plus se perdre en route, et le formulaire de contact apprend maintenant à reconnaître les messages dont tu ne veux plus.",
     etapes: [
       "Chaque commande passée sur ton site t'envoyait déjà un courriel à caroline@carolinegerard.ca, mais il partait seulement après le reçu du client, si bien qu'un reçu bloqué en route aurait emporté ton avis avec lui. Les deux partent maintenant chacun de leur côté, et quand tu fais Répondre sur ton avis, ta réponse va droit au client plutôt qu'à toi-même.",
       "Dans Communauté, onglet Demandes, un message ouvert porte maintenant un bouton Pourriel à côté d'Archiver : il range le message et retient tout ce que la même adresse t'écrira ensuite, et le domaine au complet quand il ne s'agit pas d'un service connu comme Gmail ou Hotmail. Les messages retenus ne t'arrivent plus dans ta boîte, ils restent rangés dans tes archives avec la mention Pourriel, et le bouton Pas un pourriel les remet en circulation si jamais tu t'es trompée.",
       "Le formulaire porte aussi un piège invisible que seuls les robots remplissent, et il refuse en silence un envoi fait en moins de trois secondes, ce qu'aucune personne ne réussit en tapant un vrai message. Le message de Groupe agileDSS que tu nous as signalé est déjà marqué, et son domaine bloqué.",
+      "Le bouton Enregistrer des Actualités refusait toute nouvelle dont le champ Lien restait vide, sans rien t'en dire, et c'est ce qui a fait disparaître ta publication : elle n'a jamais atteint le site, si bien qu'il n'en reste aucune copie à récupérer. Le champ vide est maintenant accepté, un message rouge te prévient si un enregistrement échoue en gardant ton texte à l'écran, et une nouvelle en cours d'écriture se garde dans ton navigateur jusqu'à ce qu'elle soit enregistrée, pour revenir d'elle-même quand tu cliques sur Nouvelle.",
     ],
   },
   {
