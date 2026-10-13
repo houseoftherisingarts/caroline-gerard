@@ -1,4 +1,4 @@
-// L'atelier des actualités. Caroline écrit une nouvelle, met une photo, publie, et partage
+// L'atelier des actualités. Caroline écrit une nouvelle, met une photo (et d'autres en galerie), publie, et partage
 // depuis la même page. Les nouvelles vivent dans la collection Firestore « news » et remontent
 // toutes seules sur /actualites et sur l'accueil.
 import React, { useEffect, useState } from 'react';
@@ -55,31 +55,82 @@ const ChoixPhoto = ({ value, onChange, mediaLibrary }: { value: string; onChange
         </div>
       </div>
 
-      {libraryOpen && (
-        <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-fade-in">
-          <div className="bg-midnight/90 border border-white/10 rounded-2xl w-full max-w-4xl h-[80vh] p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-serif text-white">Choisir une photo</h3>
-              <button type="button" onClick={() => setLibraryOpen(false)} className="p-2 text-slate-400 hover:text-white"><X /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto pr-2">
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {mediaLibrary.map((url, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => { onChange(url); setLibraryOpen(false); }}
-                    className="aspect-square rounded-lg overflow-hidden group"
-                  >
-                    <img src={url} alt={`Média ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {libraryOpen && <Mediatheque mediaLibrary={mediaLibrary} onPick={onChange} onClose={() => setLibraryOpen(false)} />}
     </>
+  );
+};
+
+const Mediatheque = ({ mediaLibrary, onPick, onClose }: { mediaLibrary: string[]; onPick: (url: string) => void; onClose: () => void }) => (
+  <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-fade-in">
+    <div className="bg-midnight/90 border border-white/10 rounded-2xl w-full max-w-4xl h-[80vh] p-6 flex flex-col">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-2xl font-serif text-white">Choisir une photo</h3>
+        <button type="button" onClick={onClose} className="p-2 text-slate-400 hover:text-white"><X /></button>
+      </div>
+      <div className="flex-1 overflow-y-auto pr-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {mediaLibrary.map((url, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => { onPick(url); onClose(); }}
+              className="aspect-square rounded-lg overflow-hidden group"
+            >
+              <img src={url} alt={`Média ${i + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Les photos de plus, montrées en galerie sous le texte, comme un album sur Facebook.
+const AutresPhotos = ({ value, onChange, mediaLibrary }: { value: string[]; onChange: (urls: string[]) => void; mediaLibrary: string[] }) => {
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    setUploading(true);
+    try {
+      onChange([...value, ...(await Promise.all(files.map(uploadMediaFile)))]);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Autres photos (facultatif)</p>
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+        {value.map((url, i) => (
+          <div key={url + i} className="relative aspect-square rounded-lg overflow-hidden bg-slate-800">
+            <img src={url} alt={`Photo ${i + 2}`} className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(value.filter((_, j) => j !== i))}
+              className="absolute top-1 right-1 p-1 rounded-full bg-midnight/80 text-white hover:bg-red-500"
+              title="Retirer cette photo"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+        <label className="aspect-square rounded-lg border-2 border-dashed border-white/10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-gold/50 text-gold text-xs font-bold p-2">
+          <UploadCloud size={18} className="text-slate-500 mb-1" />
+          {uploading ? 'Téléversement…' : 'Ajouter des photos'}
+          <input type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" disabled={uploading} />
+        </label>
+        <button type="button" onClick={() => setLibraryOpen(true)} className="aspect-square rounded-lg border-2 border-dashed border-white/10 flex flex-col items-center justify-center text-gold text-xs font-bold hover:border-gold/50 p-2">
+          <Library size={18} className="text-slate-500 mb-1" />
+          Médiathèque
+        </button>
+      </div>
+      {libraryOpen && <Mediatheque mediaLibrary={mediaLibrary} onPick={url => onChange([...value, url])} onClose={() => setLibraryOpen(false)} />}
+    </div>
   );
 };
 
@@ -93,7 +144,7 @@ const secours = (): Partial<NewsItem> | null => {
 };
 
 const vide = (): Partial<NewsItem> => ({
-  title: '', body: '', image: '', link: '', linkLabel: '',
+  title: '', body: '', image: '', images: [], link: '', linkLabel: '',
   isPublished: false, date: new Date().toLocaleDateString('fr-CA'),
 });
 
@@ -122,6 +173,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
       title: titre,
       body: (courante.body || '').trim(),
       image: courante.image || '',
+      images: (courante.images || []).filter(Boolean),
       date: courante.date || new Date().toLocaleDateString('fr-CA'),
       link: (courante.link || '').trim() || undefined,
       linkLabel: (courante.linkLabel || '').trim() || undefined,
@@ -170,6 +222,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
 
         <div className="bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 p-6 md:p-8 space-y-6">
           <ChoixPhoto value={courante.image || ''} onChange={url => setCourante({ ...courante, image: url })} mediaLibrary={mediaLibrary} />
+          <AutresPhotos value={courante.images || []} onChange={urls => setCourante(c => c && { ...c, images: urls })} mediaLibrary={mediaLibrary} />
 
           <input
             type="text"

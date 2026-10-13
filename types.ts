@@ -317,6 +317,8 @@ export type NewsItem = {
   /** Texte simple, sauts de ligne conservés. Pas de HTML. */
   body: string;
   image: string;
+  /** Photos supplémentaires, montrées en galerie sous le texte de la nouvelle. */
+  images?: string[];
   /** Date affichée, au format AAAA-MM-JJ. */
   date: string;
   /** Lien optionnel vers une page du site ou vers l'extérieur. */

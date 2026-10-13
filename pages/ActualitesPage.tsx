@@ -1,10 +1,10 @@
 // Le fil d'actualités de Caroline. La page /actualites montre le fil complet, et chaque nouvelle
 // possède sa propre adresse /actualites/<slug> pour que le lien partagé sur Facebook affiche la
 // bonne photo et le bon titre (les balises sont posées par la fonction ogActualite à la livraison).
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight, Calendar, Newspaper } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Calendar, Newspaper, X } from 'lucide-react';
 import { NewsItem } from '../types';
 import { thumb } from '../lib/img';
 import { formatLong } from '../lib/eventDate';
@@ -92,6 +92,8 @@ const NouvelleSeule = ({ item }: { item: NewsItem }) => {
 
               <p className="text-slate-200 text-base md:text-lg leading-relaxed whitespace-pre-line mb-8">{item.body}</p>
 
+              <Galerie images={item.images || []} titre={item.title} />
+
               <LienNouvelle item={item} />
 
               <div className="border-t border-white/10 mt-10 pt-6 flex flex-wrap items-center gap-4">
@@ -102,6 +104,29 @@ const NouvelleSeule = ({ item }: { item: NewsItem }) => {
           </article>
         </div>
       </div>
+    </>
+  );
+};
+
+// Les photos de plus d'une nouvelle; un clic l'ouvre en grand sur la même page.
+const Galerie = ({ images, titre }: { images: string[]; titre: string }) => {
+  const [ouverte, setOuverte] = useState<string | null>(null);
+  if (!images.length) return null;
+  return (
+    <>
+      <div className={`grid gap-3 mb-8 ${images.length === 1 ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-3'}`}>
+        {images.map((url, i) => (
+          <button key={url + i} type="button" onClick={() => setOuverte(url)} className="aspect-[4/3] rounded-xl overflow-hidden bg-slate-800 group">
+            <img src={thumb(url, 800)} alt={`${titre}, photo ${i + 2}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          </button>
+        ))}
+      </div>
+      {ouverte && (
+        <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setOuverte(null)}>
+          <button type="button" className="absolute top-4 right-4 p-2 text-white/80 hover:text-white" aria-label="Fermer"><X /></button>
+          <img src={thumb(ouverte, 1800)} alt={titre} className="max-w-full max-h-full object-contain rounded-xl" />
+        </div>
+      )}
     </>
   );
 };
