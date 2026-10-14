@@ -4,7 +4,8 @@
  *
  * « Partager » ouvre la feuille de partage du téléphone (Facebook, Messenger, courriel, tout
  * ce qu'elle a d'installé) quand le navigateur la propose, ce qui est le cas sur iPhone et sur
- * Android. Sur un ordinateur, le bouton reste caché et les trois autres suffisent.
+ * Android. Sur un ordinateur, le bouton reste caché et les autres suffisent. « Copier le texte »
+ * ne s'affiche que dans l'Espace Auteure (prop copierTexte).
  */
 import React, { useState } from 'react';
 import { Facebook, Link as LinkIcon, Check, Share2, ClipboardCopy } from 'lucide-react';
@@ -16,6 +17,8 @@ type Props = {
   className?: string;
   /** Rangée compacte, icônes seules : pour les petites cartes où trois libellés déborderaient. */
   compact?: boolean;
+  /** « Copier le texte » : Espace Auteure seulement, pour ne pas faciliter le plagiat sur le site public. */
+  copierTexte?: boolean;
 };
 
 const canNativeShare = () => typeof navigator !== 'undefined' && typeof navigator.share === 'function';
@@ -33,7 +36,7 @@ const Btn = ({ onClick, title, compact, children }: { onClick: () => void; title
   </button>
 );
 
-const PartageBoutons = ({ url, title, text = '', className = '', compact = false }: Props) => {
+const PartageBoutons = ({ url, title, text = '', className = '', compact = false, copierTexte = false }: Props) => {
   const [copie, setCopie] = useState<'lien' | 'texte' | null>(null);
 
   const flash = (quoi: 'lien' | 'texte') => {
@@ -90,14 +93,14 @@ const PartageBoutons = ({ url, title, text = '', className = '', compact = false
         {!compact && (copie === 'lien' ? 'Lien copié' : 'Copier le lien')}
       </Btn>
 
-      <Btn
+      {copierTexte && <Btn
         compact={compact}
         title="Copier le texte et le lien, prêts à coller"
         onClick={() => copier([title, text, url].filter(Boolean).join('\n\n'), 'texte')}
       >
         {copie === 'texte' ? <Check size={14} className="text-green-400" /> : <ClipboardCopy size={14} />}
         {!compact && (copie === 'texte' ? 'Texte copié' : 'Copier le texte')}
-      </Btn>
+      </Btn>}
     </div>
   );
 };

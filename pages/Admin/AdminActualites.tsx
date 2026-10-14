@@ -277,7 +277,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Adresse de cette nouvelle</p>
               <p className="text-gold text-sm break-all mb-4">{apercuUrl}</p>
               {courante.isPublished && (
-                <PartageBoutons url={apercuUrl} title={courante.title || ''} text={resume(courante.body || '')} />
+                <PartageBoutons url={apercuUrl} title={courante.title || ''} text={resume(courante.body || '')} copierTexte />
               )}
             </div>
           )}
@@ -325,7 +325,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
               <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
               <p className="text-slate-400 text-sm mb-3">{resume(item.body, 140)}</p>
               {item.isPublished && (
-                <PartageBoutons url={`${SITE}/actualites/${item.slug}`} title={item.title} text={resume(item.body)} />
+                <PartageBoutons url={`${SITE}/actualites/${item.slug}`} title={item.title} text={resume(item.body)} copierTexte />
               )}
             </div>
             <div className="flex gap-2">
