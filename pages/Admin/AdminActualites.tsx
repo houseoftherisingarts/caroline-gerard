@@ -304,12 +304,20 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
               : `${enLigne} ${enLigne === 1 ? 'nouvelle en ligne' : 'nouvelles en ligne'}, la plus récente d’abord.`}
           </p>
         </div>
-        <button
-          onClick={() => setCourante(secours() ?? vide())}
-          className="bg-gold text-midnight px-4 py-2 rounded-lg font-bold hover:bg-white transition-colors flex items-center gap-2"
-        >
-          <Newspaper size={16} /> Écrire une nouvelle
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setImportOuvert(true)}
+            className="border border-gold/40 text-gold px-4 py-2 rounded-lg font-bold hover:bg-gold hover:text-midnight transition-colors flex items-center gap-2"
+          >
+            <Download size={16} /> Importer de Facebook
+          </button>
+          <button
+            onClick={() => setCourante(secours() ?? vide())}
+            className="bg-gold text-midnight px-4 py-2 rounded-lg font-bold hover:bg-white transition-colors flex items-center gap-2"
+          >
+            <Newspaper size={16} /> Écrire une nouvelle
+          </button>
+        </div>
       </div>
 
       <div className="bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 overflow-hidden">
