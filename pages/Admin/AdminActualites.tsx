@@ -153,6 +153,7 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
   const [courante, setCourante] = useState<Partial<NewsItem> | null>(null);
   const [aSupprimer, setASupprimer] = useState<string | null>(null);
   const [erreur, setErreur] = useState('');
+  const [importOuvert, setImportOuvert] = useState(false);
 
   // Copie de secours dans le navigateur : une nouvelle en cours d'écriture
   // survit à une page fermée ou à un enregistrement raté.
