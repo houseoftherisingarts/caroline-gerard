@@ -119,6 +119,16 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
             Caroline <span className="font-semibold">Gérard</span>
           </span>
         </Link>
+        <a
+          href="https://www.facebook.com/caroline.gerard.338"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Caroline Gérard sur Facebook"
+          title="Caroline Gérard sur Facebook"
+          className="-ml-1 p-2 rounded-full text-gold/80 hover:text-midnight hover:bg-gold transition-colors flex-shrink-0"
+        >
+          <Facebook className="w-5 h-5" />
+        </a>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-5 xl:gap-8">
