@@ -2,8 +2,9 @@
 // depuis la même page. Les nouvelles vivent dans la collection Firestore « news » et remontent
 // toutes seules sur /actualites et sur l'accueil.
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Edit3, Library, Newspaper, Save, Trash2, UploadCloud, X } from 'lucide-react';
+import { ArrowLeft, Download, Edit3, Library, Newspaper, Save, Trash2, UploadCloud, X } from 'lucide-react';
 import { NewsItem } from '../../types';
+import ImportFacebook from './ImportFacebook';
 import { deleteNewsItem, saveNewsItem, slugifyNews } from '../../lib/firestore';
 import { uploadMediaFile } from '../../lib/storage';
 import { formatLong } from '../../lib/eventDate';
