@@ -291,6 +291,8 @@ const AdminActualites = ({ news, mediaLibrary }: { news: NewsItem[]; mediaLibrar
   const liste = sortNews(news);
   const enLigne = publishedNews(news).length;
 
+  if (importOuvert) return <ImportFacebook news={news} onClose={() => setImportOuvert(false)} />;
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex flex-wrap justify-between items-center gap-4">
