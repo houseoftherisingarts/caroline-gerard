@@ -26,6 +26,11 @@
     @apply rounded-xl my-6 w-full;
 }
 
+/* Les liens que Caroline pose dans un texte avec le crayon. */
+.texte-site a {
+    @apply text-gold underline underline-offset-4 decoration-gold/50 hover:text-white hover:decoration-white transition-colors;
+}
+
 /* Custom animations */
 @keyframes fadeInUp {
   from {

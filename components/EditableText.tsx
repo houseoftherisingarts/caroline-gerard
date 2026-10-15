@@ -1,7 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Bold, Italic, Type, AlignLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bold, Italic, Type, AlignLeft, Link2, Unlink } from 'lucide-react';
 import { useSiteContent } from '../contexts/SiteContentContext';
+
+/** Les pages du site qu'un lien posé dans un texte peut viser. */
+const PAGES_DU_SITE: { label: string; href: string }[] = [
+  { label: 'Accueil', href: '/' },
+  { label: 'À propos', href: '/a-propos' },
+  { label: 'Boutique', href: '/boutique' },
+  { label: 'Actualités', href: '/actualites' },
+  { label: 'Événements', href: '/evenements' },
+  { label: 'Médias', href: '/interviews' },
+  { label: 'Conférence', href: '/conferences' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Contact', href: '/contact' },
+  { label: 'Espace client', href: '/communaute' },
+];
+
+const estInterne = (href: string) => href.startsWith('/') && !href.startsWith('//');
 
 interface EditableTextProps {
   contentKey: string;
@@ -20,7 +37,7 @@ const ToolBtn = ({ onClick, active, title, children }: {
   <button
     onMouseDown={e => { e.preventDefault(); onClick(); }}
     title={title}
-    className={`px-2.5 py-1.5 rounded text-sm font-bold transition-colors select-none ${
+    className={`inline-flex items-center px-2.5 py-1.5 rounded text-sm font-bold transition-colors select-none ${
       active ? 'bg-gold text-midnight' : 'bg-white/10 text-white hover:bg-white/20'
     }`}
   >
@@ -31,8 +48,22 @@ const ToolBtn = ({ onClick, active, title, children }: {
 const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className = '' }: EditableTextProps) => {
   const { content, isEditMode, updateContent } = useSiteContent();
   const [isEditing, setIsEditing] = useState(false);
+  const [lienOuvert, setLienOuvert] = useState(false);
+  const [lienHref, setLienHref] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
+  const selectionRef = useRef<Range | null>(null);
+  const navigate = useNavigate();
   const TagEl = Tag as React.ElementType;
+
+  // Un lien vers une page du site posé dans le texte change de page sans recharger le site.
+  const handleViewClick = (e: React.MouseEvent) => {
+    const a = (e.target as Element).closest?.('a');
+    if (!a || a.target === '_blank') return;
+    const href = a.getAttribute('href') ?? '';
+    if (!estInterne(href)) return;
+    e.preventDefault();
+    navigate(href);
+  };
 
   const value = content[contentKey] ?? defaultValue;
 
@@ -48,6 +79,53 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
     const html = editorRef.current?.innerHTML ?? value;
     updateContent(contentKey, html);
     setIsEditing(false);
+    setLienOuvert(false);
+  };
+
+  const memoriserSelection = () => {
+    const sel = window.getSelection();
+    selectionRef.current = sel && sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
+  };
+
+  const ouvrirLien = () => {
+    memoriserSelection();
+    const noeud = selectionRef.current?.commonAncestorContainer as Node | undefined;
+    const el = noeud instanceof Element ? noeud : noeud?.parentElement ?? null;
+    setLienHref(el?.closest('a')?.getAttribute('href') ?? '');
+    setLienOuvert(true);
+  };
+
+  const poserLien = () => {
+    const href = lienHref.trim();
+    if (!href || !editorRef.current) return;
+    editorRef.current.focus();
+    const sel = window.getSelection();
+    if (selectionRef.current) { sel?.removeAllRanges(); sel?.addRange(selectionRef.current); }
+    const libelle = PAGES_DU_SITE.find(p => p.href === href)?.label ?? href;
+    const externe = !estInterne(href);
+    if (!sel || sel.isCollapsed) {
+      document.execCommand('insertHTML', false, `<a href="${href}"${externe ? ' target="_blank" rel="noopener"' : ''}>${libelle}</a>`);
+    } else {
+      document.execCommand('createLink', false, href);
+      editorRef.current.querySelectorAll<HTMLAnchorElement>(`a[href="${href}"]`).forEach(a => {
+        if (externe) { a.target = '_blank'; a.rel = 'noopener'; } else { a.removeAttribute('target'); a.removeAttribute('rel'); }
+      });
+    }
+    setLienOuvert(false);
+  };
+
+  const retirerLien = () => {
+    editorRef.current?.focus();
+    const sel = window.getSelection();
+    if (selectionRef.current) { sel?.removeAllRanges(); sel?.addRange(selectionRef.current); }
+    const noeud = sel?.anchorNode;
+    const el = noeud instanceof Element ? noeud : noeud?.parentElement ?? null;
+    const a = el?.closest('a');
+    if (a && sel?.isCollapsed) {
+      const r = document.createRange(); r.selectNodeContents(a); sel.removeAllRanges(); sel.addRange(r);
+    }
+    document.execCommand('unlink');
+    setLienOuvert(false);
   };
 
   // Set initial HTML content and focus when modal opens
@@ -55,6 +133,7 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
     if (isEditing && editorRef.current) {
       editorRef.current.innerHTML = value;
       editorRef.current.focus();
+      setLienOuvert(false);
       // Place cursor at end
       const range = document.createRange();
       range.selectNodeContents(editorRef.current);
@@ -79,7 +158,8 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
   if (!isEditMode) {
     return (
       <TagEl
-        className={className}
+        className={`texte-site ${className}`}
+        onClick={handleViewClick}
         dangerouslySetInnerHTML={{ __html: value }}
       />
     );
@@ -88,7 +168,7 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
   return (
     <>
       <TagEl
-        className={`${className} cursor-pointer hover:ring-2 hover:ring-gold/60 hover:ring-offset-1 hover:ring-offset-black/20 rounded transition-all`}
+        className={`texte-site ${className} cursor-pointer hover:ring-2 hover:ring-gold/60 hover:ring-offset-1 hover:ring-offset-black/20 rounded transition-all`}
         onClick={handleStartEdit}
         title="Cliquer pour modifier"
         dangerouslySetInnerHTML={{ __html: value }}
@@ -145,14 +225,63 @@ const EditableText = ({ contentKey, defaultValue, tag: Tag = 'span', className =
                 <AlignLeft size={14} />
                 <span className="text-xs ml-1">¶</span>
               </ToolBtn>
+
+              <div className="w-px h-6 bg-white/10" />
+
+              <ToolBtn onClick={ouvrirLien} active={lienOuvert} title="Lien vers une page">
+                <Link2 size={14} />
+                <span className="text-xs ml-1">Lien</span>
+              </ToolBtn>
             </div>
+
+            {lienOuvert && (
+              <div className="mb-3 p-3 rounded-xl bg-black/30 border border-gold/30 flex flex-wrap items-center gap-2">
+                <p className="w-full text-xs text-slate-400">
+                  Sélectionne d'abord le mot à lier dans ton texte, puis choisis une page du site ou colle une adresse.
+                </p>
+                <select
+                  value={PAGES_DU_SITE.some(p => p.href === lienHref) ? lienHref : ''}
+                  onChange={e => setLienHref(e.target.value)}
+                  className="bg-white/10 text-white text-sm rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-gold/50 cursor-pointer"
+                >
+                  <option value="">Page du site…</option>
+                  {PAGES_DU_SITE.map(p => <option key={p.href} value={p.href}>{p.label}</option>)}
+                </select>
+                <input
+                  type="text"
+                  value={lienHref}
+                  onChange={e => setLienHref(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); poserLien(); } }}
+                  placeholder="ou une adresse : https://…"
+                  className="flex-1 min-w-[12rem] bg-white/10 text-white text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gold/50 placeholder:text-slate-500"
+                />
+                <button
+                  type="button"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={poserLien}
+                  disabled={!lienHref.trim()}
+                  className="bg-gold text-midnight px-4 py-1.5 rounded-lg font-bold text-sm hover:bg-white transition-colors disabled:opacity-40"
+                >
+                  Poser le lien
+                </button>
+                <button
+                  type="button"
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={retirerLien}
+                  title="Retirer le lien"
+                  className="flex items-center gap-1 text-slate-300 border border-white/15 px-3 py-1.5 rounded-lg text-sm hover:bg-white/10 hover:text-white transition-colors"
+                >
+                  <Unlink size={13} /> Retirer
+                </button>
+              </div>
+            )}
 
             {/* Editable content area */}
             <div
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
-              className="w-full min-h-[80px] max-h-[50vh] overflow-y-auto bg-black/30 border border-white/10 rounded-xl p-4 text-white text-lg focus:outline-none focus:border-gold/50 leading-relaxed"
+              className="texte-site w-full min-h-[80px] max-h-[50vh] overflow-y-auto bg-black/30 border border-white/10 rounded-xl p-4 text-white text-lg focus:outline-none focus:border-gold/50 leading-relaxed"
               style={{ whiteSpace: 'pre-wrap' }}
             />
 

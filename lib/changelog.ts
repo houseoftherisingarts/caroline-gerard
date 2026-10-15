@@ -22,6 +22,16 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-10-15',
+    titre: 'Un lien vers une autre page, posé dans ton texte avec le crayon',
+    intro: "Tu as demandé ce matin comment faire du mot Boutique un lien dans ta page À propos, et la réponse est en ligne le jour même : le crayon sait maintenant poser un lien dans n'importe quel texte du site.",
+    etapes: [
+      "Quand tu modifies un texte avec le crayon, la barre d'outils porte un nouveau bouton Lien à côté du gras et de la taille. Tu sélectionnes d'abord le mot ou le bout de phrase à lier, tu cliques sur Lien, puis tu choisis la page du site dans la liste (Accueil, À propos, Boutique, Actualités, Événements, Médias, Conférence, Blog, Contact ou Espace client), ou tu colles une adresse complète si le lien mène ailleurs que sur ton site. Le bouton Poser le lien termine le geste, et Retirer défait un lien dont tu ne veux plus.",
+      "Un mot lié s'affiche en doré et souligné sur le site, comme les liens qui existent déjà dans tes pages, et il passe au blanc quand on le survole. Un lien vers une de tes pages ouvre la page sans recharger le site, alors qu'une adresse extérieure s'ouvre dans un nouvel onglet pour que le visiteur ne quitte pas ton site.",
+      "Tes deux portraits de la page À propos se changent avec le même crayon : une fois le mode modification allumé, tu passes la souris sur la photo et les boutons Changer l'image et Recadrer apparaissent dessus. Rien n'a bougé de ce côté : les deux photos t'attendent au même endroit, sous le crayon.",
+    ],
+  },
+  {
     date: '2026-10-13',
     titre: "L'avis de commande, le pourriel et des Actualités qui s'enregistrent, photos en prime",
     intro: "Tes deux demandes du 12 et du 13 octobre sont en ligne : l'avis qui t'arrive à chaque commande ne peut plus se perdre en route, et le formulaire de contact apprend maintenant à reconnaître les messages dont tu ne veux plus.",
