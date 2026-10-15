@@ -133,7 +133,7 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-5 xl:gap-8">
+        <div className="hidden lg:flex items-center gap-4 xl:gap-8 text-xs xl:text-sm whitespace-nowrap">
           <Link to="/" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
           {!vis.hidePageAPropos && <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>}
           {!vis.hidePageBoutique && <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>}
