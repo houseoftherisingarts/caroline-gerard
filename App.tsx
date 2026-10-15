@@ -134,16 +134,16 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-4 xl:gap-8 text-xs xl:text-sm whitespace-nowrap">
-          <Link to="/" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
-          {!vis.hidePageAPropos && <Link to="/a-propos" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>}
-          {!vis.hidePageBoutique && <Link to="/boutique" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>}
-          {!vis.hidePageActualites && <Link to="/actualites" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Actualités</Link>}
-          {!vis.hidePageEvenements && <Link to="/evenements" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>}
-          {!vis.hidePageInterviews && <Link to="/interviews" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>}
-          {!vis.hideConferences && <Link to="/conferences" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>}
-          {!vis.hidePageBlog && <Link to="/blog" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Blog</Link>}
-          {!vis.hidePageContact && <Link to="/contact" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase">Contact</Link>}
-          {!vis.hideEspaceClient && <Link to="/communaute" className="text-sm font-bold hover:text-gold transition-colors tracking-widest uppercase border border-gold/30 px-3 py-1.5 rounded-lg hover:border-gold">Espace client</Link>}
+          <Link to="/" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Accueil</Link>
+          {!vis.hidePageAPropos && <Link to="/a-propos" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">À Propos</Link>}
+          {!vis.hidePageBoutique && <Link to="/boutique" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Boutique</Link>}
+          {!vis.hidePageActualites && <Link to="/actualites" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Actualités</Link>}
+          {!vis.hidePageEvenements && <Link to="/evenements" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Événements</Link>}
+          {!vis.hidePageInterviews && <Link to="/interviews" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Médias</Link>}
+          {!vis.hideConferences && <Link to="/conferences" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Conférence</Link>}
+          {!vis.hidePageBlog && <Link to="/blog" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Blog</Link>}
+          {!vis.hidePageContact && <Link to="/contact" className="font-bold hover:text-gold transition-colors tracking-widest uppercase">Contact</Link>}
+          {!vis.hideEspaceClient && <Link to="/communaute" className="font-bold hover:text-gold transition-colors tracking-widest uppercase border border-gold/30 px-3 py-1.5 rounded-lg hover:border-gold">Espace client</Link>}
         </div>
 
         <div className="flex items-center gap-4">
