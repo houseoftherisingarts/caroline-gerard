@@ -35,7 +35,7 @@ const ImportFacebook = ({ news, onClose, enregistrer = saveNewsItem, televerser 
   useEffect(() => () => apercus.forEach(url => URL.revokeObjectURL(url)), [apercus]);
 
   const lire = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fichiers = Array.from(e.target.files || []);
+    const fichiers = e.target.files ? Array.from(e.target.files) : [];
     if (!fichiers.length) return;
     setLecture(true);
     setErreur('');
