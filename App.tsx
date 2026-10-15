@@ -111,24 +111,26 @@ const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenC
   return (
     <nav className="fixed w-full z-50 top-0 px-3 py-3 lg:px-6 lg:py-6 transition-all duration-300">
       <div className="w-full bg-midnight/60 backdrop-blur-md rounded-xl border border-white/10 px-4 py-3 lg:px-8 lg:py-4 flex justify-between items-center shadow-2xl">
-        <Link to="/" className="flex items-center gap-3 group" aria-label="Caroline Gérard — retour à l'accueil">
-          <div className="bg-gold/20 p-2 rounded-full group-hover:bg-gold/40 transition-colors">
-            <QuillIcon className="text-gold w-6 h-6" />
-          </div>
-          <span className="font-serif text-gold text-lg lg:text-xl tracking-wide whitespace-nowrap">
-            Caroline <span className="font-semibold">Gérard</span>
-          </span>
-        </Link>
-        <a
-          href="https://www.facebook.com/caroline.gerard.338"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Caroline Gérard sur Facebook"
-          title="Caroline Gérard sur Facebook"
-          className="-ml-1 p-2 rounded-full text-gold/80 hover:text-midnight hover:bg-gold transition-colors flex-shrink-0"
-        >
-          <Facebook className="w-5 h-5" />
-        </a>
+        <div className="flex items-center gap-1">
+          <Link to="/" className="flex items-center gap-3 group" aria-label="Caroline Gérard — retour à l'accueil">
+            <div className="bg-gold/20 p-2 rounded-full group-hover:bg-gold/40 transition-colors">
+              <QuillIcon className="text-gold w-6 h-6" />
+            </div>
+            <span className="font-serif text-gold text-lg lg:text-xl tracking-wide whitespace-nowrap">
+              Caroline <span className="font-semibold">Gérard</span>
+            </span>
+          </Link>
+          <a
+            href="https://www.facebook.com/caroline.gerard.338"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Caroline Gérard sur Facebook"
+            title="Caroline Gérard sur Facebook"
+            className="p-2 rounded-full text-gold/80 hover:text-midnight hover:bg-gold transition-colors flex-shrink-0"
+          >
+            <Facebook className="w-5 h-5" />
+          </a>
+        </div>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-5 xl:gap-8">
