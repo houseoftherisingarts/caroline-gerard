@@ -326,4 +326,6 @@ export type NewsItem = {
   linkLabel?: string;
   isPublished: boolean;
   createdAt: string;
+  /** D'où vient la nouvelle quand elle a été importée (« facebook:<horodatage> »), pour ne pas l'importer deux fois. */
+  source?: string;
 };
