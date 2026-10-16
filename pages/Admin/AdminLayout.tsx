@@ -5,6 +5,7 @@ import { auth } from '../../firebase';
 import { subscribeToRendezVous } from '../../lib/firestore';
 import {
   LayoutDashboard,
+  Gift,
   TrendingUp,
   ShoppingCart,
   FileText,
@@ -133,6 +134,7 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin" icon={<LayoutDashboard />} label="Tableau de bord" onClick={closeSidebar} />
           <NavLink to="/admin/trafic" icon={<TrendingUp />} label="Trafic du site" onClick={closeSidebar} />
           <NavLink to="/admin/demande-changement" icon={<Send />} label="Demander un changement" onClick={closeSidebar} />
+          <NavLink to="/admin/plus-par-vexel" icon={<Gift />} label="Plus par Vexel" onClick={closeSidebar} />
           <NavLink to="/admin/partenaire-vexel" icon={<Handshake />} label="Devenir partenaire Vexel" onClick={closeSidebar} />
           <NavLink to="/admin/journal" icon={<History />} label="Journal des changements" onClick={closeSidebar} />
           <NavLink to="/admin/commandes" icon={<ShoppingCart />} label="Commandes" onClick={closeSidebar} />

@@ -22,6 +22,14 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-10-16',
+    titre: "Une nouvelle section, Plus par Vexel, dans ton Espace Auteure",
+    intro: "Ton menu porte maintenant une entrée Plus par Vexel, juste au-dessus de Devenir partenaire Vexel, où le studio dépose les programmes qu'il offre à ses clients.",
+    etapes: [
+      "Tu y trouves Influencer Studio, le premier programme, avec sa description, sa version actuelle et les boutons pour le télécharger, et la liste se met à jour d'elle-même dès que le studio publie une nouveauté, sans que ton site ait à changer.",
+    ],
+  },
+  {
     date: '2026-10-15',
     titre: 'Un lien vers une autre page, posé dans ton texte avec le crayon',
     intro: "Tu as demandé ce matin comment faire du mot Boutique un lien dans ta page À propos, et la réponse est en ligne le jour même : le crayon sait maintenant poser un lien dans n'importe quel texte du site.",
