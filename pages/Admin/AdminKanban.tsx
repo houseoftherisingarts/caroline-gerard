@@ -212,7 +212,7 @@ const AdminKanban = () => {
                 <div key={date} className="mb-6">
                     <h3 className="font-bold text-gold border-b border-white/10 pb-2 mb-3">{date}</h3>
                     <div className="space-y-2">
-                        {tasksForDate.map(task => (
+                        {(tasksForDate as Task[]).map(task => (
                             <div key={task.id} className="bg-black/20 p-3 rounded-lg flex justify-between items-center">
                                 <div>
                                     <p className="text-white font-semibold">{task.title}</p>

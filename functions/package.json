@@ -2,7 +2,8 @@
   "name": "caroline-gerard-functions",
   "description": "Firebase Cloud Functions — checkout, Square payment, email receipt",
   "scripts": {
-    "build": "tsc",
+    "partage": "rm -rf src/partage && mkdir -p src/partage/lib && cp ../types.ts src/partage/types.ts && cp ../lib/factures-calcul.ts ../lib/factures-courriel.ts src/partage/lib/",
+    "build": "npm run partage && tsc",
     "serve": "npm run build && firebase emulators:start --only functions",
     "deploy": "npm run build && firebase deploy --only functions"
   },

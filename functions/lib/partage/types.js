@@ -1,0 +1,4 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+// --- module compta : fin ---
+//# sourceMappingURL=types.js.map

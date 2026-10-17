@@ -329,3 +329,86 @@ export type NewsItem = {
   /** D'où vient la nouvelle quand elle a été importée (« facebook:<horodatage> »), pour ne pas l'importer deux fois. */
   source?: string;
 };
+
+export type Language = 'FR' | 'EN';
+
+// --- module compta : début (types des factures, _vexel-base/modules/compta) ---
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  price: number;
+  /** Rabais de la ligne, en pourcentage (0 à 100). */
+  rabais?: number;
+  /** Taxes de la ligne : 'tps' = livre (TPS seule), 'aucune' = sans taxe, absent = TPS et TVQ (transport et autres). Ajout propre à Caroline. */
+  taxe?: 'tps' | 'aucune';
+}
+
+/** Credit : note de crédit, liée à une facture par `factureId`. */
+export type DocumentType = 'Invoice' | 'Quote' | 'Credit';
+/** Partial : facture dont une partie est payée (acompte), le solde reste dû. */
+export type DocumentStatus = 'Draft' | 'Sent' | 'Partial' | 'Paid' | 'Accepted' | 'Declined';
+
+export type ModePaiement = 'stripe' | 'virement' | 'cheque' | 'comptant' | 'autre';
+
+/** Un paiement reçu (montant négatif : remboursement). */
+export interface Paiement {
+  id: string;
+  date: string;
+  montant: number;
+  mode: ModePaiement;
+  note?: string;
+}
+
+export interface Recurrence {
+  frequence: 'hebdomadaire' | 'mensuelle' | 'annuelle';
+  /** AAAA-MM-JJ : la prochaine facture à créer. */
+  prochaine: string;
+  fin?: string;
+  actif: boolean;
+  /** Les dates déjà créées, pour ne jamais créer deux fois la même. */
+  generees: string[];
+}
+
+export interface PieceJointe {
+  nom: string;
+  chemin: string;
+  url: string;
+  type: string;
+  taille: number;
+  visibleClient: boolean;
+}
+
+export interface Document {
+  id: string;
+  number: string;
+  type: DocumentType;
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  date: string;
+  dueDate?: string;
+  items: InvoiceItem[];
+  status: DocumentStatus;
+  terms: string;
+  paymentLink?: string;
+  jetonPublic?: string; // adresse /facture/{jeton} une fois le document publié (voir lib/factures.ts)
+  signed?: boolean;
+  signatureDate?: string;
+  paiements?: Paiement[];
+  /** Remise en dollars sur le sous-total, avant les taxes. */
+  remise?: number;
+  /** Facture : le devis d'origine. */
+  devisId?: string;
+  /** Note de crédit : la facture créditée, et son numéro pour le papier. */
+  factureId?: string;
+  factureNumero?: string;
+  /** Facture modèle qui se répète. */
+  recurrence?: Recurrence;
+  /** Facture créée par une récurrence : son modèle. */
+  modeleId?: string;
+  envoyeeLe?: string;
+  relances?: { date: string; auto?: boolean }[];
+  piecesJointes?: PieceJointe[];
+}
+// --- module compta : fin ---

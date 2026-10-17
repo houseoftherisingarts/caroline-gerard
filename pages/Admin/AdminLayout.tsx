@@ -33,6 +33,7 @@ import {
   Send,
   Newspaper,
   History,
+  Landmark,
 } from 'lucide-react';
 import QuillIcon from '../../components/QuillIcon';
 
@@ -138,7 +139,8 @@ const AdminLayout = ({ children }: { children?: React.ReactNode }) => {
           <NavLink to="/admin/partenaire-vexel" icon={<Handshake />} label="Devenir partenaire Vexel" onClick={closeSidebar} />
           <NavLink to="/admin/journal" icon={<History />} label="Journal des changements" onClick={closeSidebar} />
           <NavLink to="/admin/commandes" icon={<ShoppingCart />} label="Commandes" onClick={closeSidebar} />
-          <NavLink to="/admin/factures" icon={<FileText />} label="Factures & Devis" onClick={closeSidebar} />
+          <NavLink to="/admin/factures" icon={<FileText />} label="Factures" onClick={closeSidebar} />
+          <NavLink to="/admin/finances" icon={<Landmark />} label="Finances" onClick={closeSidebar} />
           <NavLink to="/admin/echelle" icon={<Layers />} label="Échelle Produits" onClick={closeSidebar} />
           <NavLink to="/admin/studio" icon={<Camera />} label="Studio Social" onClick={closeSidebar} />
           <NavLink to="/admin/actualites" icon={<Newspaper />} label="Actualités" onClick={closeSidebar} />

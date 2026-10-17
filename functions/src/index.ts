@@ -1209,3 +1209,8 @@ export const ogActualite = onRequest(
 </html>`);
   },
 );
+
+// --- Factures et Finances (module compta de Vexel) ---
+export { creerPaiementFacture, webhookStripeCaroline } from './factures/paiement';
+export { envoyerDocumentFacture } from './factures/envoyer';
+export { facturesDuMatin } from './factures/planifiee';

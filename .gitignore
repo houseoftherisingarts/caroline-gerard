@@ -41,3 +41,4 @@ node_modules/
 
 # Graphe de connaissance local (graphify), reconstruit à la demande
 graphify-out/
+functions/src/partage/

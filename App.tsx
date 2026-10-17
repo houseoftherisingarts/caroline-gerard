@@ -4,7 +4,7 @@ import { auth, db } from './firebase';
 import { BadgeVexel } from './vexel/BadgeVexel';
 import { CollantVexel } from './vexel/CollantVexel';
 import { trackAddToCart, trackBeginCheckout, trackPageView } from './lib/analytics';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
   ShoppingCart,
@@ -39,7 +39,10 @@ import AdminConsignations from './pages/Admin/AdminConsignations';
 import AdminVentes from './pages/Admin/AdminVentes';
 import AdminBlog from './pages/Admin/AdminBlog';
 import AdminEvents from './pages/Admin/AdminEvents';
-import AdminInvoices from './pages/Admin/AdminInvoices';
+// Factures et Finances : module compta de Vexel (l'ancien pages/Admin/AdminInvoices.tsx est remplacé)
+import AdminInvoices from './pages/AdminInvoices';
+import AdminFinance from './pages/AdminFinance';
+import FacturePublique from './pages/FacturePublique';
 import AdminProductLadder from './pages/Admin/AdminProductLadder';
 import AdminSocialStudio from './pages/Admin/AdminSocialStudio';
 import AdminMedia from './pages/Admin/AdminMedia';
@@ -100,6 +103,19 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
+};
+
+const FactureRoute = () => {
+  const { jeton } = useParams();
+  return (
+    <div className="min-h-screen text-slate-200 font-sans">
+      <Helmet>
+        <title>Caroline Gérard | Facture</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      <FacturePublique jeton={jeton || ''} lang="FR" />
+    </div>
+  );
 };
 
 const Navigation = ({ cartCount, onOpenCart, vis }: { cartCount: number, onOpenCart: () => void, vis: VisibilitySettings }) => {
@@ -500,7 +516,8 @@ const App = () => {
                   <Route path="partenaire-vexel" element={<AdminDevenirPartenaire />} />
                   <Route path="journal" element={<AdminChangeLog />} />
                   <Route path="commandes" element={<AdminOrders />} />
-                  <Route path="factures" element={<AdminInvoices />} />
+                  <Route path="factures" element={<AdminInvoices lang="FR" />} />
+                  <Route path="finances" element={<AdminFinance lang="FR" />} />
                   <Route path="echelle" element={<AdminProductLadder offers={offers} />} />
                   <Route path="studio" element={<AdminSocialStudio mediaLibrary={mediaLibrary} setMediaLibrary={handleSetMediaLibrary} />} />
                   <Route path="actualites" element={<AdminActualites news={news} mediaLibrary={mediaLibrary} />} />
@@ -527,6 +544,9 @@ const App = () => {
               <AdminLogin />
             )
           } />
+
+          {/* Page publique d'une facture : adresse à jeton, hors du site public (ni menu ni pied de page) */}
+          <Route path="/facture/:jeton" element={<FactureRoute />} />
 
           {/* Public Routes */}
           <Route path="*" element={

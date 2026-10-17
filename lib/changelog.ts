@@ -22,6 +22,19 @@ export type EntreeJournal = {
 
 export const JOURNAL: EntreeJournal[] = [
   {
+    date: '2026-10-17',
+    titre: 'Tes factures et tes finances ont leur place dans ton Espace Auteure',
+    intro: "Ton menu porte maintenant deux entrées, Factures et Finances. Elles remplacent l'ancien créateur de facture et gardent ta comptabilité au même endroit.",
+    etapes: [
+      "La section Factures te permet de faire des devis, des factures et des notes de crédit. Le numéro se donne tout seul. Chaque ligne choisit ses taxes : un livre ne porte que la TPS, le transport porte la TPS et la TVQ.",
+      "Ta facture L-0122 a été copiée dans la nouvelle section avec son numéro, sa date et ses lignes. Ses montants et ses taxes tombent exactement sur ceux d'avant. L'ancienne liste reste en place derrière, rien n'a été effacé.",
+      "Chaque facture peut être publiée sous une adresse privée que tu envoies à ton client. Il y voit le document, et il pourra payer par carte dès que le compte Stripe sera branché.",
+      "Les courriels de facturation partiront du site quand la clé Resend sera posée. D'ici là, le bouton d'envoi ouvre ton logiciel de courriel avec le message déjà écrit.",
+      "La section Finances garde tes revenus et tes dépenses et calcule la TPS et la TVQ à remettre. Elle produit aussi des rapports, ainsi qu'un paquet de documents prêt pour ton comptable.",
+      "Le plan comptable de départ parle d'œuvres, de conférences et d'ateliers, et tu peux le modifier quand tu veux. Ton adresse et tes numéros de taxes ne sont lisibles que par toi et par Vexel.",
+    ],
+  },
+  {
     date: '2026-10-16',
     titre: "Une nouvelle section, Plus par Vexel, dans ton Espace Auteure",
     intro: "Ton menu porte maintenant une entrée Plus par Vexel, juste au-dessus de Devenir partenaire Vexel, où le studio dépose les programmes qu'il offre à ses clients.",

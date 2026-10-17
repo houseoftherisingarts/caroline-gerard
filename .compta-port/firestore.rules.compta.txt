@@ -1,0 +1,26 @@
+    // --- module compta : début (_vexel-base/modules/compta, rules/firestore.rules.compta.txt) ---
+    // Les devis, factures et notes de crédit (pages/AdminInvoices.tsx) : admin seulement.
+    match /documents/{docId}       { allow read, write: if isAdmin(); }
+
+    // Miroir public d'une facture publiée : lisible par jeton (assez long pour être imprévisible),
+    // jamais listable, jamais écrit ailleurs que par Laurie (lib/factures.ts, publierFacture).
+    // La collection documents (source, avec l'identité de la personne facturée) reste admin seulement.
+    // Le miroir ne porte que ce que la page publique montre (lib/factures.ts, FacturePubliqueDoc) : pas de
+    // note privée de paiement, pas de récurrence, pas de relance. payeLe vient du webhook Stripe; les
+    // fonctions serveur (envoi des récurrences) écrivent avec l'Admin SDK et passent à côté de ces règles.
+    match /factures_publiques/{jeton} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if isAdmin()
+                   && request.resource.data.keys().hasOnly(['documentId', 'numero', 'type', 'date', 'dueDate',
+                        'clientName', 'clientEmail', 'items', 'totaux', 'statut', 'modalites', 'note', 'vendeur',
+                        'lienPaiementStripe', 'publieLe', 'remise', 'paiements', 'credits', 'solde',
+                        'factureNumero', 'piecesJointes', 'payeLe', 'paiementCarte']);
+      allow delete: if isAdmin();
+    }
+
+    // Module comptable (lib/compta/) : grand livre et tiers, admin seulement. Les réglages
+    // (settings/compta, settings/plan_comptable, settings/fiscal) restent couverts par /settings ci-dessus.
+    match /transactions/{transactionId} { allow read, write: if isAdmin(); }
+    match /tiers/{tierId}               { allow read, write: if isAdmin(); }
+    // --- module compta : fin ---

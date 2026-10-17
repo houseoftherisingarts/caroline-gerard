@@ -1,0 +1,22 @@
+    // --- module compta : début (_vexel-base/modules/compta, rules/storage.rules.compta.txt) ---
+    // Pièces jointes des factures (components/admin/factures/PiecesJointes.tsx) : documents/{docId}/{nom},
+    // un PDF ou une image de moins de 20 Mo. La personne facturée n'a que l'adresse à jeton (getDownloadURL)
+    // recopiée dans le miroir factures_publiques quand Laurie coche « visible par le client ».
+    match /documents/{file=**} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin()
+                            && request.resource.size < 20 * 1024 * 1024
+                            && (request.resource.contentType == 'application/pdf' || request.resource.contentType.matches('image/.*'));
+      allow delete: if isAdmin();
+    }
+
+    // Reçus du module comptable (lib/compta/, components/admin/finances/Recus.tsx) : admin seulement,
+    // une image ou un PDF, 15 Mo.
+    match /recus/{transactionId}/{file} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+                   && request.resource.size < 15 * 1024 * 1024
+                   && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'application/pdf');
+      allow delete: if isAdmin();
+    }
+    // --- module compta : fin ---

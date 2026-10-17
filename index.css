@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Factures et Finances : les jetons du module, au canon de l'admin (midnight, or, texte clair).
+   À l'impression, le papier redevient blanc et l'encre noire pour que la facture sorte lisible. */
+:root {
+  --c-papier: 15 23 42;
+  --c-papier-2: 30 41 59;
+  --c-encre: 248 250 252;
+  --c-encre-2: 226 232 240;
+  --c-gris: 148 163 184;
+  --c-gris-clair: 100 116 139;
+  --c-filet: 51 65 85;
+  --c-rose: 212 175 55;
+  --c-rose-vif: 212 175 55;
+  --c-rose-clair: 232 205 120;
+  --c-trait: 212 175 55;
+  --c-bouton: 212 175 55;
+  --c-bouton-2: 184 150 40;
+  --c-sur-bouton: 15 23 42;
+}
+@media print {
+  :root {
+    --c-papier: 255 255 255;
+    --c-papier-2: 255 255 255;
+    --c-encre: 24 24 24;
+    --c-encre-2: 38 38 38;
+    --c-gris: 90 101 112;
+    --c-gris-clair: 174 184 194;
+    --c-filet: 220 229 236;
+    --c-rose: 138 106 16;
+    --c-trait: 138 106 16;
+    --c-bouton: 138 106 16;
+    --c-sur-bouton: 255 255 255;
+  }
+}
+.kicker { font-size: 0.8125rem; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; line-height: 1.2; }
+.mesure { max-width: 62ch; }
+
 /* Custom styles for React Quill Dark Mode */
 .ql-toolbar {
   @apply rounded-t-xl border-white/10 bg-midnight/60 !important;
@@ -82,3 +118,8 @@
   pointer-events: none;
   border-radius: inherit;
 }
+
+/* module compta : cases, dates et champs sur fond sombre */
+input[type='checkbox'], input[type='radio'] { accent-color: #d4af37; }
+input[type='date'], input[type='month'], input[type='time'] { color-scheme: dark; }
+@media print { input[type='date'], input[type='month'], input[type='time'] { color-scheme: light; } }

@@ -15,7 +15,7 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 // ignoreUndefinedProperties : un champ facultatif laissé vide (undefined) faisait
 // échouer tout l'enregistrement; il est maintenant simplement omis.
 export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });

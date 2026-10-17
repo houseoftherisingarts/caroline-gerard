@@ -1,3 +1,6 @@
+// REMPLACÉ le 17 octobre 2026 : la route /admin/factures sert maintenant le module Factures et Finances
+// (pages/AdminInvoices.tsx, lib/compta/). Ce fichier n'est plus branché au routeur; il reste dans le dépôt
+// pour mémoire, avec la collection Firestore `invoices` laissée intacte (scripts/migrer-factures.mjs l'a copiée).
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { subscribeToInvoices, saveInvoice, deleteInvoice, StoredInvoice } from '../../lib/firestore';
 import {

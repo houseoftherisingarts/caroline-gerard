@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ogActualite = exports.recordVisit = exports.sendDirectMessage = exports.sendContactForm = exports.onRendezVousConfirme = exports.onConferencePublished = exports.onSubscriberCreated = exports.sendNewsletter = exports.processCheckout = void 0;
+exports.facturesDuMatin = exports.envoyerDocumentFacture = exports.webhookStripeCaroline = exports.creerPaiementFacture = exports.ogActualite = exports.recordVisit = exports.sendDirectMessage = exports.sendContactForm = exports.onRendezVousConfirme = exports.onConferencePublished = exports.onSubscriberCreated = exports.sendNewsletter = exports.processCheckout = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
 const params_1 = require("firebase-functions/params");
@@ -992,4 +992,12 @@ exports.ogActualite = (0, https_1.onRequest)({ region: 'northamerica-northeast1'
   </body>
 </html>`);
 });
+// --- Factures et Finances (module compta de Vexel) ---
+var paiement_1 = require("./factures/paiement");
+Object.defineProperty(exports, "creerPaiementFacture", { enumerable: true, get: function () { return paiement_1.creerPaiementFacture; } });
+Object.defineProperty(exports, "webhookStripeCaroline", { enumerable: true, get: function () { return paiement_1.webhookStripeCaroline; } });
+var envoyer_1 = require("./factures/envoyer");
+Object.defineProperty(exports, "envoyerDocumentFacture", { enumerable: true, get: function () { return envoyer_1.envoyerDocumentFacture; } });
+var planifiee_1 = require("./factures/planifiee");
+Object.defineProperty(exports, "facturesDuMatin", { enumerable: true, get: function () { return planifiee_1.facturesDuMatin; } });
 //# sourceMappingURL=index.js.map

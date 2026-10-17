@@ -1,0 +1,18 @@
+:root {
+  --c-papier: 255 255 255;
+  --c-papier-2: 241 247 252;
+  --c-encre: 24 24 24;
+  --c-encre-2: 38 38 38;
+  --c-gris: 90 101 112;
+  --c-gris-clair: 174 184 194;
+  --c-filet: 220 229 236;
+  --c-rose: 8 118 181;
+  --c-rose-vif: 56 182 255;
+  --c-rose-clair: 127 208 255;
+  --c-trait: 56 182 255;
+  --c-bouton: 56 182 255;
+  --c-bouton-2: 24 158 232;
+  --c-sur-bouton: 24 24 24;
+}
+
+.kicker { font-size: 0.8125rem; letter-spacing: 0.26em; text-transform: uppercase; font-weight: 600; line-height: 1.2; }

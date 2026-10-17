@@ -158,7 +158,7 @@ const AdminInventory = ({ books, onSave, onDelete, mediaLibrary = [] }: AdminInv
       // Strip undefined values — Firestore rejects them
       const clean = Object.fromEntries(
         Object.entries({ ...formData, id: editingBook.id }).filter(([, v]) => v !== undefined)
-      ) as Book;
+      ) as unknown as Book;
       await onSave(clean);
       if (formData.comingSoon) {
         await saveSiteContentKeys({
