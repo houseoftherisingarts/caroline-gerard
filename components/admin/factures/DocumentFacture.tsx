@@ -123,10 +123,10 @@ const DocumentFacture: React.FC<DocumentFactureProps> = ({
         <table className="w-full table-fixed">
           <thead>
             <tr className="border-b-2 border-encre">
-              <th className="text-left py-3 kicker text-gris">{t.description}</th>
-              <th className="text-center py-3 kicker text-gris w-12 sm:w-20">{t.qty}</th>
-              <th className="hidden sm:table-cell text-right py-3 kicker text-gris w-28">{t.price}</th>
-              <th className="text-right py-3 kicker text-gris w-24 sm:w-28">{t.lineTotal}</th>
+              <th className="text-left py-3 pr-3 kicker text-gris">{t.description}</th>
+              <th className="text-center py-3 kicker text-gris w-14 sm:w-20 px-2">{t.qty}</th>
+              <th className="hidden sm:table-cell text-right py-3 kicker text-gris w-28 px-2">{t.price}</th>
+              <th className="text-right py-3 kicker text-gris w-24 sm:w-28 px-2">{t.lineTotal}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-filet">

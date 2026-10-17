@@ -10,7 +10,7 @@
   --c-encre: 248 250 252;
   --c-encre-2: 226 232 240;
   --c-gris: 148 163 184;
-  --c-gris-clair: 100 116 139;
+  --c-gris-clair: 148 163 184;
   --c-filet: 51 65 85;
   --c-rose: 212 175 55;
   --c-rose-vif: 212 175 55;
@@ -123,3 +123,21 @@
 input[type='checkbox'], input[type='radio'] { accent-color: #d4af37; }
 input[type='date'], input[type='month'], input[type='time'] { color-scheme: dark; }
 @media print { input[type='date'], input[type='month'], input[type='time'] { color-scheme: light; } }
+
+/* tableaux larges : ombre de bord et mention visible sur mobile */
+.defile-x {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, rgb(var(--c-papier-2)) 30%, transparent) 0 0 / 40px 100% no-repeat local,
+    linear-gradient(to left, rgb(var(--c-papier-2)) 30%, transparent) 100% 0 / 40px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(212, 175, 55, 0.4), transparent) 0 0 / 14px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(212, 175, 55, 0.4), transparent) 100% 0 / 14px 100% no-repeat scroll;
+}
+@media (max-width: 639px) {
+  .defile-x-indice::before {
+    content: 'Faites glisser le tableau →';
+    display: block; position: sticky; left: 0; width: max-content; max-width: 90vw;
+    font-size: 13px; color: rgb(var(--c-gris)); padding: 0 0 8px;
+  }
+}
+@media print { .defile-x::before { content: none; } }

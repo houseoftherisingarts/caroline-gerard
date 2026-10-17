@@ -82,7 +82,7 @@ const PlanComptable: React.FC<Props> = ({ lang }) => {
   const Groupe: React.FC<{ titre: string; comptes: Compte[]; estDepense?: boolean }> = ({ titre, comptes, estDepense }) => (
     <div>
       <h3 className="font-sans font-semibold text-encre mb-3">{titre}</h3>
-      <div className="overflow-x-auto">
+      <div className="defile-x">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="divide-y divide-filet border-b border-filet">

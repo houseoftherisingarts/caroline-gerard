@@ -206,7 +206,7 @@ const Rapports: React.FC<Props> = ({ lang }) => {
           {etatResultats.totalRevenus === 0 && etatResultats.totalDepenses === 0 ? (
             <Vide titre={t.etatVide} texte={t.etatVideTexte} />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="defile-x defile-x-indice">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-filet">
@@ -259,7 +259,7 @@ const Rapports: React.FC<Props> = ({ lang }) => {
         <SelecteurPeriode lang={lang} etat={etat} onChange={setEtat} mois={mois} trimestres={trimestres} exercice={exercice} masquerComparaison />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
         {/* --- Résumé des taxes --- */}
         <div id="rapport-taxes" data-rapport-bloc>
           <Panneau
@@ -272,7 +272,7 @@ const Rapports: React.FC<Props> = ({ lang }) => {
             }
           >
             <EnteteImpression titre={t.taxesTitre} periodeLibelle={libellePeriode} />
-            <div className="overflow-x-auto">
+            <div className="defile-x">
               <table className="w-full text-left border-collapse">
                 <tbody className="divide-y divide-filet">
                   <tr><td className="py-2 text-sm text-gris">{t.tpsPercue}</td><td className="py-2 text-sm text-encre text-right tabular-nums">{formatMontant(taxes.percu.tps)}</td></tr>
@@ -303,15 +303,15 @@ const Rapports: React.FC<Props> = ({ lang }) => {
             {repartitionDepenses.length === 0 ? (
               <Vide titre={t.depensesVide} texte={t.depensesVideTexte} />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="defile-x">
                 <table className="w-full text-left border-collapse">
-                  <thead><tr className="border-b border-filet"><th className="py-2 kicker text-gris">{t.compte}</th><th className="py-2 kicker text-gris text-right">{t.montant}</th><th className="py-2 kicker text-gris text-right">{t.part}</th></tr></thead>
+                  <thead><tr className="border-b border-filet"><th className="py-2 kicker text-gris">{t.compte}</th><th className="py-2 kicker text-gris text-right">{t.montant}</th><th className="py-2 pl-4 kicker text-gris text-right">{t.part}</th></tr></thead>
                   <tbody className="divide-y divide-filet">
                     {repartitionDepenses.map((r) => (
                       <tr key={r.compte.id}>
                         <td className="py-2 text-sm text-encre">{nomCompte(r.compte, lang)}</td>
                         <td className="py-2 text-sm text-encre text-right tabular-nums">{formatMontant(r.montant)}</td>
-                        <td className="py-2 text-sm text-gris text-right tabular-nums whitespace-nowrap">{formatPourcent(r.part * 100)}</td>
+                        <td className="py-2 pl-4 text-sm text-gris text-right tabular-nums whitespace-nowrap">{formatPourcent(r.part * 100)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -336,7 +336,7 @@ const Rapports: React.FC<Props> = ({ lang }) => {
             {parTiers.length === 0 ? (
               <Vide titre={t.revenusVide} texte={t.revenusVideTexte} />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="defile-x">
                 <table className="w-full text-left border-collapse">
                   <tbody className="divide-y divide-filet">
                     {parTiers.map((r) => (
@@ -377,7 +377,7 @@ const Rapports: React.FC<Props> = ({ lang }) => {
             {age.nombreTotal === 0 ? (
               <Vide titre={t.ageVide} texte={t.ageVideTexte} />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="defile-x">
                 <table className="w-full text-left border-collapse">
                   <thead><tr className="border-b border-filet"><th className="py-2 kicker text-gris">{t.tranche}</th><th className="py-2 kicker text-gris text-right">{t.nombre}</th><th className="py-2 kicker text-gris text-right">{t.montant}</th></tr></thead>
                   <tbody className="divide-y divide-filet">

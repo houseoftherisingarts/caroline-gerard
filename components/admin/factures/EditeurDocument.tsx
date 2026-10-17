@@ -171,7 +171,7 @@ const EditeurDocument: React.FC<Props> = ({
                 {doc.items.map((item) => (
                   <div key={item.id} className="bg-papier border border-filet p-2 rounded-champ space-y-2">
                     <div className="flex items-center gap-2">
-                      <input type="text" aria-label={t.description} className={RANGEE_INPUT} placeholder={t.description} value={item.description}
+                      <textarea rows={2} aria-label={t.description} className={`${RANGEE_INPUT} resize-none`} placeholder={t.description} value={item.description}
                         onChange={(e) => majLigne(item.id, 'description', e.target.value)} />
                       <button onClick={() => retirerLigne(item.id)} aria-label={t.delete} className="w-11 h-11 flex-shrink-0 flex items-center justify-center text-gris hover:text-rose transition-colors">
                         <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -233,7 +233,7 @@ const EditeurDocument: React.FC<Props> = ({
           {enregistre && <PiecesJointes lang={lang} docId={doc.id} pieces={doc.piecesJointes || []} onChange={onPieces} />}
         </div>
 
-        <div className="lg:col-span-2 min-w-0">
+        <div className="lg:col-span-2 min-w-0 lg:sticky lg:top-4 lg:self-start">
           <p className="kicker text-gris mb-3">{t.apercu}</p>
           <DocumentFacture
             lang={lang}

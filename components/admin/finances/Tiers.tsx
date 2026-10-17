@@ -83,7 +83,7 @@ const Tiers: React.FC<Props> = ({ lang }) => {
       ) : tiers.length === 0 && clientsAReprendre.length === 0 ? (
         <Panneau titre={t.titre}><Vide titre={t.vide} texte={t.videTexte} /></Panneau>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2 items-start">
           <Panneau titre={t.client}>
             {parType('client').length === 0 ? (
               <p className="text-gris text-sm">{t.vide}</p>

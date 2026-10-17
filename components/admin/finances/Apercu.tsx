@@ -276,7 +276,7 @@ const Apercu: React.FC<Props> = ({ lang, onAllerA, recurrentesAjoutees = 0 }) =>
     <div className="space-y-6">
       <SelecteurPeriode lang={lang} etat={etat} onChange={setEtat} mois={mois} trimestres={trimestres} exercice={exercice} />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 items-start">
         <Panneau>
           <Chiffre valeur={formatMontantRond(totauxPeriode.revenus)} libelle={t.revenus} note={etat.comparer ? `${delta(totauxPeriode.revenus, totauxPrecedents.revenus)} ${t.versusPrecedente}` : undefined} />
         </Panneau>
@@ -293,8 +293,8 @@ const Apercu: React.FC<Props> = ({ lang, onAllerA, recurrentesAjoutees = 0 }) =>
 
       <CartesFiscales lang={lang} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Panneau className="lg:col-span-2" titre={t.graphTitre}>
+      <div className="grid grid-cols-1 gap-6">
+        <Panneau titre={t.graphTitre}>
           <div className="h-[300px] w-full">
             {donneesGraph.every((d) => d.revenus === 0 && d.depenses === 0) ? (
               <Vide titre={t.graphVide} texte={t.graphVideTexte} />
@@ -340,16 +340,15 @@ const Apercu: React.FC<Props> = ({ lang, onAllerA, recurrentesAjoutees = 0 }) =>
         </Panneau>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <Panneau
-          className="lg:col-span-2"
           titre={t.recentesTitre}
           actions={<button type="button" onClick={() => onAllerA?.('transactions')} className="text-sm text-rose hover:text-encre transition-colors font-medium inline-flex items-center gap-1">{t.voirTransactions} <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" /></button>}
         >
           {recentes.length === 0 ? (
             <Vide titre={t.recentesVideTitre} texte={t.recentesVideTexte} />
           ) : (
-            <div className="overflow-x-auto">
+            <div className="defile-x">
               <table className="w-full text-left border-collapse">
                 <tbody className="divide-y divide-filet">
                   {recentes.map((tr) => (

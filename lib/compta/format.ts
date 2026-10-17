@@ -4,7 +4,7 @@
 const MONNAIE = new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD' });
 const MONNAIE_RONDE = new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 const NOMBRE = new Intl.NumberFormat('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const POURCENT = new Intl.NumberFormat('fr-CA', { minimumFractionDigits: 1, maximumFractionDigits: 3 });
+const POURCENT = new Intl.NumberFormat('fr-CA', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 /** 1234.5 → "1 234,50 $" */
 export function formatMontant(v: number | undefined | null): string {

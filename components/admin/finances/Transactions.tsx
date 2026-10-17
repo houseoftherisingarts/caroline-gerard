@@ -196,7 +196,7 @@ const Transactions: React.FC<Props> = ({ lang }) => {
           <Vide titre={t.vide} texte={t.videTexte} />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div className="defile-x">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="divide-y divide-filet border-b border-filet">

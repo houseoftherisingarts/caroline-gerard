@@ -168,7 +168,7 @@ const TaxesImpot: React.FC<Props> = ({ lang }) => {
     <div className="space-y-8">
       <p className="text-gris text-sm mesure">{t.lede}</p>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 items-start">
         {/* --- Taxes à remettre --- */}
         <Panneau titre={t.taxes}>
           <div className="grid gap-6 sm:grid-cols-2">
@@ -202,7 +202,7 @@ const TaxesImpot: React.FC<Props> = ({ lang }) => {
           </button>
 
           {detailTaxes && (
-            <div className="overflow-x-auto mt-4">
+            <div className="defile-x mt-4">
               <table className="w-full text-left border-collapse">
                 <tbody className="divide-y divide-filet">
                   <tr><td className="py-2 text-sm text-gris">{t.tpsPercue}</td><td className="py-2 text-sm text-encre text-right tabular-nums">{formatMontant(taxesADate.percu.tps)}</td></tr>
@@ -271,7 +271,7 @@ const TaxesImpot: React.FC<Props> = ({ lang }) => {
           </button>
 
           {detailImpot && (
-            <div className="overflow-x-auto mt-4">
+            <div className="defile-x mt-4">
               <table className="w-full text-left border-collapse">
                 <tbody className="divide-y divide-filet">
                   {projImpot.impotProjete.detail.map((ligne) => (
